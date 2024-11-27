@@ -1,0 +1,11 @@
+# cargo-features = ["edition2024"]
+
+[package]
+name = "orx-iterable"
+version = "0.1.0"
+edition = "2021"
+# edition = "2024"
+publish = ["artifactory"]
+
+[dependencies]
+orx-closure = { version = "0.1.4", registry = "artifactory" }
