@@ -1,7 +1,7 @@
 pub trait Iterable {
     type Item;
 
-    fn it(&self) -> impl Iterator<Item = Self::Item> + '_;
+    fn iter(&self) -> impl Iterator<Item = Self::Item> + '_;
 }
 
 // impl
@@ -12,7 +12,7 @@ where
 {
     type Item = <&'a X as IntoIterator>::Item;
 
-    fn it(&self) -> impl Iterator<Item = Self::Item> {
+    fn iter(&self) -> impl Iterator<Item = Self::Item> {
         self.into_iter()
     }
 }
@@ -20,7 +20,7 @@ where
 impl<'a, T> Iterable for &'a [T] {
     type Item = &'a T;
 
-    fn it(&self) -> impl Iterator<Item = Self::Item> + '_ {
-        self.iter()
+    fn iter(&self) -> impl Iterator<Item = Self::Item> + '_ {
+        self.into_iter()
     }
 }

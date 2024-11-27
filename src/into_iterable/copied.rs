@@ -1,8 +1,6 @@
 use crate::{Iterable, IterableOnce};
 use std::marker::PhantomData;
 
-// iterable
-
 pub struct Copied<'a, T, I>
 where
     T: Copy + 'a,
@@ -39,8 +37,8 @@ where
 {
     type Item = T;
 
-    fn it(&self) -> impl Iterator<Item = Self::Item> {
-        self.iterable.it().copied()
+    fn iter(&self) -> impl Iterator<Item = Self::Item> {
+        self.iterable.iter().copied()
     }
 }
 

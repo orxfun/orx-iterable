@@ -36,7 +36,7 @@ where
 {
     type Item = <&'a X as IntoIterator>::Item;
 
-    fn it(&self) -> impl Iterator<Item = Self::Item> + '_ {
+    fn iter(&self) -> impl Iterator<Item = Self::Item> + '_ {
         unsafe { into_ref(&self.x) }.into_iter()
     }
 }

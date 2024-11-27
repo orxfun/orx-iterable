@@ -14,9 +14,9 @@ impl Stats {
 }
 
 fn calc_stats(values: impl Iterable<Item = u32>) -> Stats {
-    let count = values.it().count() as u32;
+    let count = values.iter().count() as u32;
 
-    let sum: u32 = values.it().sum();
+    let sum: u32 = values.iter().sum();
 
     let mean = match count {
         0 => 0,
@@ -24,7 +24,7 @@ fn calc_stats(values: impl Iterable<Item = u32>) -> Stats {
     };
 
     let sum_sq_errors: u32 = values
-        .it()
+        .iter()
         .map(|x| {
             let diff = u32::abs_diff(x, mean);
             diff * diff

@@ -5,7 +5,8 @@ mod iterable_mut;
 mod iterable_once;
 
 pub use into_iterable::{
-    IntoClonedIterable, IntoCloningIterable, IntoCopiedIterable, IntoOwningIterable,
+    IntoChainedIterable, IntoClonedIterable, IntoCloningIterable, IntoCopiedIterable,
+    IntoFilteredIterable, IntoMappedIterable, IntoOwningIterable, IntoZippedIterable,
 };
 pub use into_iterable_mut::IntoIterableMut;
 pub use iterable::Iterable;
