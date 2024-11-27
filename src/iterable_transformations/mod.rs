@@ -3,6 +3,7 @@ mod cloned;
 mod cloning_iter;
 mod copied;
 mod filtered;
+mod flattened;
 mod mapped;
 mod owning_iterable;
 mod zipped;

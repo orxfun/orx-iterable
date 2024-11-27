@@ -56,8 +56,3 @@ where
 }
 
 impl<T, I> IntoMappedIterable<T> for I where I: Iterable<Item = T> {}
-
-fn abc() {
-    //
-    let v = vec![1, 2, 3];
-}

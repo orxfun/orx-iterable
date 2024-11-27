@@ -1,6 +1,7 @@
 use crate::{Iterable, IterableOnce};
 use std::marker::PhantomData;
 
+// TODO: let's think if we need this?
 pub struct OwningIterable<'a, X> {
     x: X,
     phantom: PhantomData<&'a ()>,
