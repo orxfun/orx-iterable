@@ -17,6 +17,7 @@ pub use transformations::{
     IntoCopied,
     IntoCopiedOnce,
     IntoFilterMapped,
+    IntoFilterMappedOnce,
     IntoFiltered,
     IntoFilteredMut,
     IntoFlatMapped,

@@ -86,3 +86,23 @@ where
 }
 
 impl<I> IntoFilterMapped for I where I: Iterable {}
+
+// once
+
+pub trait IntoFilterMappedOnce
+where
+    Self: IterableOnce + Sized,
+{
+    fn filter_mapped_once<U, M>(self, filter_map: M) -> FilterMapped<Self, U, M>
+    where
+        M: Fn(Self::Item) -> Option<U>,
+    {
+        FilterMapped {
+            iterable: self,
+            filter_map,
+            phantom: PhantomData,
+        }
+    }
+}
+
+impl<I> IntoFilterMappedOnce for I where I: IterableOnce {}
