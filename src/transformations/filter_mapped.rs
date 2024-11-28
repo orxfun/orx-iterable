@@ -1,4 +1,4 @@
-use crate::Iterable;
+use crate::{Iterable, IterableOnce};
 use std::marker::PhantomData;
 
 pub struct FilterMapped<I, U, M> {
@@ -21,6 +21,20 @@ where
             iter: self.iterable.iter(),
             filter_map: &self.filter_map,
         }
+    }
+}
+
+impl<I, U, M> IterableOnce for FilterMapped<I, U, M>
+where
+    I: IterableOnce,
+    M: Fn(I::Item) -> Option<U>,
+{
+    type Item = U;
+
+    type Iter = core::iter::FilterMap<<I as IterableOnce>::Iter, M>;
+
+    fn it_once(self) -> Self::Iter {
+        self.iterable.it_once().filter_map(self.filter_map)
     }
 }
 
