@@ -21,6 +21,7 @@ pub use cloning_iter::{CloningIterable, IntoCloningIterable};
 pub use copied::{Copied, IntoCopied, IntoCopiedOnce};
 pub use filtered::{
     Filtered, FilteredIter, FilteredMut, FilteredMutIter, IntoFiltered, IntoFilteredMut,
+    IntoFilteredOnce,
 };
 pub use flattened::{
     Flattened, FlattenedIter, FlattenedMut, FlattenedMutIter, IntoFlattened, IntoFlattenedMut,

@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableMut};
+use crate::{Iterable, IterableMut, IterableOnce};
 
 pub struct Filtered<I, F> {
     iterable: I,
@@ -31,6 +31,20 @@ where
             iter: self.iterable.iter(),
             filter: &self.filter,
         }
+    }
+}
+
+impl<I, F> IterableOnce for Filtered<I, F>
+where
+    I: IterableOnce,
+    F: Fn(&I::Item) -> bool,
+{
+    type Item = I::Item;
+
+    type Iter = core::iter::Filter<I::Iter, F>;
+
+    fn it_once(self) -> Self::Iter {
+        self.iterable.it_once().filter(self.filter)
     }
 }
 
@@ -78,6 +92,26 @@ where
 }
 
 impl<I> IntoFiltered for I where I: Iterable {}
+
+// once
+
+pub trait IntoFilteredOnce
+where
+    Self: Sized + IterableOnce,
+{
+    fn filtered_once<F>(self, filter: F) -> Filtered<Self, F>
+    where
+        Self: Sized,
+        F: Fn(&Self::Item) -> bool,
+    {
+        Filtered {
+            iterable: self,
+            filter,
+        }
+    }
+}
+
+impl<I> IntoFilteredOnce for I where I: IterableOnce {}
 
 // mut
 
