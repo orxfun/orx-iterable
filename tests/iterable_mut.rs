@@ -1,39 +1,39 @@
 use orx_iterable::*;
 use std::collections::{BTreeMap, HashMap, LinkedList, VecDeque};
 
-fn take_owned(mut iter: impl IterableMut<Item = usize>, sum: usize) {
+fn take_owned<'a>(mut iter: impl IterableMut<ItemMut = usize>, sum: usize) {
     let mut x = 0;
-    for y in iter.iter_mut() {
+    for y in iter.xyz() {
         x += *y;
     }
     assert_eq!(x, sum);
 
-    for y in iter.iter_mut() {
+    for y in iter.xyz() {
         *y += 1;
     }
 
-    let count = iter.iter_mut().count();
+    let count = iter.xyz().count();
     let mut x = 0;
-    for y in iter.iter_mut() {
+    for y in iter.xyz() {
         x += *y;
     }
     assert_eq!(x, sum + count);
 }
 
-fn take_mut_ref(iter: &mut impl IterableMut<Item = usize>, sum: usize) {
+fn take_mut_ref<'a>(iter: &mut impl IterableMut<ItemMut = usize>, sum: usize) {
     let mut x = 0;
-    for y in iter.iter_mut() {
+    for y in iter.xyz() {
         x += *y;
     }
     assert_eq!(x, sum);
 
-    for y in iter.iter_mut() {
+    for y in iter.xyz() {
         *y += 1;
     }
 
-    let count = iter.iter_mut().count();
+    let count = iter.xyz().count();
     let mut x = 0;
-    for y in iter.iter_mut() {
+    for y in iter.xyz() {
         x += *y;
     }
     assert_eq!(x, sum + count);
@@ -73,25 +73,53 @@ fn iterable_mut_std_owned_collections() {
     test_std_collection!(LinkedList<_>);
 }
 
-#[test]
-fn iterable_std_pair_collections() {
-    // TODO! this doesn't work yet.
-    fn test<'a>(mut iter: impl IterableMut<Item = u32>) {
-        for x in iter.iter_mut() {
-            *x += 1;
-        }
-        for x in iter.iter_mut() {
-            *x -= 1;
-        }
-        assert_eq!(iter.iter_mut().map(|x| *x).sum::<u32>(), 42);
-    }
+// #[test]
+// fn iterable_mut_std_pair_collections() {
+//     // TODO! this doesn't work yet.
+//     fn test<'a>(mut iter: impl IterableMut<ItemMut = u32>) {
+//         for x in iter.xyz() {
+//             *x += 1;
+//         }
+//         for x in iter.xyz() {
+//             *x -= 1;
+//         }
+//         assert_eq!(iter.xyz().map(|x| *x).sum::<u32>(), 42);
+//     }
 
-    let mut map: HashMap<u64, u32> = [(1, 40), (3, 2)].into_iter().collect();
-    // test(map.taken(10));
-    // test(map.taken_while(|x| x.1 % 2 == 0));
+//     let mut map: HashMap<u64, u32> = [(1, 40), (3, 2)].into_iter().collect();
+//     // test(map.taken(10));
+//     // test(map.taken_while(|x| x.1 % 2 == 0));
 
-    let map: BTreeMap<u64, u32> = [(1, 40), (3, 2)].into_iter().collect();
-    // test(&map);
-    // test(map.taken(10));
-    // test(map.taken_while(|x| x.1 % 2 == 0));
-}
+//     let map: BTreeMap<u64, u32> = [(1, 40), (3, 2)].into_iter().collect();
+//     // test(&map);
+//     // test(map.taken(10));
+//     // test(map.taken_while(|x| x.1 % 2 == 0));
+// }
+
+// #[test]
+// fn iterable_mut_chained() {
+//     fn add_two(mut iter: impl IterableMut<ItemMut = usize>, original_sum: usize) {
+//         for x in iter.xyz() {
+//             *x += 1;
+//         }
+//         for x in iter.xyz() {
+//             *x += 1;
+//         }
+
+//         let sum = iter.xyz().count() * 2 + original_sum;
+//         assert_eq!(iter.xyz().map(|x| *x).sum::<usize>(), sum);
+//     }
+
+//     let mut a = vec![3, 2, 1];
+//     let mut b = vec![33, 44];
+//     let mut c = vec![100];
+
+//     let aa = &mut a;
+//     let bb = &mut b;
+//     let x = aa.chained_mut(bb);
+
+//     // add_two(&mut a, 6);
+//     add_two(x, 83);
+
+//     // add_two(&mut a, 83);
+// }

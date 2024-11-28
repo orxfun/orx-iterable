@@ -37,7 +37,7 @@ pub trait IntoChained
 where
     Self: Iterable + Sized,
 {
-    fn chained<I>(self, other: I) -> Chained<Self, I> {
+    fn chained<I>(self, other: I) -> Chained<Self, I> where {
         Chained {
             it1: self,
             it2: other,
@@ -46,16 +46,3 @@ where
 }
 
 impl<I> IntoChained for I where I: Iterable {}
-
-#[test]
-fn abc() {
-    let mut a = vec![1, 2];
-    let mut b = vec![3];
-    let c = a.iter_mut().chain(b.iter_mut());
-    for x in c {
-        *x += 1;
-    }
-
-    assert_eq!(a, vec![2, 3]);
-    assert_eq!(b, vec![4]);
-}
