@@ -1,37 +1,34 @@
-use crate::{Iterable, IterableOnce};
+use crate::Iterable;
 use std::marker::PhantomData;
 
 // iterable
 
-pub struct Mapped<I, T, U, M>
-where
-    M: Fn(T) -> U,
-{
+pub struct Mapped<I, U, M> {
     iterable: I,
     map: M,
-    phantom: PhantomData<T>,
+    phantom: PhantomData<U>,
 }
 
-impl<I, T, U, M> IterableOnce for Mapped<I, T, U, M>
+// impl<I, T, U, M> IterableOnce for Mapped<I, T, U, M>
+// where
+//     M: Fn(T) -> U,
+//     I: IterableOnce<Item = T>,
+// {
+//     type Item = U;
+
+//     fn it_once(self) -> impl Iterator<Item = Self::Item> {
+//         self.iterable.it_once().map(self.map)
+//     }
+// }
+
+impl<I, U, M> Iterable for Mapped<I, U, M>
 where
-    M: Fn(T) -> U,
-    I: IterableOnce<Item = T>,
+    I: Iterable,
+    M: Fn(I::Item) -> U,
 {
     type Item = U;
 
-    fn it_once(self) -> impl Iterator<Item = Self::Item> {
-        self.iterable.it_once().map(self.map)
-    }
-}
-
-impl<I, T, U, M> Iterable for Mapped<I, T, U, M>
-where
-    M: Fn(T) -> U,
-    I: Iterable<Item = T>,
-{
-    type Item = U;
-
-    type Iter<'a> = MappedIter<'a, I, T, U, M> where Self: 'a;
+    type Iter<'a> = MappedIter<'a, I, U, M> where Self: 'a;
 
     fn iter(&self) -> Self::Iter<'_> {
         MappedIter {
@@ -43,19 +40,19 @@ where
 
 // iter
 
-pub struct MappedIter<'a, I, T, U, M>
+pub struct MappedIter<'a, I, U, M>
 where
-    M: Fn(T) -> U,
-    I: Iterable<Item = T> + 'a,
+    I: Iterable + 'a,
+    M: Fn(I::Item) -> U,
 {
     iter: I::Iter<'a>,
     map: &'a M,
 }
 
-impl<'a, I, T, U, M> Iterator for MappedIter<'a, I, T, U, M>
+impl<'a, I, U, M> Iterator for MappedIter<'a, I, U, M>
 where
-    M: Fn(T) -> U,
-    I: Iterable<Item = T>,
+    I: Iterable,
+    M: Fn(I::Item) -> U,
 {
     type Item = U;
 
@@ -66,14 +63,13 @@ where
 
 // into
 
-pub trait IntoMapped<T>
+pub trait IntoMapped
 where
-    Self: Iterable<Item = T>,
+    Self: Iterable + Sized,
 {
-    fn mapped<U, M>(self, map: M) -> Mapped<Self, T, U, M>
+    fn mapped<U, M>(self, map: M) -> Mapped<Self, U, M>
     where
-        M: Fn(T) -> U,
-        Self: Sized,
+        M: Fn(Self::Item) -> U,
     {
         Mapped {
             iterable: self,
@@ -83,4 +79,4 @@ where
     }
 }
 
-impl<T, I> IntoMapped<T> for I where I: Iterable<Item = T> {}
+impl<I> IntoMapped for I where I: Iterable {}
