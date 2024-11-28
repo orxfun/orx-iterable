@@ -19,22 +19,21 @@ pub use chained::{Chained, ChainedMut, IntoChained, IntoChainedMut, IntoChainedO
 pub use cloned::{Cloned, IntoCloned, IntoClonedOnce};
 pub use cloning_iter::{CloningIterable, IntoCloningIterable};
 pub use copied::{Copied, IntoCopied, IntoCopiedOnce};
+pub use filter_mapped::{FilterMapped, FilterMappedIter, IntoFilterMapped, IntoFilterMappedOnce};
 pub use filtered::{
     Filtered, FilteredIter, FilteredMut, FilteredMutIter, IntoFiltered, IntoFilteredMut,
     IntoFilteredOnce,
+};
+pub use flat_mapped::{
+    FlatMapped, FlatMappedIter, FlatMappedIterOnce, IntoFlatMapped, IntoFlatMappedOnce,
 };
 pub use flattened::{
     Flattened, FlattenedIter, FlattenedIterOnce, FlattenedMut, FlattenedMutIter, IntoFlattened,
     IntoFlattenedMut, IntoFlattenedOnce,
 };
-pub use mapped::{IntoMapped, Mapped, MappedIter};
-// pub use owning_iterable::{IntoOwningIterable, OwningIterable};
-pub use filter_mapped::{FilterMapped, FilterMappedIter, IntoFilterMapped, IntoFilterMappedOnce};
-pub use flat_mapped::{
-    FlatMapped, FlatMappedIter, FlatMappedIterOnce, IntoFlatMapped, IntoFlatMappedOnce,
-};
 pub use iterable_mut_from_slice_mut::{IntoSliceAsIterableMut, SliceAsIterableMut};
-pub use mapped_while::{IntoMappedWhile, MappedWhile, MappedWhileIter};
+pub use mapped::{IntoMapped, Mapped, MappedIter};
+pub use mapped_while::{IntoMappedWhile, IntoMappedWhileOnce, MappedWhile, MappedWhileIter};
 pub use skipped::{IntoSkipped, IntoSkippedMut, Skipped, SkippedMut};
 pub use taken::{IntoTaken, IntoTakenMut, Taken, TakenMut};
 pub use taken_while::{

@@ -1,4 +1,4 @@
-use crate::Iterable;
+use crate::{Iterable, IterableOnce};
 use std::marker::PhantomData;
 
 pub struct MappedWhile<I, U, M> {
@@ -24,8 +24,6 @@ where
     }
 }
 
-// iter
-
 pub struct MappedWhileIter<'a, I, U, M>
 where
     I: Iterable + 'a,
@@ -48,8 +46,6 @@ where
     }
 }
 
-// into
-
 pub trait IntoMappedWhile
 where
     Self: Iterable + Sized,
@@ -67,3 +63,37 @@ where
 }
 
 impl<I> IntoMappedWhile for I where I: Iterable {}
+
+// once
+
+impl<I, U, M> IterableOnce for MappedWhile<I, U, M>
+where
+    I: IterableOnce,
+    M: Fn(I::Item) -> Option<U>,
+{
+    type Item = U;
+
+    type Iter = core::iter::MapWhile<I::Iter, M>;
+
+    fn it_once(self) -> Self::Iter {
+        self.iterable.it_once().map_while(self.map_while)
+    }
+}
+
+pub trait IntoMappedWhileOnce
+where
+    Self: IterableOnce + Sized,
+{
+    fn mapped_while_once<U, M>(self, map_while: M) -> MappedWhile<Self, U, M>
+    where
+        M: Fn(Self::Item) -> Option<U>,
+    {
+        MappedWhile {
+            iterable: self,
+            map_while,
+            phantom: PhantomData,
+        }
+    }
+}
+
+impl<I> IntoMappedWhileOnce for I where I: IterableOnce {}
