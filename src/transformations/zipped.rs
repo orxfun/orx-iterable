@@ -1,30 +1,29 @@
 use crate::{Iterable, IterableOnce};
 use std::marker::PhantomData;
 
-pub struct Zipped<T, U, I1, I2> {
+pub struct Zipped<I1, I2> {
     it1: I1,
     it2: I2,
-    phantom: PhantomData<(T, U)>,
 }
 
-impl<T, U, I1, I2> IterableOnce for Zipped<T, U, I1, I2>
+impl<I1, I2> IterableOnce for Zipped<I1, I2>
 where
-    I1: IterableOnce<Item = T>,
-    I2: IterableOnce<Item = U>,
+    I1: IterableOnce,
+    I2: IterableOnce,
 {
-    type Item = (T, U);
+    type Item = (I1::Item, I2::Item);
 
     fn it_once(self) -> impl Iterator<Item = Self::Item> {
         self.it1.it_once().zip(self.it2.it_once())
     }
 }
 
-impl<T, U, I1, I2> Iterable for Zipped<T, U, I1, I2>
+impl<I1, I2> Iterable for Zipped<I1, I2>
 where
-    I1: Iterable<Item = T>,
-    I2: Iterable<Item = U>,
+    I1: Iterable,
+    I2: Iterable,
 {
-    type Item = (T, U);
+    type Item = (I1::Item, I2::Item);
 
     type Iter<'a> = std::iter::Zip<I1::Iter<'a>, I2::Iter<'a>> where Self: 'a;
 
@@ -33,23 +32,28 @@ where
     }
 }
 
-// into
-
-pub trait IntoZipped<T>
+pub trait IntoZipped
 where
-    Self: Iterable<Item = T>,
+    Self: Iterable,
 {
-    fn zipped<I, U>(self, other: I) -> Zipped<T, U, Self, I>
+    fn zipped<I>(self, other: I) -> Zipped<Self, I>
     where
         Self: Sized,
-        I: Iterable<Item = U>,
+        I: Iterable,
     {
         Zipped {
             it1: self,
             it2: other,
-            phantom: PhantomData,
         }
     }
 }
 
-impl<T, I> IntoZipped<T> for I where I: Iterable<Item = T> {}
+impl<I> IntoZipped for I where I: Iterable {}
+
+// mut
+
+pub struct ZippedMut<'a, T, U, I1, I2> {
+    it1: &'a mut I1,
+    it2: &'a mut I2,
+    phantom: PhantomData<(T, U)>,
+}
