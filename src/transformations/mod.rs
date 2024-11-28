@@ -32,7 +32,7 @@ pub use flattened::{
     IntoFlattenedMut, IntoFlattenedOnce,
 };
 pub use iterable_mut_from_slice_mut::{IntoSliceAsIterableMut, SliceAsIterableMut};
-pub use mapped::{IntoMapped, Mapped, MappedIter};
+pub use mapped::{IntoMapped, IntoMappedOnce, Mapped, MappedIter};
 pub use mapped_while::{IntoMappedWhile, IntoMappedWhileOnce, MappedWhile, MappedWhileIter};
 pub use skipped::{IntoSkipped, IntoSkippedMut, Skipped, SkippedMut};
 pub use taken::{IntoTaken, IntoTakenMut, Taken, TakenMut};
