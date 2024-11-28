@@ -143,10 +143,23 @@ fn iterable_type_members() {
 }
 
 #[test]
-fn iterable_flattened() {
-    let data = vec![vec![1, 2], vec![6, 0, 7], vec![3]];
-    test_sum_ref(data.flattened(), 19);
-    test_sum_val(data.flattened().copied(), 19);
+fn iterable_chained() {
+    let a = vec![3, 2, 1];
+    let b = vec![33, 44];
+    let c = vec![100];
+    test_sum_ref(a.chained(&b), 83);
+    test_sum_ref(a.chained(&b).chained(&c), 183);
+}
+
+#[test]
+fn iterable_filter_mapped() {
+    // TODO!
+}
+
+#[test]
+fn iterable_filtered() {
+    let vec = vec![3, 2, 6, 1, 0, 7, 33];
+    test_sum_ref(vec.filtered(|x| **x > 5 && **x < 30), 13);
 }
 
 #[test]
@@ -160,10 +173,23 @@ fn iterable_flat_mapped() {
 }
 
 #[test]
+fn iterable_flattened() {
+    let data = vec![vec![1, 2], vec![6, 0, 7], vec![3]];
+    test_sum_ref(data.flattened(), 19);
+    test_sum_val(data.flattened().copied(), 19);
+}
+
+#[test]
 fn iterable_mapped_while() {
     let data = vec![2, 4, 12, 3, 8, 4];
     test_sum_ref(data.mapped_while(|x| (x % 2 == 0).then_some(x)), 18);
     test_sum_val(data.mapped_while(|x| (x % 2 == 0).then_some(*x)), 18);
+}
+
+#[test]
+fn mapped() {
+    let data = vec![2, 4, 12, 3, 8, 4];
+    test_sum_val(data.mapped(|x| x - 1), 27);
 }
 
 #[test]
@@ -175,14 +201,6 @@ fn iterable_skipped() {
 }
 
 #[test]
-fn iterable_taken() {
-    let data = vec![2, 4, 12, 3, 8, 4];
-    test_sum_ref(data.taken(0), 0);
-    test_sum_ref(data.taken(4), 21);
-    test_sum_ref(data.taken(20), 33);
-}
-
-#[test]
 fn iterable_taken_while() {
     let data = vec![2, 4, 12, 3, 8, 4];
     test_sum_ref(data.taken_while(|x| *x % 2 == 0), 18);
@@ -191,10 +209,20 @@ fn iterable_taken_while() {
 }
 
 #[test]
-fn iterable_chained() {
-    let a = vec![3, 2, 1];
-    let b = vec![33, 44];
-    let c = vec![100];
-    test_sum_ref(a.chained(&b), 83);
-    test_sum_ref(a.chained(&b).chained(&c), 183);
+fn iterable_taken() {
+    let data = vec![2, 4, 12, 3, 8, 4];
+    test_sum_ref(data.taken(0), 0);
+    test_sum_ref(data.taken(4), 21);
+    test_sum_ref(data.taken(20), 33);
+}
+
+#[test]
+fn iterable_zipped() {
+    let a = vec![1, 2, 3, 4];
+    let b = vec![true, false, false, true, true, true];
+
+    test_sum_ref(
+        a.zipped(&b).mapped(|(a, b)| b.then_some(a).unwrap_or(&0)),
+        5,
+    );
 }
