@@ -1,5 +1,6 @@
 use orx_iterable::*;
 use std::collections::{BTreeMap, HashMap, LinkedList, VecDeque};
+use transformations::{Chained, ChainedMut};
 
 fn take_owned<'a>(mut iter: impl IterableMut<ItemMut = usize>, sum: usize) {
     let mut x = 0;
@@ -96,30 +97,47 @@ fn iterable_mut_std_owned_collections() {
 //     // test(map.taken_while(|x| x.1 % 2 == 0));
 // }
 
-// #[test]
-// fn iterable_mut_chained() {
-//     fn add_two(mut iter: impl IterableMut<ItemMut = usize>, original_sum: usize) {
-//         for x in iter.xyz() {
-//             *x += 1;
-//         }
-//         for x in iter.xyz() {
-//             *x += 1;
-//         }
+#[test]
+fn iterable_mut_chained() {
+    fn add_two(mut iter: impl IterableMut<ItemMut = usize>, original_sum: usize) {
+        for x in iter.xyz() {
+            *x += 1;
+        }
+        for x in iter.xyz() {
+            *x += 1;
+        }
 
-//         let sum = iter.xyz().count() * 2 + original_sum;
-//         assert_eq!(iter.xyz().map(|x| *x).sum::<usize>(), sum);
-//     }
+        let sum = iter.xyz().count() * 2 + original_sum;
+        assert_eq!(iter.xyz().map(|x| *x).sum::<usize>(), sum);
+    }
 
-//     let mut a = vec![3, 2, 1];
-//     let mut b = vec![33, 44];
-//     let mut c = vec![100];
+    let mut a: Vec<usize> = vec![3, 2, 1];
+    let mut b: Vec<usize> = vec![33, 44];
+    let mut c: Vec<usize> = vec![100];
 
-//     let aa = &mut a;
-//     let bb = &mut b;
-//     let x = aa.chained_mut(bb);
+    // let aa = &mut a;
+    // let bb = &mut b;
+    // let x: Chained<&mut Vec<i32>, &mut Vec<i32>> = (&mut a).chained(&mut b);
 
-//     // add_two(&mut a, 6);
-//     add_two(x, 83);
+    // let x = Chained::chained(a, b);
 
-//     // add_two(&mut a, 83);
-// }
+    // add_two(a, 6);
+
+    fn take_it_mut(it: &mut impl IterableMut<ItemMut = usize>) {}
+
+    let mut_a = &mut a;
+    let mut_b = &mut b;
+
+    // take_it_mut(mut_a);
+
+    IntoChainedMut::chained_mut(mut_a, mut_b);
+
+    add_two(a.chained_mut(&mut b), 83);
+
+    // let x = IntoChainedMut::chained_mut(&mut a, &mut b);
+
+    // add_two(a.chained_mut(&mut b), 83);
+    // add_two(x, 83);
+
+    // add_two(&mut a, 83);
+}

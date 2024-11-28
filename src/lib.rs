@@ -8,6 +8,7 @@ pub use iterable_mut::IterableMut;
 pub use iterable_once::IterableOnce;
 pub use transformations::{
     IntoChained,
+    IntoChainedMut,
     IntoCloned,
     IntoCloningIterable,
     //IntoOwningIterable,

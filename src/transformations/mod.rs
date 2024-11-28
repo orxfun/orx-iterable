@@ -15,7 +15,7 @@ mod taken_while;
 // mod owning_iterable;
 mod zipped;
 
-pub use chained::{Chained, IntoChained};
+pub use chained::{Chained, ChainedMut, IntoChained, IntoChainedMut};
 pub use cloned::{Cloned, IntoCloned};
 pub use cloning_iter::{CloningIterable, IntoCloningIterable};
 pub use copied::{Copied, IntoCopied};
