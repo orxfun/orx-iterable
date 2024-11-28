@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableOnce};
+use crate::Iterable;
 use std::marker::PhantomData;
 
 pub struct Cloned<'a, T, I>
@@ -18,17 +18,17 @@ where
     }
 }
 
-impl<'a, T, I> IterableOnce for Cloned<'a, T, I>
-where
-    I: IterableOnce<Item = &'a T>,
-    T: Clone + 'a,
-{
-    type Item = T;
+// impl<'a, T, I> IterableOnce for Cloned<'a, T, I>
+// where
+//     I: IterableOnce<Item = &'a T>,
+//     T: Clone + 'a,
+// {
+//     type Item = T;
 
-    fn it_once(self) -> impl Iterator<Item = Self::Item> {
-        self.iterable.it_once().cloned()
-    }
-}
+//     fn it_once(self) -> impl Iterator<Item = Self::Item> {
+//         self.iterable.it_once().cloned()
+//     }
+// }
 
 impl<'a, T, I> Iterable for Cloned<'a, T, I>
 where
@@ -37,14 +37,16 @@ where
 {
     type Item = T;
 
-    fn iter(&self) -> impl Iterator<Item = Self::Item> {
+    type Iter<'b> = std::iter::Cloned<I::Iter<'b>> where Self: 'b;
+
+    fn iter(&self) -> Self::Iter<'_> {
         self.iterable.iter().cloned()
     }
 }
 
 // into
 
-pub trait IntoClonedIterable<'a, T>
+pub trait IntoCloned<'a, T>
 where
     Self: Iterable<Item = &'a T>,
     T: Clone + 'a,
@@ -60,7 +62,7 @@ where
     }
 }
 
-impl<'a, T, I> IntoClonedIterable<'a, T> for I
+impl<'a, T, I> IntoCloned<'a, T> for I
 where
     I: Iterable<Item = &'a T>,
     T: Clone + 'a,

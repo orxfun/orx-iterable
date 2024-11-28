@@ -30,7 +30,9 @@ where
 {
     type Item = I::Item;
 
-    fn iter(&self) -> impl Iterator<Item = <Self as Iterable>::Item> + '_ {
+    type Iter<'a> = I where Self: 'a;
+
+    fn iter(&self) -> Self::Iter<'_> {
         self.0.clone()
     }
 }

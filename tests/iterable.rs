@@ -141,3 +141,51 @@ fn iterable_type_members() {
     test_sum_val(graph.out_edges(i).copied(), 19);
     test_sum_val(graph.out_edges_iter(i).into_iterable().copied(), 19);
 }
+
+#[test]
+fn iterable_flattened() {
+    let data = vec![vec![1, 2], vec![6, 0, 7], vec![3]];
+    test_sum_ref(data.flattened(), 19);
+    test_sum_val(data.flattened().copied(), 19);
+}
+
+#[test]
+fn iterable_flat_mapped() {
+    let data = vec![2, 4, 3];
+    test_sum_val(data.flat_mapped(|&i| 0..i), 10);
+
+    let data = vec![vec![1], vec![333], vec![4, 2], vec![8, 8, 3], vec![1000]];
+    let indices = vec![0, 2, 3];
+    test_sum_ref(indices.flat_mapped(|idx| &data[*idx]), 26);
+}
+
+#[test]
+fn iterable_mapped_while() {
+    let data = vec![2, 4, 12, 3, 8, 4];
+    test_sum_ref(data.mapped_while(|x| (x % 2 == 0).then_some(x)), 18);
+    test_sum_val(data.mapped_while(|x| (x % 2 == 0).then_some(*x)), 18);
+}
+
+#[test]
+fn iterable_skipped() {
+    let data = vec![2, 4, 12, 3, 8, 4];
+    test_sum_ref(data.skipped(0), 33);
+    test_sum_ref(data.skipped(2), 27);
+    test_sum_ref(data.skipped(20), 0);
+}
+
+#[test]
+fn iterable_taken() {
+    let data = vec![2, 4, 12, 3, 8, 4];
+    test_sum_ref(data.taken(0), 0);
+    test_sum_ref(data.taken(4), 21);
+    test_sum_ref(data.taken(20), 33);
+}
+
+#[test]
+fn iterable_taken_while() {
+    let data = vec![2, 4, 12, 3, 8, 4];
+    test_sum_ref(data.taken_while(|x| *x % 2 == 0), 18);
+    test_sum_ref(data.taken_while(|x| *x % 2 == 1), 0);
+    test_sum_ref(data.taken_while(|x| **x < 100), 33);
+}

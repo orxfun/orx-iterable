@@ -9,6 +9,18 @@ pub use iterable::Iterable;
 pub use iterable_mut::IterableMut;
 pub use iterable_once::IterableOnce;
 pub use iterable_transformations::{
-    IntoChainedIterable, IntoClonedIterable, IntoCloningIterable, IntoCopiedIterable,
-    IntoFilteredIterable, IntoMappedIterable, IntoOwningIterable, IntoZippedIterable,
+    IntoChained,
+    IntoCloned,
+    IntoCloningIterable,
+    //IntoOwningIterable,
+    IntoCopied,
+    IntoFiltered,
+    IntoFlatMapped,
+    IntoFlattened,
+    IntoMapped,
+    IntoMappedWhileIterable,
+    IntoSkipped,
+    IntoTaken,
+    IntoTakenWhile,
+    IntoZipped,
 };

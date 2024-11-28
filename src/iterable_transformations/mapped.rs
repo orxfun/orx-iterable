@@ -31,14 +31,42 @@ where
 {
     type Item = U;
 
-    fn iter(&self) -> impl Iterator<Item = Self::Item> {
-        self.iterable.iter().map(&self.map)
+    type Iter<'a> = MappedIter<'a, I, T, U, M> where Self: 'a;
+
+    fn iter(&self) -> Self::Iter<'_> {
+        MappedIter {
+            iter: self.iterable.iter(),
+            map: &self.map,
+        }
+    }
+}
+
+// iter
+
+pub struct MappedIter<'a, I, T, U, M>
+where
+    M: Fn(T) -> U,
+    I: Iterable<Item = T> + 'a,
+{
+    iter: I::Iter<'a>,
+    map: &'a M,
+}
+
+impl<'a, I, T, U, M> Iterator for MappedIter<'a, I, T, U, M>
+where
+    M: Fn(T) -> U,
+    I: Iterable<Item = T>,
+{
+    type Item = U;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next().map(self.map)
     }
 }
 
 // into
 
-pub trait IntoMappedIterable<T>
+pub trait IntoMapped<T>
 where
     Self: Iterable<Item = T>,
 {
@@ -55,4 +83,4 @@ where
     }
 }
 
-impl<T, I> IntoMappedIterable<T> for I where I: Iterable<Item = T> {}
+impl<T, I> IntoMapped<T> for I where I: Iterable<Item = T> {}

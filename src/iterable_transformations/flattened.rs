@@ -1,77 +1,116 @@
-use crate::{Iterable, IterableOnce};
+use crate::Iterable;
 use std::marker::PhantomData;
 
 // iterable
 
-pub struct Flattened<I1, T> {
-    it1: I1,
+pub struct Flattened<I, T> {
+    it1: I,
     phantom: PhantomData<T>,
 }
 
-impl<I1, T> IterableOnce for Flattened<I1, T>
+// impl<I, T> IterableOnce for Flattened<I, T>
+// where
+//     I: IterableOnce,
+//     I::Item: IterableOnce<Item = T>,
+// {
+//     type Item = T;
+
+//     fn it_once(self) -> impl Iterator<Item = Self::Item> {
+//         self.it1.it_once().flat_map(|it2| it2.it_once())
+//     }
+// }
+
+impl<I, T> Iterable for Flattened<I, T>
 where
-    I1: IterableOnce,
-    I1::Item: IterableOnce<Item = T>,
+    I: Iterable,
+    I::Item: Iterable<Item = T>,
 {
     type Item = T;
 
-    fn it_once(self) -> impl Iterator<Item = Self::Item> {
-        self.it1.it_once().flat_map(|it2| it2.it_once())
+    type Iter<'a> = FlattenedIter<'a, I, T> where Self: 'a;
+
+    fn iter(&self) -> Self::Iter<'_> {
+        let iter1 = self.it1.iter();
+        FlattenedIter::new(iter1)
     }
 }
 
-impl<I1, T> Iterable for Flattened<I1, T>
+pub struct FlattenedIter<'a, I, T>
 where
-    I1: Iterable,
-    I1::Item: Iterable<Item = T>,
+    I: Iterable + 'a,
+    I::Item: Iterable<Item = T>,
 {
-    type Item = T;
+    iter1: I::Iter<'a>,
+    iter2: Option<<I::Item as Iterable>::Iter<'a>>,
+}
 
-    fn iter(&self) -> impl Iterator<Item = Self::Item> {
-        // self.it1.iter().flat_map(|it2| it2.iter())
-        std::iter::empty()
+impl<'a, I, T> FlattenedIter<'a, I, T>
+where
+    I: Iterable,
+    I::Item: Iterable<Item = T>,
+{
+    fn new(mut iter1: I::Iter<'a>) -> Self {
+        let iter2 = Self::next_iter2(&mut iter1);
+        Self { iter1, iter2 }
+    }
+
+    fn next_iter2(iter1: &mut I::Iter<'a>) -> Option<<I::Item as Iterable>::Iter<'a>> {
+        unsafe fn into_ref<'b, U>(reference: &U) -> &'b U {
+            unsafe { &*(reference as *const U) }
+        }
+
+        match iter1.next() {
+            Some(iterable2) => {
+                let iterable2 = unsafe { into_ref(&iterable2) };
+                Some(iterable2.iter())
+            }
+            None => None,
+        }
     }
 }
 
-pub struct FlattenedIter<'a, I1, T>
+impl<'a, I, T> Iterator for FlattenedIter<'a, I, T>
 where
-    I1: Iterable,
-    I1::Item: Iterable<Item = T>,
-{
-    it1: &'a I1,
-    it2: I1::Item,
-}
-
-impl<'a, I1, T> Iterator for FlattenedIter<'a, I1, T>
-where
-    I1: Iterable,
-    I1::Item: Iterable<Item = T>,
+    I: Iterable,
+    I::Item: Iterable<Item = T>,
 {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        None
+        match &mut self.iter2 {
+            Some(it2) => match it2.next() {
+                Some(x) => Some(x),
+                None => {
+                    self.iter2 = Self::next_iter2(&mut self.iter1);
+                    self.next()
+                }
+            },
+            None => None,
+        }
     }
 }
 
-fn abc() {
-    let x = vec![vec![1, 2, 3]];
-    let y = x.iter();
-    let mut z = y.flatten();
+// into
 
-    let w = z.next().unwrap();
+pub trait IntoFlattened<T>
+where
+    Self: Iterable,
+    Self::Item: Iterable<Item = T>,
+{
+    fn flattened(self) -> Flattened<Self, T>
+    where
+        Self: Sized,
+    {
+        Flattened {
+            it1: self,
+            phantom: PhantomData,
+        }
+    }
+}
 
-    let o = Flattened {
-        it1: &x,
-        phantom: PhantomData::<&usize>,
-    };
-    let mut w = o.iter();
-    let zz = w.next().unwrap();
-
-    // let o = Flattened {
-    //     it1: x,
-    //     phantom: PhantomData::<usize>,
-    // };
-    // let mut w = o.it_once();
-    // let zz = w.next().unwrap();
+impl<T, I> IntoFlattened<T> for I
+where
+    I: Iterable,
+    I::Item: Iterable<Item = T>,
+{
 }

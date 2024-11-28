@@ -26,14 +26,16 @@ where
 {
     type Item = T;
 
-    fn iter(&self) -> impl Iterator<Item = Self::Item> {
+    type Iter<'a> = std::iter::Chain<I1::Iter<'a>, I2::Iter<'a>> where Self: 'a;
+
+    fn iter(&self) -> Self::Iter<'_> {
         self.it1.iter().chain(self.it2.iter())
     }
 }
 
 // into
 
-pub trait IntoChainedIterable<T>
+pub trait IntoChained<T>
 where
     Self: Iterable<Item = T>,
 {
@@ -50,4 +52,4 @@ where
     }
 }
 
-impl<T, I> IntoChainedIterable<T> for I where I: Iterable<Item = T> {}
+impl<T, I> IntoChained<T> for I where I: Iterable<Item = T> {}

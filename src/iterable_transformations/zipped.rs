@@ -26,14 +26,16 @@ where
 {
     type Item = (T, U);
 
-    fn iter(&self) -> impl Iterator<Item = Self::Item> {
+    type Iter<'a> = std::iter::Zip<I1::Iter<'a>, I2::Iter<'a>> where Self: 'a;
+
+    fn iter(&self) -> Self::Iter<'_> {
         self.it1.iter().zip(self.it2.iter())
     }
 }
 
 // into
 
-pub trait IntoZippedIterable<T>
+pub trait IntoZipped<T>
 where
     Self: Iterable<Item = T>,
 {
@@ -50,4 +52,4 @@ where
     }
 }
 
-impl<T, I> IntoZippedIterable<T> for I where I: Iterable<Item = T> {}
+impl<T, I> IntoZipped<T> for I where I: Iterable<Item = T> {}

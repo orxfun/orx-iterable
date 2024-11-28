@@ -1,7 +1,13 @@
+use std::ops::Range;
+
 pub trait Iterable {
     type Item;
 
-    fn iter(&self) -> impl Iterator<Item = Self::Item> + '_;
+    type Iter<'a>: Iterator<Item = Self::Item>
+    where
+        Self: 'a;
+
+    fn iter(&self) -> Self::Iter<'_>;
 }
 
 // impl
@@ -12,15 +18,45 @@ where
 {
     type Item = <&'a X as IntoIterator>::Item;
 
-    fn iter(&self) -> impl Iterator<Item = Self::Item> {
+    type Iter<'b> = <&'a X as IntoIterator>::IntoIter where Self: 'b;
+
+    fn iter(&self) -> Self::Iter<'_> {
         self.into_iter()
     }
 }
+
+// impl - special
 
 impl<'a, T> Iterable for &'a [T] {
     type Item = &'a T;
 
-    fn iter(&self) -> impl Iterator<Item = Self::Item> + '_ {
+    type Iter<'b> = std::slice::Iter<'a, T> where Self: 'b;
+
+    fn iter(&self) -> Self::Iter<'_> {
         self.into_iter()
     }
 }
+
+impl Iterable for Range<usize> {
+    type Item = usize;
+
+    type Iter<'a> = Range<usize> where Self: 'a;
+
+    fn iter(&self) -> Self::Iter<'_> {
+        self.clone()
+    }
+}
+
+// impl<X> Iterable for X
+// where
+//     X: IntoIterator,
+//     X::Item: Copy,
+// {
+//     type Item = usize;
+
+//     type Iter<'a> = Range<usize> where Self: 'a;
+
+//     fn iter(&self) -> Self::Iter<'_> {
+//         todo!()
+//     }
+// }
