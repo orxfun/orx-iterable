@@ -12,7 +12,9 @@ where
 {
     type Item = I1::Item;
 
-    fn it_once(self) -> impl Iterator<Item = Self::Item> {
+    type Iter = core::iter::Chain<I1::Iter, I2::Iter>;
+
+    fn it_once(self) -> Self::Iter {
         self.it1.it_once().chain(self.it2.it_once())
     }
 }
@@ -35,7 +37,7 @@ pub trait IntoChained
 where
     Self: Iterable + Sized,
 {
-    fn chained<I>(self, other: I) -> Chained<Self, I> where {
+    fn chained<I: Iterable>(self, other: I) -> Chained<Self, I> where {
         Chained {
             it1: self,
             it2: other,
@@ -44,6 +46,22 @@ where
 }
 
 impl<I> IntoChained for I where I: Iterable {}
+
+// once
+
+pub trait IntoChainedOnce
+where
+    Self: IterableOnce + Sized,
+{
+    fn chained_once<I: IterableOnce>(self, other: I) -> Chained<Self, I> where {
+        Chained {
+            it1: self,
+            it2: other,
+        }
+    }
+}
+
+impl<I> IntoChainedOnce for I where I: IterableOnce {}
 
 // mut
 

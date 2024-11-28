@@ -9,6 +9,7 @@ pub use iterable_once::IterableOnce;
 pub use transformations::{
     IntoChained,
     IntoChainedMut,
+    IntoChainedOnce,
     IntoCloned,
     IntoCloningIterable,
     //IntoOwningIterable,
@@ -29,4 +30,5 @@ pub use transformations::{
     IntoTakenWhile,
     IntoTakenWhileMut,
     IntoZipped,
+    IntoZippedOnce,
 };

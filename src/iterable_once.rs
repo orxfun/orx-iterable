@@ -1,7 +1,9 @@
 pub trait IterableOnce {
     type Item;
 
-    fn it_once(self) -> impl Iterator<Item = Self::Item>;
+    type Iter: Iterator<Item = Self::Item>;
+
+    fn it_once(self) -> Self::Iter;
 }
 
 // impl
@@ -12,7 +14,9 @@ where
 {
     type Item = <X as IntoIterator>::Item;
 
-    fn it_once(self) -> impl Iterator<Item = Self::Item> {
+    type Iter = <X as IntoIterator>::IntoIter;
+
+    fn it_once(self) -> Self::Iter {
         self.into_iter()
     }
 }

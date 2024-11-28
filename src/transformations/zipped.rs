@@ -1,5 +1,4 @@
 use crate::{Iterable, IterableOnce};
-use std::marker::PhantomData;
 
 pub struct Zipped<I1, I2> {
     it1: I1,
@@ -13,7 +12,9 @@ where
 {
     type Item = (I1::Item, I2::Item);
 
-    fn it_once(self) -> impl Iterator<Item = Self::Item> {
+    type Iter = std::iter::Zip<I1::Iter, I2::Iter>;
+
+    fn it_once(self) -> Self::Iter {
         self.it1.it_once().zip(self.it2.it_once())
     }
 }
@@ -34,13 +35,9 @@ where
 
 pub trait IntoZipped
 where
-    Self: Iterable,
+    Self: Iterable + Sized,
 {
-    fn zipped<I>(self, other: I) -> Zipped<Self, I>
-    where
-        Self: Sized,
-        I: Iterable,
-    {
+    fn zipped<I: Iterable>(self, other: I) -> Zipped<Self, I> {
         Zipped {
             it1: self,
             it2: other,
@@ -50,10 +47,18 @@ where
 
 impl<I> IntoZipped for I where I: Iterable {}
 
-// mut
+// once
 
-pub struct ZippedMut<'a, T, U, I1, I2> {
-    it1: &'a mut I1,
-    it2: &'a mut I2,
-    phantom: PhantomData<(T, U)>,
+pub trait IntoZippedOnce
+where
+    Self: IterableOnce + Sized,
+{
+    fn zipped_once<I: IterableOnce>(self, other: I) -> Zipped<Self, I> {
+        Zipped {
+            it1: self,
+            it2: other,
+        }
+    }
 }
+
+impl<I> IntoZippedOnce for I where I: IterableOnce {}
