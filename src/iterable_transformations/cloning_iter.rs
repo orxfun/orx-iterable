@@ -1,28 +1,17 @@
-use crate::{Iterable, IterableOnce};
+use crate::Iterable;
 
-pub struct CloningIterable<I>(I)
-where
-    I: Iterator + Clone;
+pub struct CloningIterable<I>(I);
 
-impl<I: Iterator + Clone> CloningIterable<I>
-where
-    I: Iterator + Clone,
-{
-    pub fn new(iter: I) -> Self {
-        Self(iter)
-    }
-}
+// impl<I> IterableOnce for CloningIterable<I>
+// where
+//     I: Iterator + Clone,
+// {
+//     type Item = I::Item;
 
-impl<I> IterableOnce for CloningIterable<I>
-where
-    I: Iterator + Clone,
-{
-    type Item = I::Item;
-
-    fn it_once(self) -> impl Iterator<Item = Self::Item> {
-        self.0
-    }
-}
+//     fn it_once(self) -> impl Iterator<Item = Self::Item> {
+//         self.0
+//     }
+// }
 
 impl<I> Iterable for CloningIterable<I>
 where

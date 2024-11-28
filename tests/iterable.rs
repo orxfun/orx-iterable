@@ -1,5 +1,5 @@
 use orx_iterable::*;
-use std::collections::{BTreeSet, HashSet, LinkedList, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDeque};
 
 fn test_sum_ref<'a>(iter: impl Iterable<Item = &'a usize>, sum: usize) {
     assert_eq!(iter.iter().sum::<usize>(), sum);
@@ -71,6 +71,24 @@ fn iterable_std_owned_collections() {
     test_std_collection!(LinkedList<_>);
     test_std_collection!(HashSet<_>);
     test_std_collection!(BTreeSet<_>);
+}
+
+#[test]
+fn iterable_std_pair_collections() {
+    fn test<'a>(iter: impl Iterable<Item = (&'a u64, &'a u32)>) {
+        assert_eq!(iter.iter().map(|x| x.0).sum::<u64>(), 4);
+        assert_eq!(iter.iter().map(|x| x.1).sum::<u32>(), 42);
+    }
+
+    let map: HashMap<u64, u32> = [(1, 40), (3, 2)].into_iter().collect();
+    test(&map);
+    test(map.taken(10));
+    test(map.taken_while(|x| x.1 % 2 == 0));
+
+    let map: BTreeMap<u64, u32> = [(1, 40), (3, 2)].into_iter().collect();
+    test(&map);
+    test(map.taken(10));
+    test(map.taken_while(|x| x.1 % 2 == 0));
 }
 
 #[test]
@@ -167,7 +185,7 @@ fn iterable_filtered() {
 
 #[test]
 fn iterable_flat_mapped() {
-    let data = vec![2, 4, 3];
+    let data = vec![2usize, 4, 3];
     test_sum_val(data.flat_mapped(|&i| 0..i), 10);
 
     let data = vec![vec![1], vec![333], vec![4, 2], vec![8, 8, 3], vec![1000]];

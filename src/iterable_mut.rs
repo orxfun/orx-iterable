@@ -1,7 +1,11 @@
 pub trait IterableMut {
     type Item;
 
-    fn it_mut(&mut self) -> impl Iterator<Item = &mut Self::Item>;
+    type IterMut<'a>: Iterator<Item = &'a mut Self::Item>
+    where
+        Self: 'a;
+
+    fn iter_mut(&mut self) -> Self::IterMut<'_>;
 }
 
 // impl
@@ -13,7 +17,9 @@ where
 {
     type Item = <X as IntoIterator>::Item;
 
-    fn it_mut(&mut self) -> impl Iterator<Item = &mut Self::Item> {
+    type IterMut<'a> = <&'a mut X as IntoIterator>::IntoIter where Self: 'a;
+
+    fn iter_mut(&mut self) -> Self::IterMut<'_> {
         <&mut X>::into_iter(self)
     }
 }

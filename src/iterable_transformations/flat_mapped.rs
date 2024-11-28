@@ -57,7 +57,7 @@ where
 
         match iter1.next() {
             Some(iterable2) => {
-                let iterable2 = unsafe { into_ref(&fmap(iterable2)) };
+                let iterable2 = std::hint::black_box(unsafe { into_ref(&fmap(iterable2)) });
                 Some(iterable2.iter())
             }
             None => None,
@@ -74,15 +74,16 @@ where
     type Item = U::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match &mut self.iter2 {
-            Some(it2) => match it2.next() {
-                Some(x) => Some(x),
-                None => {
-                    self.iter2 = Self::next_iter2(&mut self.iter1, self.fmap);
-                    self.next()
-                }
-            },
-            None => None,
+        loop {
+            match &mut self.iter2 {
+                Some(it2) => match it2.next() {
+                    Some(x) => return Some(x),
+                    None => {
+                        self.iter2 = Self::next_iter2(&mut self.iter1, self.fmap);
+                    }
+                },
+                None => return None,
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableOnce};
+use crate::{Iterable, IterableMut, IterableOnce};
 
 pub struct Chained<I1, I2> {
     it1: I1,
@@ -46,3 +46,16 @@ where
 }
 
 impl<I> IntoChained for I where I: Iterable {}
+
+#[test]
+fn abc() {
+    let mut a = vec![1, 2];
+    let mut b = vec![3];
+    let c = a.iter_mut().chain(b.iter_mut());
+    for x in c {
+        *x += 1;
+    }
+
+    assert_eq!(a, vec![2, 3]);
+    assert_eq!(b, vec![4]);
+}

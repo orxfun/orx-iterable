@@ -37,26 +37,31 @@ impl<'a, T> Iterable for &'a [T] {
     }
 }
 
-impl Iterable for Range<usize> {
-    type Item = usize;
+macro_rules! impl_for_range {
+    ($T:ty) => {
+        #[allow(unused_imports)]
+        use $crate::*;
 
-    type Iter<'a> = Range<usize> where Self: 'a;
+        impl Iterable for Range<$T> {
+            type Item = $T;
 
-    fn iter(&self) -> Self::Iter<'_> {
-        self.clone()
-    }
+            type Iter<'a> = Range<$T> where Self: 'a;
+
+            fn iter(&self) -> Self::Iter<'_> {
+                self.clone()
+            }
+        }
+    };
 }
 
-// impl<X> Iterable for X
-// where
-//     X: IntoIterator,
-//     X::Item: Copy,
-// {
-//     type Item = usize;
-
-//     type Iter<'a> = Range<usize> where Self: 'a;
-
-//     fn iter(&self) -> Self::Iter<'_> {
-//         todo!()
-//     }
-// }
+impl_for_range!(usize);
+impl_for_range!(u8);
+impl_for_range!(u16);
+impl_for_range!(u32);
+impl_for_range!(u64);
+impl_for_range!(u128);
+impl_for_range!(i8);
+impl_for_range!(i16);
+impl_for_range!(i32);
+impl_for_range!(i64);
+impl_for_range!(i128);
