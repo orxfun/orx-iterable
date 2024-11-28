@@ -39,6 +39,7 @@ pub use transformations::{
     IntoTakenOnce,
     IntoTakenWhile,
     IntoTakenWhileMut,
+    IntoTakenWhileOnce,
     IntoZipped,
     IntoZippedOnce,
 };

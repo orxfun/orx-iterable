@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableMut};
+use crate::{Iterable, IterableMut, IterableOnce};
 
 pub struct TakenWhile<I, P> {
     iterable: I,
@@ -35,6 +35,39 @@ where
 }
 
 impl<I> IntoTakenWhile for I where I: Iterable {}
+
+// once
+
+impl<I, P> IterableOnce for TakenWhile<I, P>
+where
+    I: IterableOnce,
+    P: Fn(&I::Item) -> bool,
+{
+    type Item = I::Item;
+
+    type Iter = core::iter::TakeWhile<I::Iter, P>;
+
+    fn it_once(self) -> Self::Iter {
+        self.iterable.it_once().take_while(self.take_while)
+    }
+}
+
+pub trait IntoTakenWhileOnce
+where
+    Self: Sized + IterableOnce,
+{
+    fn taken_while_once<P>(self, take_while_predicate: P) -> TakenWhile<Self, P>
+    where
+        P: Fn(&Self::Item) -> bool,
+    {
+        TakenWhile {
+            iterable: self,
+            take_while: take_while_predicate,
+        }
+    }
+}
+
+impl<I> IntoTakenWhileOnce for I where I: IterableOnce {}
 
 // mut
 
