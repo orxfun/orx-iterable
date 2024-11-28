@@ -32,6 +32,7 @@ pub use transformations::{
     IntoMappedWhileOnce,
     IntoSkipped,
     IntoSkippedMut,
+    IntoSkippedOnce,
     IntoSliceAsIterableMut,
     IntoTaken,
     IntoTakenMut,
