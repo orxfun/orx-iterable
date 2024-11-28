@@ -1,4 +1,4 @@
-use crate::Iterable;
+use crate::{Iterable, IterableOnce};
 use std::marker::PhantomData;
 
 pub struct Copied<'a, T, I>
@@ -18,17 +18,19 @@ where
     }
 }
 
-// impl<'a, T, I> IterableOnce for Copied<'a, T, I>
-// where
-//     I: IterableOnce<Item = &'a T>,
-//     T: Copy + 'a,
-// {
-//     type Item = T;
+impl<'a, T, I> IterableOnce for Copied<'a, T, I>
+where
+    I: IterableOnce<Item = &'a T>,
+    T: Copy + 'a,
+{
+    type Item = T;
 
-//     fn it_once(self) -> impl Iterator<Item = Self::Item> {
-//         self.iterable.it_once().copied()
-//     }
-// }
+    type Iter = std::iter::Copied<I::Iter>;
+
+    fn it_once(self) -> Self::Iter {
+        self.iterable.it_once().copied()
+    }
+}
 
 impl<'a, T, I> Iterable for Copied<'a, T, I>
 where
@@ -65,6 +67,28 @@ where
 impl<'a, T, I> IntoCopied<'a, T> for I
 where
     I: Iterable<Item = &'a T>,
+    T: Copy + 'a,
+{
+}
+
+// once
+
+pub trait IntoCopiedOnce<'a, T>
+where
+    Self: IterableOnce<Item = &'a T> + Sized,
+    T: Copy + 'a,
+{
+    fn copied_once(self) -> Copied<'a, T, Self> {
+        Copied {
+            iterable: self,
+            phantom: PhantomData,
+        }
+    }
+}
+
+impl<'a, T, I> IntoCopiedOnce<'a, T> for I
+where
+    I: IterableOnce<Item = &'a T>,
     T: Copy + 'a,
 {
 }

@@ -15,6 +15,7 @@ pub use transformations::{
     IntoCloningIterable,
     //IntoOwningIterable,
     IntoCopied,
+    IntoCopiedOnce,
     IntoFilterMapped,
     IntoFiltered,
     IntoFilteredMut,

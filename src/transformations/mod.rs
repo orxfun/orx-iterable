@@ -18,7 +18,7 @@ mod zipped;
 pub use chained::{Chained, ChainedMut, IntoChained, IntoChainedMut, IntoChainedOnce};
 pub use cloned::{Cloned, IntoCloned, IntoClonedOnce};
 pub use cloning_iter::{CloningIterable, IntoCloningIterable};
-pub use copied::{Copied, IntoCopied};
+pub use copied::{Copied, IntoCopied, IntoCopiedOnce};
 pub use filtered::{
     Filtered, FilteredIter, FilteredMut, FilteredMutIter, IntoFiltered, IntoFilteredMut,
 };
