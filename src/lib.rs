@@ -36,6 +36,7 @@ pub use transformations::{
     IntoSliceAsIterableMut,
     IntoTaken,
     IntoTakenMut,
+    IntoTakenOnce,
     IntoTakenWhile,
     IntoTakenWhileMut,
     IntoZipped,

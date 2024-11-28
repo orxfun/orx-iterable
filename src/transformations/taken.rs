@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableMut};
+use crate::{Iterable, IterableMut, IterableOnce};
 
 pub struct Taken<I> {
     take: usize,
@@ -34,6 +34,38 @@ where
 }
 
 impl<I> IntoTaken for I where I: Iterable {}
+
+// once
+
+impl<I> IterableOnce for Taken<I>
+where
+    I: IterableOnce,
+{
+    type Item = I::Item;
+
+    type Iter = core::iter::Skip<I::Iter>;
+
+    fn it_once(self) -> Self::Iter {
+        self.iterable.it_once().skip(self.take)
+    }
+}
+
+pub trait IntoTakenOnce
+where
+    Self: IterableOnce,
+{
+    fn taken_once(self, num_items_to_take: usize) -> Taken<Self>
+    where
+        Self: Sized,
+    {
+        Taken {
+            iterable: self,
+            take: num_items_to_take,
+        }
+    }
+}
+
+impl<I> IntoTakenOnce for I where I: IterableOnce {}
 
 // mut
 
