@@ -1,15 +1,10 @@
 use crate::Iterable;
-use std::marker::PhantomData;
 
 // iterable
 
-pub struct Filtered<I, T, F>
-where
-    F: Fn(&T) -> bool,
-{
+pub struct Filtered<I, F> {
     iterable: I,
     filter: F,
-    phantom: PhantomData<T>,
 }
 
 // impl<I, T, F> IterableOnce for Filtered<I, T, F>
@@ -24,14 +19,14 @@ where
 //     }
 // }
 
-impl<I, T, F> Iterable for Filtered<I, T, F>
+impl<I, F> Iterable for Filtered<I, F>
 where
-    F: Fn(&T) -> bool,
-    I: Iterable<Item = T>,
+    I: Iterable,
+    F: Fn(&I::Item) -> bool,
 {
-    type Item = T;
+    type Item = I::Item;
 
-    type Iter<'a> = FilteredIter<'a, I, T, F> where Self: 'a;
+    type Iter<'a> = FilteredIter<'a, I, F> where Self: 'a;
 
     fn iter(&self) -> Self::Iter<'_> {
         FilteredIter {
@@ -43,21 +38,21 @@ where
 
 // iter
 
-pub struct FilteredIter<'a, I, T, F>
+pub struct FilteredIter<'a, I, F>
 where
-    F: Fn(&T) -> bool,
-    I: Iterable<Item = T> + 'a,
+    I: Iterable + 'a,
+    F: Fn(&I::Item) -> bool,
 {
     iter: I::Iter<'a>,
     filter: &'a F,
 }
 
-impl<'a, I, T, F> Iterator for FilteredIter<'a, I, T, F>
+impl<'a, I, F> Iterator for FilteredIter<'a, I, F>
 where
-    F: Fn(&T) -> bool,
-    I: Iterable<Item = T>,
+    I: Iterable,
+    F: Fn(&I::Item) -> bool,
 {
-    type Item = T;
+    type Item = I::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.iter.next() {
@@ -72,21 +67,20 @@ where
 
 // into
 
-pub trait IntoFiltered<T>
+pub trait IntoFiltered
 where
-    Self: Iterable<Item = T>,
+    Self: Sized + Iterable,
 {
-    fn filtered<F>(self, filter: F) -> Filtered<Self, T, F>
+    fn filtered<F>(self, filter: F) -> Filtered<Self, F>
     where
-        F: Fn(&T) -> bool,
         Self: Sized,
+        F: Fn(&Self::Item) -> bool,
     {
         Filtered {
             iterable: self,
             filter,
-            phantom: PhantomData,
         }
     }
 }
 
-impl<T, I> IntoFiltered<T> for I where I: Iterable<Item = T> {}
+impl<I> IntoFiltered for I where I: Iterable {}

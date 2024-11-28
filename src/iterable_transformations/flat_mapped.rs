@@ -3,25 +3,24 @@ use std::marker::PhantomData;
 
 // iterable
 
-pub struct FlatMapped<I, T, U, M>
+pub struct FlatMapped<I, U, M>
 where
-    M: Fn(T) -> U,
     U: Iterable,
 {
     it1: I,
     fmap: M,
-    phantom: PhantomData<T>,
+    phantom: PhantomData<U>,
 }
 
-impl<I, T, U, M> Iterable for FlatMapped<I, T, U, M>
+impl<I, U, M> Iterable for FlatMapped<I, U, M>
 where
-    I: Iterable<Item = T>,
-    M: Fn(T) -> U,
+    I: Iterable,
     U: Iterable,
+    M: Fn(I::Item) -> U,
 {
     type Item = U::Item;
 
-    type Iter<'a> = FlatMappedIter<'a, I, T, U, M> where Self: 'a;
+    type Iter<'a> = FlatMappedIter<'a, I, U, M> where Self: 'a;
 
     fn iter(&self) -> Self::Iter<'_> {
         let iter1 = self.it1.iter();
@@ -31,22 +30,22 @@ where
 
 // iter
 
-pub struct FlatMappedIter<'a, I, T, U, M>
+pub struct FlatMappedIter<'a, I, U, M>
 where
-    I: Iterable<Item = T> + 'a,
-    M: Fn(T) -> U,
+    I: Iterable + 'a,
     U: Iterable + 'a,
+    M: Fn(I::Item) -> U,
 {
     iter1: I::Iter<'a>,
     iter2: Option<<U as Iterable>::Iter<'a>>,
     fmap: &'a M,
 }
 
-impl<'a, I, T, U, M> FlatMappedIter<'a, I, T, U, M>
+impl<'a, I, U, M> FlatMappedIter<'a, I, U, M>
 where
-    I: Iterable<Item = T> + 'a,
-    M: Fn(T) -> U,
-    U: Iterable,
+    I: Iterable + 'a,
+    U: Iterable + 'a,
+    M: Fn(I::Item) -> U,
 {
     fn new(mut iter1: I::Iter<'a>, fmap: &'a M) -> Self {
         let iter2 = Self::next_iter2(&mut iter1, fmap);
@@ -68,11 +67,11 @@ where
     }
 }
 
-impl<'a, I, T, U, M> Iterator for FlatMappedIter<'a, I, T, U, M>
+impl<'a, I, U, M> Iterator for FlatMappedIter<'a, I, U, M>
 where
-    I: Iterable<Item = T> + 'a,
-    M: Fn(T) -> U,
-    U: Iterable,
+    I: Iterable + 'a,
+    U: Iterable + 'a,
+    M: Fn(I::Item) -> U,
 {
     type Item = U::Item;
 
@@ -92,15 +91,14 @@ where
 
 // into
 
-pub trait IntoFlatMapped<T>
+pub trait IntoFlatMapped
 where
-    Self: Iterable<Item = T>,
+    Self: Iterable + Sized,
 {
-    fn flat_mapped<U, M>(self, flat_map: M) -> FlatMapped<Self, T, U, M>
+    fn flat_mapped<U, M>(self, flat_map: M) -> FlatMapped<Self, U, M>
     where
-        M: Fn(T) -> U,
+        M: Fn(Self::Item) -> U,
         U: Iterable,
-        Self: Sized,
     {
         FlatMapped {
             it1: self,
@@ -110,4 +108,4 @@ where
     }
 }
 
-impl<T, I> IntoFlatMapped<T> for I where Self: Iterable<Item = T> {}
+impl<I> IntoFlatMapped for I where Self: Iterable {}
