@@ -24,7 +24,8 @@ pub use filtered::{
     IntoFilteredOnce,
 };
 pub use flattened::{
-    Flattened, FlattenedIter, FlattenedMut, FlattenedMutIter, IntoFlattened, IntoFlattenedMut,
+    Flattened, FlattenedIter, FlattenedIterOnce, FlattenedMut, FlattenedMutIter, IntoFlattened,
+    IntoFlattenedMut, IntoFlattenedOnce,
 };
 pub use mapped::{IntoMapped, Mapped, MappedIter};
 // pub use owning_iterable::{IntoOwningIterable, OwningIterable};
