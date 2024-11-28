@@ -22,6 +22,7 @@ pub use transformations::{
     IntoFilteredMut,
     IntoFilteredOnce,
     IntoFlatMapped,
+    IntoFlatMappedOnce,
     IntoFlattened,
     IntoFlattenedMut,
     IntoMapped,

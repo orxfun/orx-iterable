@@ -5,18 +5,6 @@ pub struct Filtered<I, F> {
     filter: F,
 }
 
-// impl<I, T, F> IterableOnce for Filtered<I, T, F>
-// where
-//     F: Fn(&T) -> bool,
-//     I: IterableOnce<Item = T>,
-// {
-//     type Item = T;
-
-//     fn it_once(self) -> impl Iterator<Item = Self::Item> {
-//         self.iterable.it_once().filter(self.filter)
-//     }
-// }
-
 impl<I, F> Iterable for Filtered<I, F>
 where
     I: Iterable,

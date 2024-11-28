@@ -29,7 +29,9 @@ pub use flattened::{
 pub use mapped::{IntoMapped, Mapped, MappedIter};
 // pub use owning_iterable::{IntoOwningIterable, OwningIterable};
 pub use filter_mapped::{FilterMapped, FilterMappedIter, IntoFilterMapped, IntoFilterMappedOnce};
-pub use flat_mapped::{FlatMapped, FlatMappedIter, IntoFlatMapped};
+pub use flat_mapped::{
+    FlatMapped, FlatMappedIter, FlatMappedIterOnce, IntoFlatMapped, IntoFlatMappedOnce,
+};
 pub use iterable_mut_from_slice_mut::{IntoSliceAsIterableMut, SliceAsIterableMut};
 pub use mapped_while::{IntoMappedWhile, MappedWhile, MappedWhileIter};
 pub use skipped::{IntoSkipped, IntoSkippedMut, Skipped, SkippedMut};
