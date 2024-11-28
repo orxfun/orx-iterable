@@ -18,6 +18,7 @@ pub use transformations::{
     IntoFlattenedMut,
     IntoMapped,
     IntoMappedWhile,
+    IntoOwningIterable,
     IntoSkipped,
     IntoSkippedMut,
     IntoSliceAsIterableMut,
