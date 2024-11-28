@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableOnce};
+use crate::Iterable;
 use std::marker::PhantomData;
 
 pub struct Mapped<I, U, M> {
@@ -62,37 +62,3 @@ where
 }
 
 impl<I> IntoMapped for I where I: Iterable {}
-
-// once
-
-impl<I, U, M> IterableOnce for Mapped<I, U, M>
-where
-    I: IterableOnce,
-    M: Fn(I::Item) -> U,
-{
-    type Item = U;
-
-    type Iter = core::iter::Map<I::Iter, M>;
-
-    fn it_once(self) -> Self::Iter {
-        self.iterable.it_once().map(self.map)
-    }
-}
-
-pub trait IntoMappedOnce
-where
-    Self: IterableOnce + Sized,
-{
-    fn mapped_once<U, M>(self, map: M) -> Mapped<Self, U, M>
-    where
-        M: Fn(Self::Item) -> U,
-    {
-        Mapped {
-            iterable: self,
-            map,
-            phantom: PhantomData,
-        }
-    }
-}
-
-impl<I> IntoMappedOnce for I where I: IterableOnce {}

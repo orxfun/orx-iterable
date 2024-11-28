@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableMut, IterableOnce};
+use crate::{Iterable, IterableMut};
 
 pub struct Flattened<I> {
     it1: I,
@@ -91,89 +91,6 @@ impl<I> IntoFlattened for I
 where
     I: Iterable,
     I::Item: Iterable,
-{
-}
-
-// once
-
-impl<I> IterableOnce for Flattened<I>
-where
-    I: IterableOnce,
-    I::Item: IterableOnce,
-{
-    type Item = <I::Item as IterableOnce>::Item;
-
-    type Iter = FlattenedIterOnce<I>;
-
-    fn it_once(self) -> Self::Iter {
-        let iter1 = self.it1.it_once();
-        FlattenedIterOnce::new(iter1)
-    }
-}
-
-pub struct FlattenedIterOnce<I>
-where
-    I: IterableOnce,
-    I::Item: IterableOnce,
-{
-    iter1: I::Iter,
-    iter2: Option<<I::Item as IterableOnce>::Iter>,
-}
-
-impl<I> FlattenedIterOnce<I>
-where
-    I: IterableOnce,
-    I::Item: IterableOnce,
-{
-    fn new(mut iter1: I::Iter) -> Self {
-        let iter2 = Self::next_iter2(&mut iter1);
-        Self { iter1, iter2 }
-    }
-
-    fn next_iter2(iter1: &mut I::Iter) -> Option<<I::Item as IterableOnce>::Iter> {
-        let iterable2 = iter1.next()?;
-        Some(iterable2.it_once())
-    }
-}
-
-impl<I> Iterator for FlattenedIterOnce<I>
-where
-    I: IterableOnce,
-    I::Item: IterableOnce,
-{
-    type Item = <I::Item as IterableOnce>::Item;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        match &mut self.iter2 {
-            Some(it2) => match it2.next() {
-                Some(x) => Some(x),
-                None => {
-                    self.iter2 = Self::next_iter2(&mut self.iter1);
-                    self.next()
-                }
-            },
-            None => None,
-        }
-    }
-}
-
-pub trait IntoFlattenedOnce
-where
-    Self: IterableOnce,
-    Self::Item: IterableOnce,
-{
-    fn flattened_once(self) -> Flattened<Self>
-    where
-        Self: Sized,
-    {
-        Flattened { it1: self }
-    }
-}
-
-impl<I> IntoFlattenedOnce for I
-where
-    I: IterableOnce,
-    I::Item: IterableOnce,
 {
 }
 

@@ -39,9 +39,6 @@ impl<'a, T> Iterable for &'a [T] {
 
 macro_rules! impl_for_range {
     ($T:ty) => {
-        #[allow(unused_imports)]
-        use $crate::*;
-
         impl Iterable for Range<$T> {
             type Item = $T;
 

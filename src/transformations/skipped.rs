@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableMut, IterableOnce};
+use crate::{Iterable, IterableMut};
 
 pub struct Skipped<I> {
     skip: usize,
@@ -34,38 +34,6 @@ where
 }
 
 impl<I> IntoSkipped for I where I: Iterable {}
-
-// once
-
-impl<I> IterableOnce for Skipped<I>
-where
-    I: IterableOnce,
-{
-    type Item = I::Item;
-
-    type Iter = core::iter::Skip<I::Iter>;
-
-    fn it_once(self) -> Self::Iter {
-        self.iterable.it_once().skip(self.skip)
-    }
-}
-
-pub trait IntoSkippedOnce
-where
-    Self: IterableOnce,
-{
-    fn skipped_once(self, num_items_to_skip: usize) -> Skipped<Self>
-    where
-        Self: Sized,
-    {
-        Skipped {
-            iterable: self,
-            skip: num_items_to_skip,
-        }
-    }
-}
-
-impl<I> IntoSkippedOnce for I where I: IterableOnce {}
 
 // mut
 

@@ -1,22 +1,8 @@
-use crate::{Iterable, IterableMut, IterableOnce};
+use crate::{Iterable, IterableMut};
 
 pub struct Chained<I1, I2> {
     it1: I1,
     it2: I2,
-}
-
-impl<I1, I2> IterableOnce for Chained<I1, I2>
-where
-    I1: IterableOnce,
-    I2: IterableOnce<Item = I1::Item>,
-{
-    type Item = I1::Item;
-
-    type Iter = core::iter::Chain<I1::Iter, I2::Iter>;
-
-    fn it_once(self) -> Self::Iter {
-        self.it1.it_once().chain(self.it2.it_once())
-    }
 }
 
 impl<I1, I2> Iterable for Chained<I1, I2>
@@ -46,22 +32,6 @@ where
 }
 
 impl<I> IntoChained for I where I: Iterable {}
-
-// once
-
-pub trait IntoChainedOnce
-where
-    Self: IterableOnce + Sized,
-{
-    fn chained_once<I: IterableOnce>(self, other: I) -> Chained<Self, I> where {
-        Chained {
-            it1: self,
-            it2: other,
-        }
-    }
-}
-
-impl<I> IntoChainedOnce for I where I: IterableOnce {}
 
 // mut
 

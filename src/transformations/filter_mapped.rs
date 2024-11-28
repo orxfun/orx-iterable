@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableOnce};
+use crate::Iterable;
 use std::marker::PhantomData;
 
 pub struct FilterMapped<I, U, M> {
@@ -23,22 +23,6 @@ where
         }
     }
 }
-
-impl<I, U, M> IterableOnce for FilterMapped<I, U, M>
-where
-    I: IterableOnce,
-    M: Fn(I::Item) -> Option<U>,
-{
-    type Item = U;
-
-    type Iter = core::iter::FilterMap<<I as IterableOnce>::Iter, M>;
-
-    fn it_once(self) -> Self::Iter {
-        self.iterable.it_once().filter_map(self.filter_map)
-    }
-}
-
-// iter
 
 pub struct FilterMappedIter<'a, I, U, M>
 where
@@ -67,8 +51,6 @@ where
     }
 }
 
-// into
-
 pub trait IntoFilterMapped
 where
     Self: Iterable + Sized,
@@ -86,23 +68,3 @@ where
 }
 
 impl<I> IntoFilterMapped for I where I: Iterable {}
-
-// once
-
-pub trait IntoFilterMappedOnce
-where
-    Self: IterableOnce + Sized,
-{
-    fn filter_mapped_once<U, M>(self, filter_map: M) -> FilterMapped<Self, U, M>
-    where
-        M: Fn(Self::Item) -> Option<U>,
-    {
-        FilterMapped {
-            iterable: self,
-            filter_map,
-            phantom: PhantomData,
-        }
-    }
-}
-
-impl<I> IntoFilterMappedOnce for I where I: IterableOnce {}

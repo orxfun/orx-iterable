@@ -2,17 +2,6 @@ use crate::Iterable;
 
 pub struct CloningIterable<I>(I);
 
-// impl<I> IterableOnce for CloningIterable<I>
-// where
-//     I: Iterator + Clone,
-// {
-//     type Item = I::Item;
-
-//     fn it_once(self) -> impl Iterator<Item = Self::Item> {
-//         self.0
-//     }
-// }
-
 impl<I> Iterable for CloningIterable<I>
 where
     I: Iterator + Clone,
