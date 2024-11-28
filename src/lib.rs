@@ -11,6 +11,7 @@ pub use transformations::{
     IntoChainedMut,
     IntoChainedOnce,
     IntoCloned,
+    IntoClonedOnce,
     IntoCloningIterable,
     //IntoOwningIterable,
     IntoCopied,
