@@ -1,7 +1,11 @@
 use crate::Iterable;
 use std::marker::PhantomData;
 
-pub struct MappedWhile<I, U, M> {
+pub struct MappedWhile<I, U, M>
+where
+    I: Iterable,
+    M: Fn(I::Item) -> Option<U>,
+{
     iterable: I,
     map_while: M,
     phantom: PhantomData<U>,

@@ -3,19 +3,11 @@ use std::marker::PhantomData;
 
 pub struct Copied<'a, T, I>
 where
+    I: Iterable<Item = &'a T>,
     T: Copy + 'a,
 {
     iterable: I,
     phantom: PhantomData<&'a T>,
-}
-
-impl<'a, T, I> Copied<'a, T, I>
-where
-    T: Copy + 'a,
-{
-    pub fn into_inner(self) -> I {
-        self.iterable
-    }
 }
 
 impl<'a, T, I> Iterable for Copied<'a, T, I>
@@ -31,8 +23,6 @@ where
         self.iterable.iter().copied()
     }
 }
-
-// into
 
 pub trait IntoCopied<'a, T>
 where

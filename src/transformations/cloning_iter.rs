@@ -1,6 +1,8 @@
 use crate::Iterable;
 
-pub struct CloningIterable<I>(I);
+pub struct CloningIterable<I>(I)
+where
+    I: Iterator + Clone;
 
 impl<I> Iterable for CloningIterable<I>
 where
@@ -14,8 +16,6 @@ where
         self.0.clone()
     }
 }
-
-// into
 
 pub trait IntoCloningIterable: IntoIterator
 where

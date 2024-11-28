@@ -1,7 +1,11 @@
 use crate::Iterable;
 use std::marker::PhantomData;
 
-pub struct FilterMapped<I, U, M> {
+pub struct FilterMapped<I, U, M>
+where
+    I: Iterable,
+    M: Fn(I::Item) -> Option<U>,
+{
     iterable: I,
     filter_map: M,
     phantom: PhantomData<U>,

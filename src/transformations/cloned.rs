@@ -3,19 +3,11 @@ use std::marker::PhantomData;
 
 pub struct Cloned<'a, T, I>
 where
+    I: Iterable<Item = &'a T>,
     T: Clone + 'a,
 {
     iterable: I,
     phantom: PhantomData<&'a T>,
-}
-
-impl<'a, T, I> Cloned<'a, T, I>
-where
-    T: Clone + 'a,
-{
-    pub fn into_inner(self) -> I {
-        self.iterable
-    }
 }
 
 impl<'a, T, I> Iterable for Cloned<'a, T, I>

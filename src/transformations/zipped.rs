@@ -1,6 +1,10 @@
 use crate::Iterable;
 
-pub struct Zipped<I1, I2> {
+pub struct Zipped<I1, I2>
+where
+    I1: Iterable,
+    I2: Iterable,
+{
     it1: I1,
     it2: I2,
 }

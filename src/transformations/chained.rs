@@ -1,6 +1,10 @@
 use crate::{Iterable, IterableMut};
 
-pub struct Chained<I1, I2> {
+pub struct Chained<I1, I2>
+where
+    I1: Iterable,
+    I2: Iterable<Item = I1::Item>,
+{
     it1: I1,
     it2: I2,
 }
@@ -23,7 +27,10 @@ pub trait IntoChained
 where
     Self: Iterable + Sized,
 {
-    fn chained<I: Iterable>(self, other: I) -> Chained<Self, I> where {
+    fn chained<I>(self, other: I) -> Chained<Self, I>
+    where
+        I: Iterable<Item = Self::Item>,
+    {
         Chained {
             it1: self,
             it2: other,

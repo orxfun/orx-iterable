@@ -1,7 +1,11 @@
 use crate::Iterable;
 use std::marker::PhantomData;
 
-pub struct Mapped<I, U, M> {
+pub struct Mapped<I, U, M>
+where
+    I: Iterable,
+    M: Fn(I::Item) -> U,
+{
     iterable: I,
     map: M,
     phantom: PhantomData<U>,

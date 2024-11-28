@@ -1,6 +1,10 @@
 use crate::{Iterable, IterableMut};
 
-pub struct Flattened<I> {
+pub struct Flattened<I>
+where
+    I: Iterable,
+    I::Item: Iterable,
+{
     it1: I,
 }
 
@@ -61,15 +65,17 @@ where
     type Item = <I::Item as Iterable>::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match &mut self.iter2 {
-            Some(it2) => match it2.next() {
-                Some(x) => Some(x),
-                None => {
+        loop {
+            match &mut self.iter2 {
+                Some(it2) => {
+                    let x = it2.next();
+                    if x.is_some() {
+                        return x;
+                    }
                     self.iter2 = Self::next_iter2(&mut self.iter1);
-                    self.next()
                 }
-            },
-            None => None,
+                None => return None,
+            }
         }
     }
 }
@@ -96,7 +102,11 @@ where
 
 // mut
 
-pub struct FlattenedMut<'a, I> {
+pub struct FlattenedMut<'a, I>
+where
+    I: IterableMut + 'a,
+    I::ItemMut: IterableMut,
+{
     it1: &'a mut I,
 }
 
@@ -156,15 +166,17 @@ where
     type Item = &'a mut <I::ItemMut as IterableMut>::ItemMut;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match &mut self.iter2 {
-            Some(it2) => match it2.next() {
-                Some(x) => Some(x),
-                None => {
+        loop {
+            match &mut self.iter2 {
+                Some(it2) => {
+                    let x = it2.next();
+                    if x.is_some() {
+                        return x;
+                    }
                     self.iter2 = Self::next_iter2(&mut self.iter1);
-                    self.next()
                 }
-            },
-            None => None,
+                None => return None,
+            }
         }
     }
 }

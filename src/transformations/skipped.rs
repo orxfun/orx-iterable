@@ -1,6 +1,9 @@
 use crate::{Iterable, IterableMut};
 
-pub struct Skipped<I> {
+pub struct Skipped<I>
+where
+    I: Iterable,
+{
     skip: usize,
     iterable: I,
 }
@@ -20,12 +23,9 @@ where
 
 pub trait IntoSkipped
 where
-    Self: Iterable,
+    Self: Iterable + Sized,
 {
-    fn skipped(self, num_items_to_skip: usize) -> Skipped<Self>
-    where
-        Self: Sized,
-    {
+    fn skipped(self, num_items_to_skip: usize) -> Skipped<Self> {
         Skipped {
             iterable: self,
             skip: num_items_to_skip,
@@ -60,12 +60,9 @@ where
 
 pub trait IntoSkippedMut
 where
-    Self: IterableMut,
+    Self: IterableMut + Sized,
 {
-    fn skipped_mut(&mut self, num_items_to_skip: usize) -> SkippedMut<Self>
-    where
-        Self: Sized,
-    {
+    fn skipped_mut(&mut self, num_items_to_skip: usize) -> SkippedMut<Self> {
         SkippedMut {
             iterable: self,
             skip: num_items_to_skip,

@@ -1,6 +1,10 @@
 use crate::{Iterable, IterableMut};
 
-pub struct Filtered<I, F> {
+pub struct Filtered<I, F>
+where
+    I: Iterable,
+    F: Fn(&I::Item) -> bool,
+{
     iterable: I,
     filter: F,
 }
@@ -39,12 +43,11 @@ where
     type Item = I::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match self.iter.next() {
-            Some(x) => match (self.filter)(&x) {
-                true => Some(x),
-                false => self.next(),
-            },
-            None => None,
+        loop {
+            let x = self.iter.next()?;
+            if (self.filter)(&x) {
+                return Some(x);
+            }
         }
     }
 }
@@ -55,7 +58,6 @@ where
 {
     fn filtered<F>(self, filter: F) -> Filtered<Self, F>
     where
-        Self: Sized,
         F: Fn(&Self::Item) -> bool,
     {
         Filtered {
@@ -69,8 +71,12 @@ impl<I> IntoFiltered for I where I: Iterable {}
 
 // mut
 
-pub struct FilteredMut<'i, I, F> {
-    iterable: &'i mut I,
+pub struct FilteredMut<'a, I, F>
+where
+    I: IterableMut + 'a,
+    F: Fn(&I::ItemMut) -> bool,
+{
+    iterable: &'a mut I,
     filter: F,
 }
 
@@ -91,24 +97,23 @@ where
     type Item = &'a mut I::ItemMut;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match self.iter.next() {
-            Some(x) => match (self.filter)(x) {
-                true => Some(x),
-                false => self.next(),
-            },
-            None => None,
+        loop {
+            let x = self.iter.next()?;
+            if (self.filter)(&x) {
+                return Some(x);
+            }
         }
     }
 }
 
-impl<'i, I, F> IterableMut for FilteredMut<'i, I, F>
+impl<'a, I, F> IterableMut for FilteredMut<'a, I, F>
 where
     I: IterableMut,
     F: Fn(&I::ItemMut) -> bool,
 {
     type ItemMut = I::ItemMut;
 
-    type IterMut<'a> = FilteredMutIter<'a, I, F> where Self: 'a;
+    type IterMut<'b> = FilteredMutIter<'b, I, F> where Self: 'b;
 
     fn iter_mut(&mut self) -> Self::IterMut<'_> {
         FilteredMutIter {

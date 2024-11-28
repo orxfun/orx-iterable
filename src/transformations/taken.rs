@@ -1,6 +1,9 @@
 use crate::{Iterable, IterableMut};
 
-pub struct Taken<I> {
+pub struct Taken<I>
+where
+    I: Iterable,
+{
     take: usize,
     iterable: I,
 }
@@ -20,12 +23,9 @@ where
 
 pub trait IntoTaken
 where
-    Self: Iterable,
+    Self: Iterable + Sized,
 {
-    fn taken(self, num_items_to_take: usize) -> Taken<Self>
-    where
-        Self: Sized,
-    {
+    fn taken(self, num_items_to_take: usize) -> Taken<Self> {
         Taken {
             iterable: self,
             take: num_items_to_take,
@@ -60,12 +60,9 @@ where
 
 pub trait IntoTakenMut
 where
-    Self: IterableMut,
+    Self: IterableMut + Sized,
 {
-    fn taken_mut(&mut self, num_items_to_take: usize) -> TakenMut<Self>
-    where
-        Self: Sized,
-    {
+    fn taken_mut(&mut self, num_items_to_take: usize) -> TakenMut<Self> {
         TakenMut {
             iterable: self,
             take: num_items_to_take,

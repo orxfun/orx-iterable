@@ -1,6 +1,10 @@
 use crate::{Iterable, IterableMut};
 
-pub struct TakenWhile<I, P> {
+pub struct TakenWhile<I, P>
+where
+    I: Iterable,
+    P: Fn(&I::Item) -> bool,
+{
     iterable: I,
     take_while: P,
 }
