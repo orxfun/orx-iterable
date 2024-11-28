@@ -189,3 +189,12 @@ fn iterable_taken_while() {
     test_sum_ref(data.taken_while(|x| *x % 2 == 1), 0);
     test_sum_ref(data.taken_while(|x| **x < 100), 33);
 }
+
+#[test]
+fn iterable_chained() {
+    let a = vec![3, 2, 1];
+    let b = vec![33, 44];
+    let c = vec![100];
+    test_sum_ref(a.chained(&b), 83);
+    test_sum_ref(a.chained(&b).chained(&c), 183);
+}

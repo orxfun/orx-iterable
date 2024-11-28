@@ -1,30 +1,28 @@
 use crate::{Iterable, IterableOnce};
-use std::marker::PhantomData;
 
-pub struct Chained<T, I1, I2> {
+pub struct Chained<I1, I2> {
     it1: I1,
     it2: I2,
-    phantom: PhantomData<T>,
 }
 
-impl<T, I1, I2> IterableOnce for Chained<T, I1, I2>
+impl<I1, I2> IterableOnce for Chained<I1, I2>
 where
-    I1: IterableOnce<Item = T>,
-    I2: IterableOnce<Item = T>,
+    I1: IterableOnce,
+    I2: IterableOnce<Item = I1::Item>,
 {
-    type Item = T;
+    type Item = I1::Item;
 
     fn it_once(self) -> impl Iterator<Item = Self::Item> {
         self.it1.it_once().chain(self.it2.it_once())
     }
 }
 
-impl<T, I1, I2> Iterable for Chained<T, I1, I2>
+impl<I1, I2> Iterable for Chained<I1, I2>
 where
-    I1: Iterable<Item = T>,
-    I2: Iterable<Item = T>,
+    I1: Iterable,
+    I2: Iterable<Item = I1::Item>,
 {
-    type Item = T;
+    type Item = I1::Item;
 
     type Iter<'a> = std::iter::Chain<I1::Iter<'a>, I2::Iter<'a>> where Self: 'a;
 
@@ -35,21 +33,16 @@ where
 
 // into
 
-pub trait IntoChained<T>
+pub trait IntoChained
 where
-    Self: Iterable<Item = T>,
+    Self: Iterable + Sized,
 {
-    fn chained<I>(self, other: I) -> Chained<T, Self, I>
-    where
-        Self: Sized,
-        I: Iterable<Item = T>,
-    {
+    fn chained<I>(self, other: I) -> Chained<Self, I> {
         Chained {
             it1: self,
             it2: other,
-            phantom: PhantomData,
         }
     }
 }
 
-impl<T, I> IntoChained<T> for I where I: Iterable<Item = T> {}
+impl<I> IntoChained for I where I: Iterable {}
