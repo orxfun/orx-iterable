@@ -1,11 +1,9 @@
 use crate::Iterable;
-use std::marker::PhantomData;
 
 // iterable
 
-pub struct Flattened<I, T> {
+pub struct Flattened<I> {
     it1: I,
-    phantom: PhantomData<T>,
 }
 
 // impl<I, T> IterableOnce for Flattened<I, T>
@@ -20,14 +18,14 @@ pub struct Flattened<I, T> {
 //     }
 // }
 
-impl<I, T> Iterable for Flattened<I, T>
+impl<I> Iterable for Flattened<I>
 where
     I: Iterable,
-    I::Item: Iterable<Item = T>,
+    I::Item: Iterable,
 {
-    type Item = T;
+    type Item = <I::Item as Iterable>::Item;
 
-    type Iter<'a> = FlattenedIter<'a, I, T> where Self: 'a;
+    type Iter<'a> = FlattenedIter<'a, I> where Self: 'a;
 
     fn iter(&self) -> Self::Iter<'_> {
         let iter1 = self.it1.iter();
@@ -35,19 +33,19 @@ where
     }
 }
 
-pub struct FlattenedIter<'a, I, T>
+pub struct FlattenedIter<'a, I>
 where
     I: Iterable + 'a,
-    I::Item: Iterable<Item = T>,
+    I::Item: Iterable,
 {
     iter1: I::Iter<'a>,
     iter2: Option<<I::Item as Iterable>::Iter<'a>>,
 }
 
-impl<'a, I, T> FlattenedIter<'a, I, T>
+impl<'a, I> FlattenedIter<'a, I>
 where
     I: Iterable,
-    I::Item: Iterable<Item = T>,
+    I::Item: Iterable,
 {
     fn new(mut iter1: I::Iter<'a>) -> Self {
         let iter2 = Self::next_iter2(&mut iter1);
@@ -69,12 +67,12 @@ where
     }
 }
 
-impl<'a, I, T> Iterator for FlattenedIter<'a, I, T>
+impl<'a, I> Iterator for FlattenedIter<'a, I>
 where
     I: Iterable,
-    I::Item: Iterable<Item = T>,
+    I::Item: Iterable,
 {
-    type Item = T;
+    type Item = <I::Item as Iterable>::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
         match &mut self.iter2 {
@@ -92,25 +90,22 @@ where
 
 // into
 
-pub trait IntoFlattened<T>
+pub trait IntoFlattened
 where
     Self: Iterable,
-    Self::Item: Iterable<Item = T>,
+    Self::Item: Iterable,
 {
-    fn flattened(self) -> Flattened<Self, T>
+    fn flattened(self) -> Flattened<Self>
     where
         Self: Sized,
     {
-        Flattened {
-            it1: self,
-            phantom: PhantomData,
-        }
+        Flattened { it1: self }
     }
 }
 
-impl<T, I> IntoFlattened<T> for I
+impl<I> IntoFlattened for I
 where
     I: Iterable,
-    I::Item: Iterable<Item = T>,
+    I::Item: Iterable,
 {
 }

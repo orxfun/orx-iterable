@@ -3,23 +3,20 @@ use std::marker::PhantomData;
 
 // iterable
 
-pub struct MappedWhile<I, T, U, M>
-where
-    M: Fn(T) -> Option<U>,
-{
+pub struct MappedWhile<I, U, M> {
     iterable: I,
     map_while: M,
-    phantom: PhantomData<T>,
+    phantom: PhantomData<U>,
 }
 
-impl<I, T, U, M> Iterable for MappedWhile<I, T, U, M>
+impl<I, U, M> Iterable for MappedWhile<I, U, M>
 where
-    M: Fn(T) -> Option<U>,
-    I: Iterable<Item = T>,
+    I: Iterable,
+    M: Fn(I::Item) -> Option<U>,
 {
     type Item = U;
 
-    type Iter<'a> = MappedWhileIter<'a, I, T, U, M> where Self: 'a;
+    type Iter<'a> = MappedWhileIter<'a, I, U, M> where Self: 'a;
 
     fn iter(&self) -> Self::Iter<'_> {
         MappedWhileIter {
@@ -31,19 +28,19 @@ where
 
 // iter
 
-pub struct MappedWhileIter<'a, I, T, U, M>
+pub struct MappedWhileIter<'a, I, U, M>
 where
-    M: Fn(T) -> Option<U>,
-    I: Iterable<Item = T> + 'a,
+    I: Iterable + 'a,
+    M: Fn(I::Item) -> Option<U>,
 {
     iter: I::Iter<'a>,
     map_while: &'a M,
 }
 
-impl<'a, I, T, U, M> Iterator for MappedWhileIter<'a, I, T, U, M>
+impl<'a, I, U, M> Iterator for MappedWhileIter<'a, I, U, M>
 where
-    M: Fn(T) -> Option<U>,
-    I: Iterable<Item = T>,
+    I: Iterable,
+    M: Fn(I::Item) -> Option<U>,
 {
     type Item = U;
 
@@ -55,14 +52,13 @@ where
 
 // into
 
-pub trait IntoMappedWhileIterable<T>
+pub trait IntoMappedWhileIterable
 where
-    Self: Iterable<Item = T>,
+    Self: Iterable + Sized,
 {
-    fn mapped_while<U, M>(self, map_while: M) -> MappedWhile<Self, T, U, M>
+    fn mapped_while<U, M>(self, map_while: M) -> MappedWhile<Self, U, M>
     where
-        M: Fn(T) -> Option<U>,
-        Self: Sized,
+        M: Fn(Self::Item) -> Option<U>,
     {
         MappedWhile {
             iterable: self,
@@ -72,4 +68,4 @@ where
     }
 }
 
-impl<T, I> IntoMappedWhileIterable<T> for I where I: Iterable<Item = T> {}
+impl<I> IntoMappedWhileIterable for I where I: Iterable {}
