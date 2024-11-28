@@ -31,8 +31,6 @@ where
     }
 }
 
-// into
-
 pub trait IntoChained
 where
     Self: Iterable + Sized,

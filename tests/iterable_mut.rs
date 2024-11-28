@@ -1,6 +1,5 @@
 use orx_iterable::*;
 use std::collections::{BTreeMap, HashMap, LinkedList, VecDeque};
-use transformations::{Chained, ChainedMut};
 
 fn take_owned<'a>(mut iter: impl IterableMut<ItemMut = usize>, sum: usize) {
     let mut x = 0;
@@ -113,31 +112,40 @@ fn iterable_mut_chained() {
 
     let mut a: Vec<usize> = vec![3, 2, 1];
     let mut b: Vec<usize> = vec![33, 44];
-    let mut c: Vec<usize> = vec![100];
-
-    // let aa = &mut a;
-    // let bb = &mut b;
-    // let x: Chained<&mut Vec<i32>, &mut Vec<i32>> = (&mut a).chained(&mut b);
-
-    // let x = Chained::chained(a, b);
-
-    // add_two(a, 6);
-
-    fn take_it_mut(it: &mut impl IterableMut<ItemMut = usize>) {}
-
-    let mut_a = &mut a;
-    let mut_b = &mut b;
-
-    // take_it_mut(mut_a);
-
-    IntoChainedMut::chained_mut(mut_a, mut_b);
-
     add_two(a.chained_mut(&mut b), 83);
 
-    // let x = IntoChainedMut::chained_mut(&mut a, &mut b);
+    let mut a: Vec<usize> = vec![3, 2, 1];
+    let mut b: Vec<usize> = vec![33, 44];
+    let mut c: Vec<usize> = vec![100];
+    add_two(a.chained_mut(&mut b).chained_mut(&mut c), 183);
+}
 
-    // add_two(a.chained_mut(&mut b), 83);
-    // add_two(x, 83);
+#[test]
+fn iterable_filtered() {
+    let mut vec = vec![3, 2, 6, 1, 0, 7, 33];
 
-    // add_two(&mut a, 83);
+    let mut iterable = vec.filtered_mut(|x| *x > 30);
+    for x in iterable.xyz() {
+        *x += 100;
+    }
+    for x in iterable.xyz() {
+        *x += 100;
+    }
+
+    assert_eq!(vec, vec![3, 2, 6, 1, 0, 7, 233]);
+}
+
+#[test]
+fn iterable_flattened() {
+    let mut data = vec![vec![1, 2], vec![6, 0, 7], vec![3]];
+
+    let mut iter = data.flattened_mut();
+    for x in iter.xyz() {
+        *x += 10;
+    }
+    for x in iter.xyz() {
+        *x += 100;
+    }
+
+    assert_eq!(data, vec![vec![111, 112], vec![116, 110, 117], vec![113]]);
 }

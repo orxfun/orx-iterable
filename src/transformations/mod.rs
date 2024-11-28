@@ -19,8 +19,12 @@ pub use chained::{Chained, ChainedMut, IntoChained, IntoChainedMut};
 pub use cloned::{Cloned, IntoCloned};
 pub use cloning_iter::{CloningIterable, IntoCloningIterable};
 pub use copied::{Copied, IntoCopied};
-pub use filtered::{Filtered, FilteredIter, IntoFiltered};
-pub use flattened::{Flattened, FlattenedIter, IntoFlattened};
+pub use filtered::{
+    Filtered, FilteredIter, FilteredMut, FilteredMutIter, IntoFiltered, IntoFilteredMut,
+};
+pub use flattened::{
+    Flattened, FlattenedIter, FlattenedMut, FlattenedMutIter, IntoFlattened, IntoFlattenedMut,
+};
 pub use mapped::{IntoMapped, Mapped, MappedIter};
 // pub use owning_iterable::{IntoOwningIterable, OwningIterable};
 pub use filter_mapped::{FilterMapped, FilterMappedIter, IntoFilterMapped};
