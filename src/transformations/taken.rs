@@ -1,4 +1,4 @@
-use crate::Iterable;
+use crate::{Iterable, IterableMut};
 
 pub struct Taken<I> {
     take: usize,
@@ -18,8 +18,6 @@ where
     }
 }
 
-// into
-
 pub trait IntoTaken
 where
     Self: Iterable,
@@ -36,3 +34,43 @@ where
 }
 
 impl<I> IntoTaken for I where I: Iterable {}
+
+// mut
+
+pub struct TakenMut<'a, I>
+where
+    I: IterableMut,
+{
+    take: usize,
+    iterable: &'a mut I,
+}
+
+impl<'a, I> IterableMut for TakenMut<'a, I>
+where
+    I: IterableMut,
+{
+    type ItemMut = I::ItemMut;
+
+    type IterMut<'b> = core::iter::Take<I::IterMut<'b>> where Self: 'b;
+
+    fn xyz(&mut self) -> Self::IterMut<'_> {
+        self.iterable.xyz().take(self.take)
+    }
+}
+
+pub trait IntoTakenMut
+where
+    Self: IterableMut,
+{
+    fn taken_mut(&mut self, num_items_to_take: usize) -> TakenMut<Self>
+    where
+        Self: Sized,
+    {
+        TakenMut {
+            iterable: self,
+            take: num_items_to_take,
+        }
+    }
+}
+
+impl<I> IntoTakenMut for I where I: IterableMut {}

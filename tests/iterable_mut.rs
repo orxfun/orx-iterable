@@ -164,3 +164,45 @@ fn iterable_mut_skipped() {
 
     assert_eq!(data, vec![2, 4, 12, 3, 28, 24]);
 }
+
+#[test]
+fn iterable_mut_taken_while() {
+    let mut data = vec![2, 4, 1, 3, 8, 4];
+    for x in data.taken_while_mut(|x| x % 2 == 0).xyz() {
+        *x += 10;
+    }
+    assert_eq!(data, [12, 14, 1, 3, 8, 4]);
+
+    let mut data = vec![2, 4, 1, 3, 8, 4];
+    for x in data.taken_while_mut(|x| x % 2 == 1).xyz() {
+        *x += 10;
+    }
+    assert_eq!(data, [2, 4, 1, 3, 8, 4]);
+
+    let mut data = vec![2, 4, 1, 3, 8, 4];
+    for x in data.taken_while_mut(|x| *x < 100).xyz() {
+        *x += 10;
+    }
+    assert_eq!(data, [12, 14, 11, 13, 18, 14]);
+}
+
+#[test]
+fn iterable_mut_taken() {
+    let mut data = vec![2, 4, 1, 3, 8, 4];
+    for x in data.taken_mut(2).xyz() {
+        *x += 10;
+    }
+    assert_eq!(data, [12, 14, 1, 3, 8, 4]);
+
+    let mut data = vec![2, 4, 1, 3, 8, 4];
+    for x in data.taken_mut(0).xyz() {
+        *x += 10;
+    }
+    assert_eq!(data, [2, 4, 1, 3, 8, 4]);
+
+    let mut data = vec![2, 4, 1, 3, 8, 4];
+    for x in data.taken_mut(100).xyz() {
+        *x += 10;
+    }
+    assert_eq!(data, [12, 14, 11, 13, 18, 14]);
+}

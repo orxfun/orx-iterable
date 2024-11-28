@@ -120,9 +120,7 @@ where
 {
     type ItemMut = I::ItemMut;
 
-    type IterMut<'a> = FilteredMutIter<'a, I, F>
-    where
-        Self: 'a;
+    type IterMut<'a> = FilteredMutIter<'a, I, F> where Self: 'a;
 
     fn xyz(&mut self) -> Self::IterMut<'_> {
         FilteredMutIter {

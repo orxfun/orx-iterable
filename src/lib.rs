@@ -25,6 +25,8 @@ pub use transformations::{
     IntoSkippedMut,
     IntoSliceAsIterableMut,
     IntoTaken,
+    IntoTakenMut,
     IntoTakenWhile,
+    IntoTakenWhileMut,
     IntoZipped,
 };

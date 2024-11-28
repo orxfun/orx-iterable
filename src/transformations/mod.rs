@@ -32,6 +32,8 @@ pub use flat_mapped::{FlatMapped, FlatMappedIter, IntoFlatMapped};
 pub use iterable_mut_from_slice_mut::{IntoSliceAsIterableMut, SliceAsIterableMut};
 pub use mapped_while::{IntoMappedWhile, MappedWhile, MappedWhileIter};
 pub use skipped::{IntoSkipped, IntoSkippedMut, Skipped, SkippedMut};
-pub use taken::{IntoTaken, Taken};
-pub use taken_while::{IntoTakenWhile, TakenWhile};
+pub use taken::{IntoTaken, IntoTakenMut, Taken, TakenMut};
+pub use taken_while::{
+    IntoTakenWhile, IntoTakenWhileMut, TakenWhile, TakenWhileMut, TakenWhileMutIter,
+};
 pub use zipped::{IntoZipped, Zipped};
