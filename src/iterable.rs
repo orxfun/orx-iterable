@@ -1,5 +1,3 @@
-use std::ops::Range;
-
 pub trait Iterable {
     type Item;
 
@@ -33,16 +31,16 @@ impl<'a, T> Iterable for &'a [T] {
     type Iter<'b> = std::slice::Iter<'a, T> where Self: 'b;
 
     fn iter(&self) -> Self::Iter<'_> {
-        self.into_iter()
+        IntoIterator::into_iter(*self)
     }
 }
 
 macro_rules! impl_for_range {
     ($T:ty) => {
-        impl Iterable for Range<$T> {
+        impl Iterable for std::ops::Range<$T> {
             type Item = $T;
 
-            type Iter<'a> = Range<$T> where Self: 'a;
+            type Iter<'a> = std::ops::Range<$T> where Self: 'a;
 
             fn iter(&self) -> Self::Iter<'_> {
                 self.clone()

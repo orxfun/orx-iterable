@@ -7,7 +7,7 @@ impl<'s, T> IterableMut for SliceAsIterableMut<'s, T> {
 
     type IterMut<'a> = core::slice::IterMut<'a, T> where Self: 'a;
 
-    fn xyz(&mut self) -> Self::IterMut<'_> {
+    fn iter_mut(&mut self) -> Self::IterMut<'_> {
         self.0.iter_mut()
     }
 }

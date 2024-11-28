@@ -53,8 +53,8 @@ where
 
     type IterMut<'b> = core::iter::Take<I::IterMut<'b>> where Self: 'b;
 
-    fn xyz(&mut self) -> Self::IterMut<'_> {
-        self.iterable.xyz().take(self.take)
+    fn iter_mut(&mut self) -> Self::IterMut<'_> {
+        self.iterable.iter_mut().take(self.take)
     }
 }
 

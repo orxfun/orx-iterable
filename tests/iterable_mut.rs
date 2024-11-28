@@ -3,18 +3,18 @@ use std::collections::{BTreeMap, HashMap, LinkedList, VecDeque};
 
 fn take_owned<'a>(mut iter: impl IterableMut<ItemMut = usize>, sum: usize) {
     let mut x = 0;
-    for y in iter.xyz() {
+    for y in iter.iter_mut() {
         x += *y;
     }
     assert_eq!(x, sum);
 
-    for y in iter.xyz() {
+    for y in iter.iter_mut() {
         *y += 1;
     }
 
-    let count = iter.xyz().count();
+    let count = iter.iter_mut().count();
     let mut x = 0;
-    for y in iter.xyz() {
+    for y in iter.iter_mut() {
         x += *y;
     }
     assert_eq!(x, sum + count);
@@ -22,18 +22,18 @@ fn take_owned<'a>(mut iter: impl IterableMut<ItemMut = usize>, sum: usize) {
 
 fn take_mut_ref<'a>(iter: &mut impl IterableMut<ItemMut = usize>, sum: usize) {
     let mut x = 0;
-    for y in iter.xyz() {
+    for y in iter.iter_mut() {
         x += *y;
     }
     assert_eq!(x, sum);
 
-    for y in iter.xyz() {
+    for y in iter.iter_mut() {
         *y += 1;
     }
 
-    let count = iter.xyz().count();
+    let count = iter.iter_mut().count();
     let mut x = 0;
-    for y in iter.xyz() {
+    for y in iter.iter_mut() {
         x += *y;
     }
     assert_eq!(x, sum + count);
@@ -99,15 +99,15 @@ fn iterable_mut_std_owned_collections() {
 #[test]
 fn iterable_mut_chained() {
     fn add_two(mut iter: impl IterableMut<ItemMut = usize>, original_sum: usize) {
-        for x in iter.xyz() {
+        for x in iter.iter_mut() {
             *x += 1;
         }
-        for x in iter.xyz() {
+        for x in iter.iter_mut() {
             *x += 1;
         }
 
-        let sum = iter.xyz().count() * 2 + original_sum;
-        assert_eq!(iter.xyz().map(|x| *x).sum::<usize>(), sum);
+        let sum = iter.iter_mut().count() * 2 + original_sum;
+        assert_eq!(iter.iter_mut().map(|x| *x).sum::<usize>(), sum);
     }
 
     let mut a: Vec<usize> = vec![3, 2, 1];
@@ -125,10 +125,10 @@ fn iterable_mut_filtered() {
     let mut vec = vec![3, 2, 6, 1, 0, 7, 33];
 
     let mut iterable = vec.filtered_mut(|x| *x > 30);
-    for x in iterable.xyz() {
+    for x in iterable.iter_mut() {
         *x += 100;
     }
-    for x in iterable.xyz() {
+    for x in iterable.iter_mut() {
         *x += 100;
     }
 
@@ -140,10 +140,10 @@ fn iterable_mut_flattened() {
     let mut data = vec![vec![1, 2], vec![6, 0, 7], vec![3]];
 
     let mut iter = data.flattened_mut();
-    for x in iter.xyz() {
+    for x in iter.iter_mut() {
         *x += 10;
     }
-    for x in iter.xyz() {
+    for x in iter.iter_mut() {
         *x += 100;
     }
 
@@ -155,10 +155,10 @@ fn iterable_mut_skipped() {
     let mut data = vec![2, 4, 12, 3, 8, 4];
 
     let mut iter = data.skipped_mut(4);
-    for x in iter.xyz() {
+    for x in iter.iter_mut() {
         *x += 10;
     }
-    for x in iter.xyz() {
+    for x in iter.iter_mut() {
         *x += 10;
     }
 
@@ -168,19 +168,19 @@ fn iterable_mut_skipped() {
 #[test]
 fn iterable_mut_taken_while() {
     let mut data = vec![2, 4, 1, 3, 8, 4];
-    for x in data.taken_while_mut(|x| x % 2 == 0).xyz() {
+    for x in data.taken_while_mut(|x| x % 2 == 0).iter_mut() {
         *x += 10;
     }
     assert_eq!(data, [12, 14, 1, 3, 8, 4]);
 
     let mut data = vec![2, 4, 1, 3, 8, 4];
-    for x in data.taken_while_mut(|x| x % 2 == 1).xyz() {
+    for x in data.taken_while_mut(|x| x % 2 == 1).iter_mut() {
         *x += 10;
     }
     assert_eq!(data, [2, 4, 1, 3, 8, 4]);
 
     let mut data = vec![2, 4, 1, 3, 8, 4];
-    for x in data.taken_while_mut(|x| *x < 100).xyz() {
+    for x in data.taken_while_mut(|x| *x < 100).iter_mut() {
         *x += 10;
     }
     assert_eq!(data, [12, 14, 11, 13, 18, 14]);
@@ -189,19 +189,19 @@ fn iterable_mut_taken_while() {
 #[test]
 fn iterable_mut_taken() {
     let mut data = vec![2, 4, 1, 3, 8, 4];
-    for x in data.taken_mut(2).xyz() {
+    for x in data.taken_mut(2).iter_mut() {
         *x += 10;
     }
     assert_eq!(data, [12, 14, 1, 3, 8, 4]);
 
     let mut data = vec![2, 4, 1, 3, 8, 4];
-    for x in data.taken_mut(0).xyz() {
+    for x in data.taken_mut(0).iter_mut() {
         *x += 10;
     }
     assert_eq!(data, [2, 4, 1, 3, 8, 4]);
 
     let mut data = vec![2, 4, 1, 3, 8, 4];
-    for x in data.taken_mut(100).xyz() {
+    for x in data.taken_mut(100).iter_mut() {
         *x += 10;
     }
     assert_eq!(data, [12, 14, 11, 13, 18, 14]);

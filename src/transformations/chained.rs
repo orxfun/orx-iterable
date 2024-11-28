@@ -53,8 +53,8 @@ where
 
     type IterMut<'a> = core::iter::Chain<I1::IterMut<'a>, I2::IterMut<'a>> where Self: 'a;
 
-    fn xyz(&mut self) -> Self::IterMut<'_> {
-        self.it1.xyz().chain(self.it2.xyz())
+    fn iter_mut(&mut self) -> Self::IterMut<'_> {
+        self.it1.iter_mut().chain(self.it2.iter_mut())
     }
 }
 

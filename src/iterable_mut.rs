@@ -5,7 +5,7 @@ pub trait IterableMut {
     where
         Self: 'a;
 
-    fn xyz(&mut self) -> Self::IterMut<'_>;
+    fn iter_mut(&mut self) -> Self::IterMut<'_>;
 }
 
 // impl
@@ -19,7 +19,7 @@ where
 
     type IterMut<'b> = <&'b mut X as IntoIterator>::IntoIter where Self: 'b;
 
-    fn xyz(&mut self) -> Self::IterMut<'_> {
+    fn iter_mut(&mut self) -> Self::IterMut<'_> {
         <&mut X>::into_iter(self)
     }
 }

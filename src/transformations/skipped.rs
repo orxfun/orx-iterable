@@ -53,8 +53,8 @@ where
 
     type IterMut<'b> = core::iter::Skip<I::IterMut<'b>> where Self: 'b;
 
-    fn xyz(&mut self) -> Self::IterMut<'_> {
-        self.iterable.xyz().skip(self.skip)
+    fn iter_mut(&mut self) -> Self::IterMut<'_> {
+        self.iterable.iter_mut().skip(self.skip)
     }
 }
 

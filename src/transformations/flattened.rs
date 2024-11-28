@@ -109,8 +109,8 @@ where
 
     type IterMut<'b> = FlattenedMutIter<'b, I> where Self: 'b;
 
-    fn xyz(&mut self) -> Self::IterMut<'_> {
-        FlattenedMutIter::new(self.it1.xyz())
+    fn iter_mut(&mut self) -> Self::IterMut<'_> {
+        FlattenedMutIter::new(self.it1.iter_mut())
     }
 }
 
@@ -141,7 +141,7 @@ where
         match iter1.next() {
             Some(iterable2) => {
                 let iterable2 = unsafe { into_mut(iterable2) };
-                Some(iterable2.xyz())
+                Some(iterable2.iter_mut())
             }
             None => None,
         }

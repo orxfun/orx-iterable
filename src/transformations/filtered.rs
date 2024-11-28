@@ -92,7 +92,7 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.iter.next() {
-            Some(x) => match (self.filter)(&x) {
+            Some(x) => match (self.filter)(x) {
                 true => Some(x),
                 false => self.next(),
             },
@@ -110,9 +110,9 @@ where
 
     type IterMut<'a> = FilteredMutIter<'a, I, F> where Self: 'a;
 
-    fn xyz(&mut self) -> Self::IterMut<'_> {
+    fn iter_mut(&mut self) -> Self::IterMut<'_> {
         FilteredMutIter {
-            iter: self.iterable.xyz(),
+            iter: self.iterable.iter_mut(),
             filter: &self.filter,
         }
     }

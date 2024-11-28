@@ -56,9 +56,9 @@ where
 
     type IterMut<'b> = TakenWhileMutIter<'b, I, F> where Self: 'b;
 
-    fn xyz(&mut self) -> Self::IterMut<'_> {
+    fn iter_mut(&mut self) -> Self::IterMut<'_> {
         TakenWhileMutIter {
-            iter: self.iterable.xyz(),
+            iter: self.iterable.iter_mut(),
             take_while: &self.take_while,
         }
     }
@@ -82,7 +82,7 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.iter.next() {
-            Some(x) => match (self.take_while)(&x) {
+            Some(x) => match (self.take_while)(x) {
                 true => Some(x),
                 false => None,
             },
