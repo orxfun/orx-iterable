@@ -121,7 +121,7 @@ fn iterable_mut_chained() {
 }
 
 #[test]
-fn iterable_filtered() {
+fn iterable_mut_filtered() {
     let mut vec = vec![3, 2, 6, 1, 0, 7, 33];
 
     let mut iterable = vec.filtered_mut(|x| *x > 30);
@@ -136,7 +136,7 @@ fn iterable_filtered() {
 }
 
 #[test]
-fn iterable_flattened() {
+fn iterable_mut_flattened() {
     let mut data = vec![vec![1, 2], vec![6, 0, 7], vec![3]];
 
     let mut iter = data.flattened_mut();
@@ -148,4 +148,19 @@ fn iterable_flattened() {
     }
 
     assert_eq!(data, vec![vec![111, 112], vec![116, 110, 117], vec![113]]);
+}
+
+#[test]
+fn iterable_mut_skipped() {
+    let mut data = vec![2, 4, 12, 3, 8, 4];
+
+    let mut iter = data.skipped_mut(4);
+    for x in iter.xyz() {
+        *x += 10;
+    }
+    for x in iter.xyz() {
+        *x += 10;
+    }
+
+    assert_eq!(data, vec![2, 4, 12, 3, 28, 24]);
 }
