@@ -5,20 +5,6 @@ pub struct Zipped<I1, I2> {
     it2: I2,
 }
 
-impl<I1, I2> IterableOnce for Zipped<I1, I2>
-where
-    I1: IterableOnce,
-    I2: IterableOnce,
-{
-    type Item = (I1::Item, I2::Item);
-
-    type Iter = std::iter::Zip<I1::Iter, I2::Iter>;
-
-    fn it_once(self) -> Self::Iter {
-        self.it1.it_once().zip(self.it2.it_once())
-    }
-}
-
 impl<I1, I2> Iterable for Zipped<I1, I2>
 where
     I1: Iterable,
@@ -48,6 +34,20 @@ where
 impl<I> IntoZipped for I where I: Iterable {}
 
 // once
+
+impl<I1, I2> IterableOnce for Zipped<I1, I2>
+where
+    I1: IterableOnce,
+    I2: IterableOnce,
+{
+    type Item = (I1::Item, I2::Item);
+
+    type Iter = std::iter::Zip<I1::Iter, I2::Iter>;
+
+    fn it_once(self) -> Self::Iter {
+        self.it1.it_once().zip(self.it2.it_once())
+    }
+}
 
 pub trait IntoZippedOnce
 where
