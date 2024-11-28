@@ -1,8 +1,6 @@
 use crate::Iterable;
 use std::marker::PhantomData;
 
-// iterable
-
 pub struct MappedWhile<I, U, M> {
     iterable: I,
     map_while: M,
@@ -52,7 +50,7 @@ where
 
 // into
 
-pub trait IntoMappedWhileIterable
+pub trait IntoMappedWhile
 where
     Self: Iterable + Sized,
 {
@@ -68,4 +66,4 @@ where
     }
 }
 
-impl<I> IntoMappedWhileIterable for I where I: Iterable {}
+impl<I> IntoMappedWhile for I where I: Iterable {}

@@ -1,8 +1,6 @@
 use crate::Iterable;
 use std::marker::PhantomData;
 
-// iterable
-
 pub struct FlatMapped<I, U, M>
 where
     U: Iterable,

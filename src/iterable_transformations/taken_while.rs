@@ -1,7 +1,5 @@
 use crate::Iterable;
 
-// iterable
-
 pub struct TakenWhile<I, P> {
     iterable: I,
     take_while: P,

@@ -1,7 +1,5 @@
 use crate::Iterable;
 
-// iterable
-
 pub struct Filtered<I, F> {
     iterable: I,
     filter: F,

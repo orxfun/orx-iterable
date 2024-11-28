@@ -1,7 +1,5 @@
 use crate::Iterable;
 
-// iterable
-
 pub struct Flattened<I> {
     it1: I,
 }

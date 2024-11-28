@@ -153,7 +153,10 @@ fn iterable_chained() {
 
 #[test]
 fn iterable_filter_mapped() {
-    // TODO!
+    let data = vec![3, 2, 6, 1, 0, 7, 33];
+
+    test_sum_val(data.filter_mapped(|x| (*x % 2 == 0).then_some(*x)), 8);
+    test_sum_val(data.filter_mapped(|x| (*x % 2 == 1).then_some(*x)), 44);
 }
 
 #[test]
