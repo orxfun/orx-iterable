@@ -44,23 +44,23 @@ impl<'a, I> IntoTakenWhile<'a> for I where I: Iterable<'a> {}
 
 pub struct TakenWhileMut<'a, I, F>
 where
-    I: IterableMut,
+    I: IterableMut<'a>,
     F: Fn(&I::ItemMut) -> bool,
 {
-    iterable: &'a mut I,
-    take_while: F,
+    iterable: I,
+    take_while: &'a F,
 }
 
-impl<'a, I, F> IterableMut for TakenWhileMut<'a, I, F>
+impl<'a, I, F> IterableMut<'a> for TakenWhileMut<'a, I, F>
 where
-    I: IterableMut,
+    I: IterableMut<'a> + 'a,
     F: Fn(&I::ItemMut) -> bool,
 {
     type ItemMut = I::ItemMut;
 
-    type IterMut<'b> = TakenWhileMutIter<'b, I, F> where Self: 'b;
+    type IterMut = TakenWhileMutIter<'a, I, F>;
 
-    fn iter_mut(&mut self) -> Self::IterMut<'_> {
+    fn iter_mut(&'a mut self) -> Self::IterMut {
         TakenWhileMutIter {
             iter: self.iterable.iter_mut(),
             take_while: &self.take_while,
@@ -70,23 +70,23 @@ where
 
 pub struct TakenWhileMutIter<'a, I, F>
 where
-    I: IterableMut + 'a,
+    I: IterableMut<'a> + 'a,
     F: Fn(&I::ItemMut) -> bool,
 {
-    iter: I::IterMut<'a>,
+    iter: I::IterMut,
     take_while: &'a F,
 }
 
 impl<'a, I, F> Iterator for TakenWhileMutIter<'a, I, F>
 where
-    I: IterableMut + 'a,
+    I: IterableMut<'a> + 'a,
     F: Fn(&I::ItemMut) -> bool,
 {
-    type Item = &'a mut I::ItemMut;
+    type Item = I::ItemMut;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.iter.next() {
-            Some(x) => match (self.take_while)(x) {
+            Some(x) => match (self.take_while)(&x) {
                 true => Some(x),
                 false => None,
             },
@@ -95,11 +95,11 @@ where
     }
 }
 
-pub trait IntoTakenWhileMut
+pub trait IntoTakenWhileMut<'a>
 where
-    Self: Sized + IterableMut,
+    Self: Sized + IterableMut<'a>,
 {
-    fn taken_while_mut<F>(&mut self, take_while: F) -> TakenWhileMut<Self, F>
+    fn taken_while_mut<F>(self, take_while: &'a F) -> TakenWhileMut<'a, Self, F>
     where
         F: Fn(&Self::ItemMut) -> bool,
     {
@@ -110,4 +110,4 @@ where
     }
 }
 
-impl<I> IntoTakenWhileMut for I where I: IterableMut {}
+impl<'a, I> IntoTakenWhileMut<'a> for I where I: IterableMut<'a> {}

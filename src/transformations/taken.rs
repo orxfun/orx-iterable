@@ -42,35 +42,37 @@ impl<'a, I> IntoTaken<'a> for I where I: Iterable<'a> {}
 
 pub struct TakenMut<'a, I>
 where
-    I: IterableMut,
+    I: IterableMut<'a>,
 {
     take: usize,
-    iterable: &'a mut I,
+    iterable: I,
+    phantom: PhantomData<&'a ()>,
 }
 
-impl<'a, I> IterableMut for TakenMut<'a, I>
+impl<'a, I> IterableMut<'a> for TakenMut<'a, I>
 where
-    I: IterableMut,
+    I: IterableMut<'a>,
 {
     type ItemMut = I::ItemMut;
 
-    type IterMut<'b> = core::iter::Take<I::IterMut<'b>> where Self: 'b;
+    type IterMut = core::iter::Take<I::IterMut>;
 
-    fn iter_mut(&mut self) -> Self::IterMut<'_> {
+    fn iter_mut(&'a mut self) -> Self::IterMut {
         self.iterable.iter_mut().take(self.take)
     }
 }
 
-pub trait IntoTakenMut
+pub trait IntoTakenMut<'a>
 where
-    Self: IterableMut + Sized,
+    Self: IterableMut<'a> + Sized,
 {
-    fn taken_mut(&mut self, num_items_to_take: usize) -> TakenMut<Self> {
+    fn taken_mut(self, num_items_to_take: usize) -> TakenMut<'a, Self> {
         TakenMut {
             iterable: self,
             take: num_items_to_take,
+            phantom: PhantomData,
         }
     }
 }
 
-impl<I> IntoTakenMut for I where I: IterableMut {}
+impl<'a, I> IntoTakenMut<'a> for I where I: IterableMut<'a> {}

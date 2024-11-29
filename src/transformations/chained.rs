@@ -45,36 +45,36 @@ impl<'a, I> IntoChained<'a> for I where I: Iterable<'a> {}
 
 // mut
 
-pub struct ChainedMut<'i, I1, I2>
+pub struct ChainedMut<'a, I1, I2>
 where
-    I1: IterableMut,
-    I2: IterableMut<ItemMut = I1::ItemMut>,
+    I1: IterableMut<'a>,
+    I2: IterableMut<'a, ItemMut = I1::ItemMut>,
 {
-    it1: &'i mut I1,
-    it2: &'i mut I2,
+    it1: &'a mut I1,
+    it2: &'a mut I2,
 }
 
-impl<'i, I1, I2> IterableMut for ChainedMut<'i, I1, I2>
+impl<'a, I1, I2> IterableMut<'a> for ChainedMut<'a, I1, I2>
 where
-    I1: IterableMut,
-    I2: IterableMut<ItemMut = I1::ItemMut>,
+    I1: IterableMut<'a>,
+    I2: IterableMut<'a, ItemMut = I1::ItemMut>,
 {
     type ItemMut = I1::ItemMut;
 
-    type IterMut<'a> = core::iter::Chain<I1::IterMut<'a>, I2::IterMut<'a>> where Self: 'a;
+    type IterMut = core::iter::Chain<I1::IterMut, I2::IterMut>;
 
-    fn iter_mut(&mut self) -> Self::IterMut<'_> {
+    fn iter_mut(&'a mut self) -> Self::IterMut {
         self.it1.iter_mut().chain(self.it2.iter_mut())
     }
 }
 
-pub trait IntoChainedMut
+pub trait IntoChainedMut<'a>
 where
-    Self: IterableMut + Sized,
+    Self: IterableMut<'a> + Sized,
 {
-    fn chained_mut<'i, I>(&'i mut self, other: &'i mut I) -> ChainedMut<Self, I>
+    fn chained_mut<I>(&'a mut self, other: &'a mut I) -> ChainedMut<'a, Self, I>
     where
-        I: IterableMut<ItemMut = Self::ItemMut>,
+        I: IterableMut<'a, ItemMut = Self::ItemMut>,
     {
         ChainedMut {
             it1: self,
@@ -83,4 +83,4 @@ where
     }
 }
 
-impl<I> IntoChainedMut for I where I: IterableMut {}
+impl<'a, I> IntoChainedMut<'a> for I where I: IterableMut<'a> {}

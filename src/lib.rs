@@ -1,12 +1,13 @@
 mod iterable;
 mod iterable_mut;
+mod special_impl;
 pub mod transformations;
 
 pub use iterable::Iterable;
 pub use iterable_mut::IterableMut;
-pub use transformations::{
-    IntoChained, IntoChainedMut, IntoCloned, IntoCloningIterable, IntoCopied, IntoFilterMapped,
-    IntoFiltered, IntoFilteredMut, IntoFlatMapped, IntoFlattened, IntoFlattenedMut, IntoMapped,
-    IntoMappedWhile, IntoOwningIterable, IntoSkipped, IntoSkippedMut, IntoSliceAsIterableMut,
-    IntoTaken, IntoTakenMut, IntoTakenWhile, IntoTakenWhileMut, IntoZipped,
-};
+// pub use transformations::{
+//     IntoChained, IntoChainedMut, IntoCloned, IntoCloningIterable, IntoCopied, IntoFilterMapped,
+//     IntoFiltered, IntoFilteredMut, IntoFlatMapped, IntoFlattened, IntoFlattenedMut, IntoMapped,
+//     IntoMappedWhile, IntoOwningIterable, IntoSkipped, IntoSkippedMut, IntoSliceAsIterableMut,
+//     IntoTaken, IntoTakenMut, IntoTakenWhile, IntoTakenWhileMut, IntoZipped,
+// };

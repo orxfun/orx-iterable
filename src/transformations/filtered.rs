@@ -73,28 +73,28 @@ impl<'a, I> IntoFiltered<'a> for I where I: Iterable<'a> {}
 
 pub struct FilteredMut<'a, I, F>
 where
-    I: IterableMut + 'a,
+    I: IterableMut<'a>,
     F: Fn(&I::ItemMut) -> bool,
 {
-    iterable: &'a mut I,
-    filter: F,
+    iterable: I,
+    filter: &'a F,
 }
 
 pub struct FilteredMutIter<'a, I, F>
 where
-    I: IterableMut + 'a,
+    I: IterableMut<'a> + 'a,
     F: Fn(&I::ItemMut) -> bool,
 {
-    iter: I::IterMut<'a>,
+    iter: I::IterMut,
     filter: &'a F,
 }
 
 impl<'a, I, F> Iterator for FilteredMutIter<'a, I, F>
 where
-    I: IterableMut + 'a,
+    I: IterableMut<'a> + 'a,
     F: Fn(&I::ItemMut) -> bool,
 {
-    type Item = &'a mut I::ItemMut;
+    type Item = I::ItemMut;
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
@@ -106,16 +106,16 @@ where
     }
 }
 
-impl<'a, I, F> IterableMut for FilteredMut<'a, I, F>
+impl<'a, I, F> IterableMut<'a> for FilteredMut<'a, I, F>
 where
-    I: IterableMut,
+    I: IterableMut<'a> + 'a,
     F: Fn(&I::ItemMut) -> bool,
 {
     type ItemMut = I::ItemMut;
 
-    type IterMut<'b> = FilteredMutIter<'b, I, F> where Self: 'b;
+    type IterMut = FilteredMutIter<'a, I, F>;
 
-    fn iter_mut(&mut self) -> Self::IterMut<'_> {
+    fn iter_mut(&'a mut self) -> Self::IterMut {
         FilteredMutIter {
             iter: self.iterable.iter_mut(),
             filter: &self.filter,
@@ -123,11 +123,11 @@ where
     }
 }
 
-pub trait IntoFilteredMut
+pub trait IntoFilteredMut<'a>
 where
-    Self: Sized + IterableMut,
+    Self: Sized + IterableMut<'a>,
 {
-    fn filtered_mut<F>(&mut self, filter: F) -> FilteredMut<Self, F>
+    fn filtered_mut<F>(self, filter: &'a F) -> FilteredMut<'a, Self, F>
     where
         F: Fn(&Self::ItemMut) -> bool,
     {
@@ -138,4 +138,4 @@ where
     }
 }
 
-impl<I> IntoFilteredMut for I where I: IterableMut {}
+impl<'a, I> IntoFilteredMut<'a> for I where I: IterableMut<'a> {}

@@ -1,25 +1,22 @@
-pub trait IterableMut {
+pub trait IterableMut<'a> {
     type ItemMut;
 
-    type IterMut<'a>: Iterator<Item = &'a mut Self::ItemMut>
-    where
-        Self: 'a;
+    type IterMut: Iterator<Item = Self::ItemMut>;
 
-    fn iter_mut(&mut self) -> Self::IterMut<'_>;
+    fn iter_mut(&'a mut self) -> Self::IterMut;
 }
 
 // impl
 
-impl<X> IterableMut for X
-where
-    X: IntoIterator,
-    for<'a> &'a mut X: IntoIterator<Item = &'a mut <X as IntoIterator>::Item>,
-{
-    type ItemMut = <X as IntoIterator>::Item;
+// impl<'a, X> IterableMut<'a> for &'a mut X
+// where
+//     &'a mut X: IntoIterator,
+// {
+//     type ItemMut = <&'a mut X as IntoIterator>::Item;
 
-    type IterMut<'b> = <&'b mut X as IntoIterator>::IntoIter where Self: 'b;
+//     type IterMut = <&'a mut X as IntoIterator>::IntoIter;
 
-    fn iter_mut(&mut self) -> Self::IterMut<'_> {
-        <&mut X>::into_iter(self)
-    }
-}
+//     fn iter_mut(&'a mut self) -> Self::IterMut {
+//         self.into_iter()
+//     }
+// }
