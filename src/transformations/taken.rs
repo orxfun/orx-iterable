@@ -1,39 +1,42 @@
 use crate::{Iterable, IterableMut};
+use std::marker::PhantomData;
 
-pub struct Taken<I>
+pub struct Taken<'a, I>
 where
-    I: Iterable,
+    I: Iterable<'a>,
 {
     take: usize,
     iterable: I,
+    phantom: PhantomData<&'a ()>,
 }
 
-impl<I> Iterable for Taken<I>
+impl<'a, I> Iterable<'a> for Taken<'a, I>
 where
-    I: Iterable,
+    I: Iterable<'a>,
 {
-    type Item = I::Item;
+    type Item = <I as Iterable<'a>>::Item;
 
-    type Iter<'a> = core::iter::Take<I::Iter<'a>> where Self: 'a;
+    type Iter = core::iter::Take<<I as Iterable<'a>>::Iter>;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter {
         self.iterable.iter().take(self.take)
     }
 }
 
-pub trait IntoTaken
+pub trait IntoTaken<'a>
 where
-    Self: Iterable + Sized,
+    Self: Iterable<'a> + Sized,
 {
-    fn taken(self, num_items_to_take: usize) -> Taken<Self> {
+    fn taken(self, num_items_to_take: usize) -> Taken<'a, Self> {
         Taken {
             iterable: self,
             take: num_items_to_take,
+            phantom: PhantomData,
         }
     }
 }
 
-impl<I> IntoTaken for I where I: Iterable {}
+impl<'a, I> IntoTaken<'a> for I where I: Iterable<'a> {}
 
 // mut
 

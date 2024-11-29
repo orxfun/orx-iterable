@@ -1,33 +1,33 @@
 use crate::{Iterable, IterableMut};
 
-pub struct TakenWhile<I, P>
+pub struct TakenWhile<'a, I, P>
 where
-    I: Iterable,
+    I: Iterable<'a>,
     P: Fn(&I::Item) -> bool,
 {
     iterable: I,
-    take_while: P,
+    take_while: &'a P,
 }
 
-impl<I, P> Iterable for TakenWhile<I, P>
+impl<'a, I, P> Iterable<'a> for TakenWhile<'a, I, P>
 where
-    I: Iterable,
+    I: Iterable<'a>,
     P: Fn(&I::Item) -> bool,
 {
     type Item = I::Item;
 
-    type Iter<'a> = core::iter::TakeWhile<I::Iter<'a>, &'a P> where Self: 'a;
+    type Iter = core::iter::TakeWhile<I::Iter, &'a P>;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter {
         self.iterable.iter().take_while(&self.take_while)
     }
 }
 
-pub trait IntoTakenWhile
+pub trait IntoTakenWhile<'a>
 where
-    Self: Sized + Iterable,
+    Self: Sized + Iterable<'a>,
 {
-    fn taken_while<P>(self, take_while_predicate: P) -> TakenWhile<Self, P>
+    fn taken_while<P>(self, take_while_predicate: &'a P) -> TakenWhile<'a, Self, P>
     where
         P: Fn(&Self::Item) -> bool,
     {
@@ -38,7 +38,7 @@ where
     }
 }
 
-impl<I> IntoTakenWhile for I where I: Iterable {}
+impl<'a, I> IntoTakenWhile<'a> for I where I: Iterable<'a> {}
 
 // mut
 

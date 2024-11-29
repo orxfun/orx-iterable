@@ -1,38 +1,41 @@
 use crate::Iterable;
+use std::marker::PhantomData;
 
-pub struct Zipped<I1, I2>
+pub struct Zipped<'a, I1, I2>
 where
-    I1: Iterable,
-    I2: Iterable,
+    I1: Iterable<'a>,
+    I2: Iterable<'a>,
 {
     it1: I1,
     it2: I2,
+    phantom: PhantomData<&'a ()>,
 }
 
-impl<I1, I2> Iterable for Zipped<I1, I2>
+impl<'a, I1, I2> Iterable<'a> for Zipped<'a, I1, I2>
 where
-    I1: Iterable,
-    I2: Iterable,
+    I1: Iterable<'a>,
+    I2: Iterable<'a>,
 {
     type Item = (I1::Item, I2::Item);
 
-    type Iter<'a> = std::iter::Zip<I1::Iter<'a>, I2::Iter<'a>> where Self: 'a;
+    type Iter = std::iter::Zip<I1::Iter, I2::Iter>;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter {
         self.it1.iter().zip(self.it2.iter())
     }
 }
 
-pub trait IntoZipped
+pub trait IntoZipped<'a>
 where
-    Self: Iterable + Sized,
+    Self: Iterable<'a> + Sized,
 {
-    fn zipped<I: Iterable>(self, other: I) -> Zipped<Self, I> {
+    fn zipped<I: Iterable<'a>>(self, other: I) -> Zipped<'a, Self, I> {
         Zipped {
             it1: self,
             it2: other,
+            phantom: PhantomData,
         }
     }
 }
 
-impl<I> IntoZipped for I where I: Iterable {}
+impl<'a, I> IntoZipped<'a> for I where I: Iterable<'a> {}

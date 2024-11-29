@@ -1,26 +1,26 @@
 use crate::Iterable;
 use std::marker::PhantomData;
 
-pub struct FilterMapped<I, U, M>
+pub struct FilterMapped<'a, I, U, M>
 where
-    I: Iterable,
+    I: Iterable<'a>,
     M: Fn(I::Item) -> Option<U>,
 {
     iterable: I,
-    filter_map: M,
+    filter_map: &'a M,
     phantom: PhantomData<U>,
 }
 
-impl<I, U, M> Iterable for FilterMapped<I, U, M>
+impl<'a, I, U, M> Iterable<'a> for FilterMapped<'a, I, U, M>
 where
-    I: Iterable,
+    I: Iterable<'a> + 'a,
     M: Fn(I::Item) -> Option<U>,
 {
     type Item = U;
 
-    type Iter<'a> = FilterMappedIter<'a, I, U, M> where Self: 'a;
+    type Iter = FilterMappedIter<'a, I, U, M>;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter {
         FilterMappedIter {
             iter: self.iterable.iter(),
             filter_map: &self.filter_map,
@@ -30,16 +30,16 @@ where
 
 pub struct FilterMappedIter<'a, I, U, M>
 where
-    I: Iterable + 'a,
+    I: Iterable<'a> + 'a,
     M: Fn(I::Item) -> Option<U>,
 {
-    iter: I::Iter<'a>,
+    iter: I::Iter,
     filter_map: &'a M,
 }
 
 impl<'a, I, U, M> Iterator for FilterMappedIter<'a, I, U, M>
 where
-    I: Iterable + 'a,
+    I: Iterable<'a> + 'a,
     M: Fn(I::Item) -> Option<U>,
 {
     type Item = U;
@@ -55,11 +55,11 @@ where
     }
 }
 
-pub trait IntoFilterMapped
+pub trait IntoFilterMapped<'a>
 where
-    Self: Iterable + Sized,
+    Self: Iterable<'a> + Sized,
 {
-    fn filter_mapped<U, M>(self, filter_map: M) -> FilterMapped<Self, U, M>
+    fn filter_mapped<U, M>(self, filter_map: &'a M) -> FilterMapped<'a, Self, U, M>
     where
         M: Fn(Self::Item) -> Option<U>,
     {
@@ -71,4 +71,4 @@ where
     }
 }
 
-impl<I> IntoFilterMapped for I where I: Iterable {}
+impl<'a, I> IntoFilterMapped<'a> for I where I: Iterable<'a> {}

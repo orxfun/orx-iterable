@@ -4,6 +4,7 @@ mod cloning_iter;
 mod copied;
 mod filter_mapped;
 mod filtered;
+mod flat_mapped;
 mod flattened;
 mod iterable_mut_from_slice_mut;
 mod mapped;
@@ -14,8 +15,6 @@ mod taken;
 mod taken_while;
 mod zipped;
 
-// mod flat_mapped;
-
 pub use chained::{Chained, ChainedMut, IntoChained, IntoChainedMut};
 pub use cloned::{Cloned, IntoCloned};
 pub use cloning_iter::{CloningIterable, IntoCloningIterable};
@@ -24,6 +23,7 @@ pub use filter_mapped::{FilterMapped, FilterMappedIter, IntoFilterMapped};
 pub use filtered::{
     Filtered, FilteredIter, FilteredMut, FilteredMutIter, IntoFiltered, IntoFilteredMut,
 };
+pub use flat_mapped::{FlatMapped, FlatMappedIter, IntoFlatMapped};
 pub use flattened::{
     Flattened, FlattenedIter, FlattenedMut, FlattenedMutIter, IntoFlattened, IntoFlattenedMut,
 };
@@ -37,5 +37,3 @@ pub use taken_while::{
     IntoTakenWhile, IntoTakenWhileMut, TakenWhile, TakenWhileMut, TakenWhileMutIter,
 };
 pub use zipped::{IntoZipped, Zipped};
-
-// pub use flat_mapped::{FlatMapped, FlatMappedIter, IntoFlatMapped};

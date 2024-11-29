@@ -1,44 +1,47 @@
 use crate::{Iterable, IterableMut};
+use std::marker::PhantomData;
 
-pub struct Chained<I1, I2>
+pub struct Chained<'a, I1, I2>
 where
-    I1: Iterable,
-    I2: Iterable<Item = I1::Item>,
+    I1: Iterable<'a>,
+    I2: Iterable<'a, Item = I1::Item>,
 {
     it1: I1,
     it2: I2,
+    phantom: PhantomData<&'a ()>,
 }
 
-impl<I1, I2> Iterable for Chained<I1, I2>
+impl<'a, I1, I2> Iterable<'a> for Chained<'a, I1, I2>
 where
-    I1: Iterable,
-    I2: Iterable<Item = I1::Item>,
+    I1: Iterable<'a>,
+    I2: Iterable<'a, Item = I1::Item>,
 {
     type Item = I1::Item;
 
-    type Iter<'a> = core::iter::Chain<I1::Iter<'a>, I2::Iter<'a>> where Self: 'a;
+    type Iter = core::iter::Chain<I1::Iter, I2::Iter>;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter {
         self.it1.iter().chain(self.it2.iter())
     }
 }
 
-pub trait IntoChained
+pub trait IntoChained<'a>
 where
-    Self: Iterable + Sized,
+    Self: Iterable<'a> + Sized,
 {
-    fn chained<I>(self, other: I) -> Chained<Self, I>
+    fn chained<I>(self, other: I) -> Chained<'a, Self, I>
     where
-        I: Iterable<Item = Self::Item>,
+        I: Iterable<'a, Item = Self::Item>,
     {
         Chained {
             it1: self,
             it2: other,
+            phantom: PhantomData,
         }
     }
 }
 
-impl<I> IntoChained for I where I: Iterable {}
+impl<'a, I> IntoChained<'a> for I where I: Iterable<'a> {}
 
 // mut
 

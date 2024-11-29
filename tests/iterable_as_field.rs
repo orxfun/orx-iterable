@@ -1,17 +1,25 @@
 use orx_iterable::*;
-use transformations::OwningIterable;
+use std::marker::PhantomData;
 
 pub struct Struct<'a, I>
 where
-    I: Iterable<Item = &'a usize>,
+    I: Iterable<'a, Item = &'a usize>,
 {
     iterable: I,
+    phantom: PhantomData<&'a ()>,
 }
 
 impl<'a, I> Struct<'a, I>
 where
-    I: Iterable<Item = &'a usize>,
+    I: Iterable<'a, Item = &'a usize>,
 {
+    fn new(iterable: I) -> Self {
+        Self {
+            iterable,
+            phantom: PhantomData,
+        }
+    }
+
     fn sum(&self) -> usize {
         self.iterable.iter().sum()
     }
@@ -22,11 +30,11 @@ fn iterable_as_field() {
     let vec = vec![1, 4, 2, 7];
 
     // reference
-    let obj_as_ref = Struct { iterable: &vec };
+    let obj_as_ref = Struct::new(&vec);
     assert_eq!(obj_as_ref.sum(), 14);
 
     // owned
-    // let owned: OwningIterable<Vec<_>> = vec.move_into_iterable();
-    // let obj_as_ref = Struct { iterable: owned };
-    // assert_eq!(obj_as_ref.sum(), 14);
+    let owned = vec.move_into_iterable();
+    let obj_as_ref = Struct::new(owned);
+    assert_eq!(obj_as_ref.sum(), 14);
 }

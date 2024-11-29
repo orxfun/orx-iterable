@@ -1,26 +1,26 @@
 use crate::Iterable;
 use std::marker::PhantomData;
 
-pub struct Mapped<I, U, M>
+pub struct Mapped<'a, I, U, M>
 where
-    I: Iterable,
+    I: Iterable<'a>,
     M: Fn(I::Item) -> U,
 {
     iterable: I,
-    map: M,
+    map: &'a M,
     phantom: PhantomData<U>,
 }
 
-impl<I, U, M> Iterable for Mapped<I, U, M>
+impl<'a, I, U, M> Iterable<'a> for Mapped<'a, I, U, M>
 where
-    I: Iterable,
+    I: Iterable<'a> + 'a,
     M: Fn(I::Item) -> U,
 {
     type Item = U;
 
-    type Iter<'a> = MappedIter<'a, I, U, M> where Self: 'a;
+    type Iter = MappedIter<'a, I, U, M>;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter {
         MappedIter {
             iter: self.iterable.iter(),
             map: &self.map,
@@ -30,16 +30,16 @@ where
 
 pub struct MappedIter<'a, I, U, M>
 where
-    I: Iterable + 'a,
+    I: Iterable<'a> + 'a,
     M: Fn(I::Item) -> U,
 {
-    iter: I::Iter<'a>,
+    iter: I::Iter,
     map: &'a M,
 }
 
 impl<'a, I, U, M> Iterator for MappedIter<'a, I, U, M>
 where
-    I: Iterable,
+    I: Iterable<'a>,
     M: Fn(I::Item) -> U,
 {
     type Item = U;
@@ -49,11 +49,11 @@ where
     }
 }
 
-pub trait IntoMapped
+pub trait IntoMapped<'a>
 where
-    Self: Iterable + Sized,
+    Self: Iterable<'a> + Sized,
 {
-    fn mapped<U, M>(self, map: M) -> Mapped<Self, U, M>
+    fn mapped<U, M>(self, map: &'a M) -> Mapped<'a, Self, U, M>
     where
         M: Fn(Self::Item) -> U,
     {
@@ -65,4 +65,4 @@ where
     }
 }
 
-impl<I> IntoMapped for I where I: Iterable {}
+impl<'a, I> IntoMapped<'a> for I where I: Iterable<'a> {}

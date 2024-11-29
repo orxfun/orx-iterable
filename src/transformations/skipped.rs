@@ -1,39 +1,42 @@
 use crate::{Iterable, IterableMut};
+use std::marker::PhantomData;
 
-pub struct Skipped<I>
+pub struct Skipped<'a, I>
 where
-    I: Iterable,
+    I: Iterable<'a>,
 {
     skip: usize,
     iterable: I,
+    phantom: PhantomData<&'a ()>,
 }
 
-impl<I> Iterable for Skipped<I>
+impl<'a, I> Iterable<'a> for Skipped<'a, I>
 where
-    I: Iterable,
+    I: Iterable<'a>,
 {
-    type Item = I::Item;
+    type Item = <I as Iterable<'a>>::Item;
 
-    type Iter<'a> = core::iter::Skip<I::Iter<'a>> where Self: 'a;
+    type Iter = core::iter::Skip<<I as Iterable<'a>>::Iter>;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter {
         self.iterable.iter().skip(self.skip)
     }
 }
 
-pub trait IntoSkipped
+pub trait IntoSkipped<'a>
 where
-    Self: Iterable + Sized,
+    Self: Iterable<'a> + Sized,
 {
-    fn skipped(self, num_items_to_skip: usize) -> Skipped<Self> {
+    fn skipped(self, num_items_to_skip: usize) -> Skipped<'a, Self> {
         Skipped {
             iterable: self,
             skip: num_items_to_skip,
+            phantom: PhantomData,
         }
     }
 }
 
-impl<I> IntoSkipped for I where I: Iterable {}
+impl<'a, I> IntoSkipped<'a> for I where I: Iterable<'a> {}
 
 // mut
 

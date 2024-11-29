@@ -1,23 +1,25 @@
 use crate::{Iterable, IterableMut};
+use std::marker::PhantomData;
 
-pub struct Flattened<I>
+pub struct Flattened<'a, I>
 where
-    I: Iterable,
-    I::Item: Iterable,
+    I: Iterable<'a>,
+    I::Item: Iterable<'a>,
 {
     it1: I,
+    phantom: PhantomData<&'a ()>,
 }
 
-impl<I> Iterable for Flattened<I>
+impl<'a, I> Iterable<'a> for Flattened<'a, I>
 where
-    I: Iterable,
-    I::Item: Iterable,
+    I: Iterable<'a> + 'a,
+    I::Item: Iterable<'a>,
 {
-    type Item = <I::Item as Iterable>::Item;
+    type Item = <I::Item as Iterable<'a>>::Item;
 
-    type Iter<'a> = FlattenedIter<'a, I> where Self: 'a;
+    type Iter = FlattenedIter<'a, I>;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter {
         let iter1 = self.it1.iter();
         FlattenedIter::new(iter1)
     }
@@ -25,24 +27,24 @@ where
 
 pub struct FlattenedIter<'a, I>
 where
-    I: Iterable + 'a,
-    I::Item: Iterable,
+    I: Iterable<'a> + 'a,
+    I::Item: Iterable<'a>,
 {
-    iter1: I::Iter<'a>,
-    iter2: Option<<I::Item as Iterable>::Iter<'a>>,
+    iter1: I::Iter,
+    iter2: Option<<I::Item as Iterable<'a>>::Iter>,
 }
 
 impl<'a, I> FlattenedIter<'a, I>
 where
-    I: Iterable,
-    I::Item: Iterable,
+    I: Iterable<'a>,
+    I::Item: Iterable<'a>,
 {
-    fn new(mut iter1: I::Iter<'a>) -> Self {
+    fn new(mut iter1: I::Iter) -> Self {
         let iter2 = Self::next_iter2(&mut iter1);
         Self { iter1, iter2 }
     }
 
-    fn next_iter2(iter1: &mut I::Iter<'a>) -> Option<<I::Item as Iterable>::Iter<'a>> {
+    fn next_iter2(iter1: &mut I::Iter) -> Option<<I::Item as Iterable<'a>>::Iter> {
         unsafe fn into_ref<'b, U>(reference: &U) -> &'b U {
             unsafe { &*(reference as *const U) }
         }
@@ -59,10 +61,10 @@ where
 
 impl<'a, I> Iterator for FlattenedIter<'a, I>
 where
-    I: Iterable,
-    I::Item: Iterable,
+    I: Iterable<'a>,
+    I::Item: Iterable<'a>,
 {
-    type Item = <I::Item as Iterable>::Item;
+    type Item = <I::Item as Iterable<'a>>::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
@@ -80,23 +82,26 @@ where
     }
 }
 
-pub trait IntoFlattened
+pub trait IntoFlattened<'a>
 where
-    Self: Iterable,
-    Self::Item: Iterable,
+    Self: Iterable<'a>,
+    Self::Item: Iterable<'a>,
 {
-    fn flattened(self) -> Flattened<Self>
+    fn flattened(self) -> Flattened<'a, Self>
     where
         Self: Sized,
     {
-        Flattened { it1: self }
+        Flattened {
+            it1: self,
+            phantom: PhantomData,
+        }
     }
 }
 
-impl<I> IntoFlattened for I
+impl<'a, I> IntoFlattened<'a> for I
 where
-    I: Iterable,
-    I::Item: Iterable,
+    I: Iterable<'a>,
+    I::Item: Iterable<'a>,
 {
 }
 

@@ -1,24 +1,24 @@
 use crate::{Iterable, IterableMut};
 
-pub struct Filtered<I, F>
+pub struct Filtered<'a, I, F>
 where
-    I: Iterable,
+    I: Iterable<'a>,
     F: Fn(&I::Item) -> bool,
 {
     iterable: I,
-    filter: F,
+    filter: &'a F,
 }
 
-impl<I, F> Iterable for Filtered<I, F>
+impl<'a, I, F> Iterable<'a> for Filtered<'a, I, F>
 where
-    I: Iterable,
+    I: Iterable<'a> + 'a,
     F: Fn(&I::Item) -> bool,
 {
     type Item = I::Item;
 
-    type Iter<'a> = FilteredIter<'a, I, F> where Self: 'a;
+    type Iter = FilteredIter<'a, I, F>;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter {
         FilteredIter {
             iter: self.iterable.iter(),
             filter: &self.filter,
@@ -28,16 +28,16 @@ where
 
 pub struct FilteredIter<'a, I, F>
 where
-    I: Iterable + 'a,
+    I: Iterable<'a> + 'a,
     F: Fn(&I::Item) -> bool,
 {
-    iter: I::Iter<'a>,
+    iter: I::Iter,
     filter: &'a F,
 }
 
 impl<'a, I, F> Iterator for FilteredIter<'a, I, F>
 where
-    I: Iterable,
+    I: Iterable<'a>,
     F: Fn(&I::Item) -> bool,
 {
     type Item = I::Item;
@@ -52,11 +52,11 @@ where
     }
 }
 
-pub trait IntoFiltered
+pub trait IntoFiltered<'a>
 where
-    Self: Sized + Iterable,
+    Self: Sized + Iterable<'a>,
 {
-    fn filtered<F>(self, filter: F) -> Filtered<Self, F>
+    fn filtered<F>(self, filter: &'a F) -> Filtered<'_, Self, F>
     where
         F: Fn(&Self::Item) -> bool,
     {
@@ -67,7 +67,7 @@ where
     }
 }
 
-impl<I> IntoFiltered for I where I: Iterable {}
+impl<'a, I> IntoFiltered<'a> for I where I: Iterable<'a> {}
 
 // mut
 

@@ -1,48 +1,46 @@
-pub trait Iterable {
+pub trait Iterable<'a> {
     type Item;
 
-    type Iter<'a>: Iterator<Item = Self::Item>
-    where
-        Self: 'a;
+    type Iter: Iterator<Item = Self::Item>;
 
-    fn iter(&self) -> Self::Iter<'_>;
+    fn iter(&self) -> Self::Iter;
 }
 
 // impl
 
-impl<'a, X> Iterable for &'a X
+impl<'a, X> Iterable<'a> for &'a X
 where
     &'a X: IntoIterator,
 {
     type Item = <&'a X as IntoIterator>::Item;
 
-    type Iter<'b> = <&'a X as IntoIterator>::IntoIter where Self: 'b;
+    type Iter = <&'a X as IntoIterator>::IntoIter;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter {
         self.into_iter()
     }
 }
 
 // impl - special
 
-impl<'a, T> Iterable for &'a [T] {
+impl<'a, T> Iterable<'a> for &'a [T] {
     type Item = &'a T;
 
-    type Iter<'b> = std::slice::Iter<'a, T> where Self: 'b;
+    type Iter = std::slice::Iter<'a, T>;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter {
         IntoIterator::into_iter(*self)
     }
 }
 
 macro_rules! impl_for_range {
     ($T:ty) => {
-        impl Iterable for std::ops::Range<$T> {
+        impl<'a> Iterable<'a> for std::ops::Range<$T> {
             type Item = $T;
 
-            type Iter<'a> = std::ops::Range<$T> where Self: 'a;
+            type Iter = std::ops::Range<$T>;
 
-            fn iter(&self) -> Self::Iter<'_> {
+            fn iter(&self) -> Self::Iter {
                 self.clone()
             }
         }

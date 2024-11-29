@@ -3,30 +3,30 @@ use std::marker::PhantomData;
 
 pub struct Cloned<'a, T, I>
 where
-    I: Iterable<Item = &'a T>,
+    I: Iterable<'a, Item = &'a T>,
     T: Clone + 'a,
 {
     iterable: I,
     phantom: PhantomData<&'a T>,
 }
 
-impl<'a, T, I> Iterable for Cloned<'a, T, I>
+impl<'a, T, I> Iterable<'a> for Cloned<'a, T, I>
 where
-    I: Iterable<Item = &'a T>,
+    I: Iterable<'a, Item = &'a T>,
     T: Clone + 'a,
 {
     type Item = T;
 
-    type Iter<'b> = std::iter::Cloned<I::Iter<'b>> where Self: 'b;
+    type Iter = std::iter::Cloned<I::Iter>;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter {
         self.iterable.iter().cloned()
     }
 }
 
 pub trait IntoCloned<'a, T>
 where
-    Self: Iterable<Item = &'a T> + Sized,
+    Self: Iterable<'a, Item = &'a T> + Sized,
     T: Clone + 'a,
 {
     fn cloned(self) -> Cloned<'a, T, Self> {
@@ -39,7 +39,7 @@ where
 
 impl<'a, T, I> IntoCloned<'a, T> for I
 where
-    I: Iterable<Item = &'a T>,
+    I: Iterable<'a, Item = &'a T>,
     T: Clone + 'a,
 {
 }

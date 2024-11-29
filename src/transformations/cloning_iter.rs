@@ -4,15 +4,15 @@ pub struct CloningIterable<I>(I)
 where
     I: Iterator + Clone;
 
-impl<I> Iterable for CloningIterable<I>
+impl<'a, I> Iterable<'a> for CloningIterable<I>
 where
     I: Iterator + Clone,
 {
     type Item = I::Item;
 
-    type Iter<'a> = I where Self: 'a;
+    type Iter = I;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter {
         self.0.clone()
     }
 }

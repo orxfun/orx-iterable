@@ -1,103 +1,98 @@
 use crate::Iterable;
 use std::marker::PhantomData;
 
-pub struct FlatMapped<I, U, M> {
-    it1: I,
-    fmap: M,
+pub struct FlatMapped<'a, I, U, M>
+where
+    I: Iterable<'a>,
+    U: Iterable<'a>,
+    M: Fn(I::Item) -> U,
+{
+    iterable1: I,
+    fmap: &'a M,
     phantom: PhantomData<U>,
 }
 
-impl<I, U, M> Iterable for FlatMapped<I, U, M>
+impl<'a, I, U, M> Iterable<'a> for FlatMapped<'a, I, U, M>
 where
-    I: Iterable,
-    U: Iterable,
+    I: Iterable<'a>,
+    U: Iterable<'a>,
     M: Fn(I::Item) -> U,
 {
     type Item = U::Item;
 
-    type Iter<'a> = FlatMappedIter<'a, I, U, M> where Self: 'a;
+    type Iter = FlatMappedIter<'a, I, U, M>;
 
-    fn iter(&self) -> Self::Iter<'_> {
-        let iter1 = self.it1.iter();
-        FlatMappedIter::new(iter1, &self.fmap)
+    fn iter(&self) -> Self::Iter {
+        let mut iter1 = self.iterable1.iter();
+        let iterable2: Option<U> = iter1.next().map(self.fmap);
+        let iter2: Option<U::Iter> = iterable2.map(|x| x.iter());
+
+        FlatMappedIter {
+            fmap: self.fmap,
+            iter1,
+            iter2,
+        }
     }
 }
 
 pub struct FlatMappedIter<'a, I, U, M>
 where
-    I: Iterable + 'a,
-    U: Iterable + 'a,
+    I: Iterable<'a>,
+    U: Iterable<'a>,
     M: Fn(I::Item) -> U,
 {
-    iter1: I::Iter<'a>,
-    iter2: Option<<U as Iterable>::Iter<'a>>,
+    iter1: I::Iter,
+    iter2: Option<U::Iter>,
     fmap: &'a M,
-}
-
-impl<'a, I, U, M> FlatMappedIter<'a, I, U, M>
-where
-    I: Iterable + 'a,
-    U: Iterable + 'a,
-    M: Fn(I::Item) -> U,
-{
-    fn new(mut iter1: I::Iter<'a>, fmap: &'a M) -> Self {
-        let iter2 = Self::next_iter2(&mut iter1, fmap);
-        Self { iter1, iter2, fmap }
-    }
-
-    fn next_iter2(iter1: &mut I::Iter<'a>, fmap: &'a M) -> Option<<U as Iterable>::Iter<'a>> {
-        unsafe fn into_ref<'b, U>(reference: &U) -> &'b U {
-            unsafe { &*(reference as *const U) }
-        }
-
-        match iter1.next() {
-            Some(iterable2) => {
-                let iterable2 = std::hint::black_box(unsafe { into_ref(&fmap(iterable2)) });
-                Some(iterable2.iter())
-            }
-            None => None,
-        }
-    }
 }
 
 impl<'a, I, U, M> Iterator for FlatMappedIter<'a, I, U, M>
 where
-    I: Iterable + 'a,
-    U: Iterable + 'a,
+    I: Iterable<'a>,
+    U: Iterable<'a>,
     M: Fn(I::Item) -> U,
 {
     type Item = U::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            match &mut self.iter2 {
-                Some(it2) => match it2.next() {
-                    Some(x) => return Some(x),
-                    None => {
-                        self.iter2 = Self::next_iter2(&mut self.iter1, self.fmap);
-                    }
-                },
-                None => return None,
-            }
+        if self.iter2.is_none() {
+            return None;
         }
+
+        let iter2 = self.iter2.as_mut().unwrap();
+        let value = iter2.next();
+        if value.is_some() {
+            return value;
+        }
+
+        let x = self.iter1.next();
+        if x.is_none() {
+            return None;
+        }
+
+        let iterable2: U = (self.fmap)(x.unwrap());
+        let iter2: U::Iter = iterable2.iter();
+        self.iter2 = Some(iter2);
+
+        self.next()
     }
 }
 
-pub trait IntoFlatMapped
+pub trait IntoFlatMapped<'a>
 where
-    Self: Iterable + Sized,
+    Self: Iterable<'a> + Sized,
 {
-    fn flat_mapped<U, M>(self, flat_map: M) -> FlatMapped<Self, U, M>
+    fn flat_mapped<U, M>(self, flat_map: &'a M) -> FlatMapped<'a, Self, U, M>
     where
         M: Fn(Self::Item) -> U,
-        U: Iterable,
+        U: Iterable<'a>,
     {
         FlatMapped {
-            it1: self,
+            iterable1: self,
             fmap: flat_map,
             phantom: PhantomData,
         }
     }
 }
 
-impl<I> IntoFlatMapped for I where Self: Iterable {}
+impl<'a, I> IntoFlatMapped<'a> for I where Self: Iterable<'a> {}
