@@ -10,6 +10,16 @@ where
     phantom: PhantomData<&'a ()>,
 }
 
+impl<'a, I> OwningIterable<'a, I>
+where
+    I: 'a,
+    &'a I: Iterable<'a>,
+{
+    pub fn into_inner(self) -> I {
+        self.iter
+    }
+}
+
 impl<'a, I> Iterable<'a> for OwningIterable<'a, I>
 where
     I: 'a,
@@ -48,3 +58,5 @@ where
     &'a I: Iterable<'a>,
 {
 }
+
+// mut

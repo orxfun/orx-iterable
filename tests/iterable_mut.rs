@@ -1,5 +1,5 @@
 use orx_iterable::*;
-use std::collections::{BTreeMap, HashMap, LinkedList, VecDeque};
+use std::collections::{LinkedList, VecDeque};
 
 fn take_owned<'a>(mut iter: impl IterableMut<ItemMut = usize>, sum: usize) {
     let mut x = 0;
@@ -72,29 +72,6 @@ fn iterable_mut_std_owned_collections() {
     test_std_collection!(VecDeque<_>);
     test_std_collection!(LinkedList<_>);
 }
-
-// #[test]
-// fn iterable_mut_std_pair_collections() {
-//     // TODO! this doesn't work yet.
-//     fn test<'a>(mut iter: impl IterableMut<ItemMut = u32>) {
-//         for x in iter.xyz() {
-//             *x += 1;
-//         }
-//         for x in iter.xyz() {
-//             *x -= 1;
-//         }
-//         assert_eq!(iter.xyz().map(|x| *x).sum::<u32>(), 42);
-//     }
-
-//     let mut map: HashMap<u64, u32> = [(1, 40), (3, 2)].into_iter().collect();
-//     // test(map.taken(10));
-//     // test(map.taken_while(|x| x.1 % 2 == 0));
-
-//     let map: BTreeMap<u64, u32> = [(1, 40), (3, 2)].into_iter().collect();
-//     // test(&map);
-//     // test(map.taken(10));
-//     // test(map.taken_while(|x| x.1 % 2 == 0));
-// }
 
 #[test]
 fn iterable_mut_chained() {
