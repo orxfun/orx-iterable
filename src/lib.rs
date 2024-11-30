@@ -14,3 +14,13 @@
 //     IntoFlattened, IntoFlattenedMut, IntoMapped, IntoMappedWhile, IntoOwningIterable, IntoSkipped,
 //     IntoSkippedMut, IntoTaken, IntoTakenMut, IntoTakenWhile, IntoTakenWhileMut, IntoZipped,
 // };
+
+// mod iterable;
+// mod iterable_mut;
+// mod iterable_ref;
+// pub mod transformations;
+
+// pub use iterable::Iterable;
+// pub use iterable_mut::IterableMut;
+// pub use iterable_ref::IterableRef;
+// pub use transformations::{IntoChained, IntoChainedMut};
