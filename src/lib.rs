@@ -24,3 +24,13 @@
 // pub use iterable_mut::IterableMut;
 // pub use iterable_ref::IterableRef;
 // pub use transformations::{IntoChained, IntoChainedMut};
+
+mod exclusive;
+mod iterable;
+mod iterable_col;
+pub mod transformations;
+
+pub use iterable::Iterable;
+pub use iterable_col::IterableCol;
+
+pub use transformations::{IntoCloned, IntoCopied};
