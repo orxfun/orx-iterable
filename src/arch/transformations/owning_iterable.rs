@@ -58,5 +58,3 @@ where
     &'a I: Iterable<'a>,
 {
 }
-
-// mut

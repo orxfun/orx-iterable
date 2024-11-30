@@ -48,30 +48,30 @@
 //     take_owned(data, 19);
 // }
 
-// #[test]
-// fn iterable_mut_slice() {
-//     let mut vec = vec![3, 2, 6, 1, 0, 7];
+// // #[test]
+// // fn iterable_mut_slice() {
+// //     let mut vec = vec![3, 2, 6, 1, 0, 7];
 
-//     let slice = vec.as_mut_slice();
-//     take_owned(slice.iterable_mut(), 19);
-// }
+// //     let slice = vec.as_mut_slice();
+// //     take_owned(slice.iterable_mut(), 19);
+// // }
 
-// #[test]
-// fn iterable_mut_std_owned_collections() {
-//     macro_rules! test_std_collection {
-//         ($V:ty) => {
-//             let mut data: $V = [3, 2, 6, 1, 0, 7].into_iter().collect();
-//             take_mut_ref(&mut data, 19);
+// // #[test]
+// // fn iterable_mut_std_owned_collections() {
+// //     macro_rules! test_std_collection {
+// //         ($V:ty) => {
+// //             let mut data: $V = [3, 2, 6, 1, 0, 7].into_iter().collect();
+// //             take_mut_ref(&mut data, 19);
 
-//             let data: $V = [3, 2, 6, 1, 0, 7].into_iter().collect();
-//             take_owned(data, 19);
-//         };
-//     }
+// //             let data: $V = [3, 2, 6, 1, 0, 7].into_iter().collect();
+// //             take_owned(data, 19);
+// //         };
+// //     }
 
-//     test_std_collection!(Vec<_>);
-//     test_std_collection!(VecDeque<_>);
-//     test_std_collection!(LinkedList<_>);
-// }
+// //     test_std_collection!(Vec<_>);
+// //     test_std_collection!(VecDeque<_>);
+// //     test_std_collection!(LinkedList<_>);
+// // }
 
 // #[test]
 // fn iterable_mut_chained() {
@@ -101,7 +101,7 @@
 // fn iterable_mut_filtered() {
 //     let mut vec = vec![3, 2, 6, 1, 0, 7, 33];
 
-//     let mut iterable = vec.filtered_mut(|x| *x > 30);
+//     let mut iterable = vec.filtered_mut(&|x| *x > 30);
 //     for x in iterable.iter_mut() {
 //         *x += 100;
 //     }
@@ -145,19 +145,19 @@
 // #[test]
 // fn iterable_mut_taken_while() {
 //     let mut data = vec![2, 4, 1, 3, 8, 4];
-//     for x in data.taken_while_mut(|x| x % 2 == 0).iter_mut() {
+//     for x in data.taken_while_mut(&|x| x % 2 == 0).iter_mut() {
 //         *x += 10;
 //     }
 //     assert_eq!(data, [12, 14, 1, 3, 8, 4]);
 
 //     let mut data = vec![2, 4, 1, 3, 8, 4];
-//     for x in data.taken_while_mut(|x| x % 2 == 1).iter_mut() {
+//     for x in data.taken_while_mut(&|x| x % 2 == 1).iter_mut() {
 //         *x += 10;
 //     }
 //     assert_eq!(data, [2, 4, 1, 3, 8, 4]);
 
 //     let mut data = vec![2, 4, 1, 3, 8, 4];
-//     for x in data.taken_while_mut(|x| *x < 100).iter_mut() {
+//     for x in data.taken_while_mut(&|x| *x < 100).iter_mut() {
 //         *x += 10;
 //     }
 //     assert_eq!(data, [12, 14, 11, 13, 18, 14]);

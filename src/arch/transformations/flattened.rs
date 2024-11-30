@@ -109,47 +109,47 @@ where
 
 pub struct FlattenedMut<'a, I>
 where
-    I: IterableMut<'a> + 'a,
-    I::ItemMut: IterableMut<'a>,
+    I: IterableMut + 'a,
+    I::ItemMut: IterableMut,
 {
-    it1: I,
+    it1: &'a mut I,
     phantom: PhantomData<&'a ()>,
 }
 
-impl<'a, I> IterableMut<'a> for FlattenedMut<'a, I>
+impl<'a, I> IterableMut for FlattenedMut<'a, I>
 where
-    I: IterableMut<'a> + 'a,
-    I::ItemMut: IterableMut<'a>,
+    I: IterableMut + 'a,
+    I::ItemMut: IterableMut,
 {
-    type ItemMut = <I::ItemMut as IterableMut<'a>>::ItemMut;
+    type ItemMut = <I::ItemMut as IterableMut>::ItemMut;
 
-    type IterMut = FlattenedMutIter<'a, I>;
+    type IterMut<'b> = FlattenedMutIter<'b, I> where Self: 'b;
 
-    fn iter_mut(&'a mut self) -> Self::IterMut {
+    fn iter_mut(&mut self) -> Self::IterMut<'_> {
         FlattenedMutIter::new(self.it1.iter_mut())
     }
 }
 
 pub struct FlattenedMutIter<'a, I>
 where
-    I: IterableMut<'a> + 'a,
-    I::ItemMut: IterableMut<'a>,
+    I: IterableMut + 'a,
+    I::ItemMut: IterableMut,
 {
-    iter1: I::IterMut,
-    iter2: Option<<I::ItemMut as IterableMut<'a>>::IterMut>,
+    iter1: I::IterMut<'a>,
+    iter2: Option<<I::ItemMut as IterableMut>::IterMut<'a>>,
 }
 
 impl<'a, I> FlattenedMutIter<'a, I>
 where
-    I: IterableMut<'a> + 'a,
-    I::ItemMut: IterableMut<'a>,
+    I: IterableMut + 'a,
+    I::ItemMut: IterableMut,
 {
-    fn new(mut iter1: I::IterMut) -> Self {
+    fn new(mut iter1: I::IterMut<'a>) -> Self {
         let iter2 = Self::next_iter2(&mut iter1);
         Self { iter1, iter2 }
     }
 
-    fn next_iter2(iter1: &mut I::IterMut) -> Option<<I::ItemMut as IterableMut<'a>>::IterMut> {
+    fn next_iter2(iter1: &mut I::IterMut<'a>) -> Option<<I::ItemMut as IterableMut>::IterMut<'a>> {
         unsafe fn into_mut<'b, U>(reference: &mut U) -> &'b mut U {
             unsafe { &mut *(reference as *mut U) }
         }
@@ -166,10 +166,10 @@ where
 
 impl<'a, I> Iterator for FlattenedMutIter<'a, I>
 where
-    I: IterableMut<'a> + 'a,
-    I::ItemMut: IterableMut<'a>,
+    I: IterableMut + 'a,
+    I::ItemMut: IterableMut,
 {
-    type Item = <I::ItemMut as IterableMut<'a>>::ItemMut;
+    type Item = &'a mut <I::ItemMut as IterableMut>::ItemMut;
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
@@ -187,12 +187,12 @@ where
     }
 }
 
-pub trait IntoFlattenedMut<'a>
+pub trait IntoFlattenedMut
 where
-    Self: IterableMut<'a> + Sized,
-    Self::ItemMut: IterableMut<'a>,
+    Self: IterableMut + Sized,
+    Self::ItemMut: IterableMut,
 {
-    fn flattened_mut(self) -> FlattenedMut<'a, Self> {
+    fn flattened_mut<'a>(&'a mut self) -> FlattenedMut<'a, Self> {
         FlattenedMut {
             it1: self,
             phantom: PhantomData,
@@ -200,9 +200,9 @@ where
     }
 }
 
-impl<'a, I> IntoFlattenedMut<'a> for I
+impl<I> IntoFlattenedMut for I
 where
-    I: IterableMut<'a>,
-    I::ItemMut: IterableMut<'a>,
+    I: IterableMut,
+    I::ItemMut: IterableMut,
 {
 }

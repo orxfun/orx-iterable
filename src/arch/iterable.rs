@@ -21,16 +21,6 @@ where
     }
 }
 
-// impl<'a, T> Iterable<'a> for &'a mut [T] {
-//     type Item = &'a T;
-
-//     type Iter = std::slice::Iter<'a, T>;
-
-//     fn iter(&self) -> Self::Iter {
-//         IntoIterator::into_iter(*self)
-//     }
-// }
-
 macro_rules! impl_for_range {
     ($T:ty) => {
         impl<'a> Iterable<'a> for std::ops::Range<$T> {

@@ -44,23 +44,23 @@ impl<'a, I> IntoTakenWhile<'a> for I where I: Iterable<'a> {}
 
 pub struct TakenWhileMut<'a, I, F>
 where
-    I: IterableMut<'a>,
+    I: IterableMut,
     F: Fn(&I::ItemMut) -> bool,
 {
-    iterable: I,
+    iterable: &'a mut I,
     take_while: &'a F,
 }
 
-impl<'a, I, F> IterableMut<'a> for TakenWhileMut<'a, I, F>
+impl<'a, I, F> IterableMut for TakenWhileMut<'a, I, F>
 where
-    I: IterableMut<'a> + 'a,
+    I: IterableMut + 'a,
     F: Fn(&I::ItemMut) -> bool,
 {
     type ItemMut = I::ItemMut;
 
-    type IterMut = TakenWhileMutIter<'a, I, F>;
+    type IterMut<'b> = TakenWhileMutIter<'b, I, F> where Self: 'b;
 
-    fn iter_mut(&'a mut self) -> Self::IterMut {
+    fn iter_mut(&mut self) -> Self::IterMut<'_> {
         TakenWhileMutIter {
             iter: self.iterable.iter_mut(),
             take_while: &self.take_while,
@@ -70,19 +70,19 @@ where
 
 pub struct TakenWhileMutIter<'a, I, F>
 where
-    I: IterableMut<'a> + 'a,
+    I: IterableMut + 'a,
     F: Fn(&I::ItemMut) -> bool,
 {
-    iter: I::IterMut,
+    iter: I::IterMut<'a>,
     take_while: &'a F,
 }
 
 impl<'a, I, F> Iterator for TakenWhileMutIter<'a, I, F>
 where
-    I: IterableMut<'a> + 'a,
+    I: IterableMut + 'a,
     F: Fn(&I::ItemMut) -> bool,
 {
-    type Item = I::ItemMut;
+    type Item = &'a mut I::ItemMut;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.iter.next() {
@@ -95,11 +95,11 @@ where
     }
 }
 
-pub trait IntoTakenWhileMut<'a>
+pub trait IntoTakenWhileMut
 where
-    Self: Sized + IterableMut<'a>,
+    Self: Sized + IterableMut,
 {
-    fn taken_while_mut<F>(self, take_while: &'a F) -> TakenWhileMut<'a, Self, F>
+    fn taken_while_mut<'a, F>(&'a mut self, take_while: &'a F) -> TakenWhileMut<'a, Self, F>
     where
         F: Fn(&Self::ItemMut) -> bool,
     {
@@ -110,4 +110,4 @@ where
     }
 }
 
-impl<'a, I> IntoTakenWhileMut<'a> for I where I: IterableMut<'a> {}
+impl<'a, I> IntoTakenWhileMut for I where I: IterableMut {}

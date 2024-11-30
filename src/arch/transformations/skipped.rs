@@ -42,37 +42,35 @@ impl<'a, I> IntoSkipped<'a> for I where I: Iterable<'a> {}
 
 pub struct SkippedMut<'a, I>
 where
-    I: IterableMut<'a>,
+    I: IterableMut,
 {
     skip: usize,
-    iterable: I,
-    phantom: PhantomData<&'a ()>,
+    iterable: &'a mut I,
 }
 
-impl<'a, I> IterableMut<'a> for SkippedMut<'a, I>
+impl<'a, I> IterableMut for SkippedMut<'a, I>
 where
-    I: IterableMut<'a>,
+    I: IterableMut,
 {
     type ItemMut = I::ItemMut;
 
-    type IterMut = core::iter::Skip<I::IterMut>;
+    type IterMut<'b> = core::iter::Skip<I::IterMut<'b>> where Self: 'b;
 
-    fn iter_mut(&'a mut self) -> Self::IterMut {
+    fn iter_mut(&mut self) -> Self::IterMut<'_> {
         self.iterable.iter_mut().skip(self.skip)
     }
 }
 
-pub trait IntoSkippedMut<'a>
+pub trait IntoSkippedMut
 where
-    Self: IterableMut<'a> + Sized,
+    Self: IterableMut + Sized,
 {
-    fn skipped_mut(self, num_items_to_skip: usize) -> SkippedMut<'a, Self> {
+    fn skipped_mut<'a>(&'a mut self, num_items_to_skip: usize) -> SkippedMut<'a, Self> {
         SkippedMut {
             iterable: self,
             skip: num_items_to_skip,
-            phantom: PhantomData,
         }
     }
 }
 
-impl<'a, I> IntoSkippedMut<'a> for I where I: IterableMut<'a> {}
+impl<'a, I> IntoSkippedMut for I where I: IterableMut {}
