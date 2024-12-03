@@ -1,8 +1,12 @@
-use crate::transformations::{ChainedCol, FilteredCol, FlattenedCol, SkippedCol, TakenCol};
+use crate::{
+    transformations::{ChainedCol, FilteredCol, FlattenedCol, SkippedCol, TakenCol},
+    Iterable,
+};
 
 // TODO: consider IterableCol: Iterable bound
 
-pub trait IterableCol: Sized {
+pub trait IterableCol: Sized // for<'a> &'a Self: Iterable<Item = &'a Self::Item>,
+{
     type Item;
 
     type Iter<'i>: Iterator<Item = &'i Self::Item>
@@ -22,6 +26,7 @@ pub trait IterableCol: Sized {
     fn into_chained<I>(self, other: I) -> ChainedCol<Self, I, Self, I>
     where
         I: IterableCol<Item = Self::Item>,
+        for<'a> &'a I: Iterable<Item = &'a Self::Item>,
     {
         ChainedCol {
             it1: self,
@@ -36,6 +41,7 @@ pub trait IterableCol: Sized {
     ) -> ChainedCol<Self, I, &'a mut Self, &'a mut I>
     where
         I: IterableCol<Item = Self::Item>,
+        for<'b> &'b I: Iterable<Item = &'b Self::Item>,
     {
         ChainedCol {
             it1: self,

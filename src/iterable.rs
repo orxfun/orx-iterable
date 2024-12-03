@@ -7,7 +7,7 @@ pub trait Iterable: Sized {
 
     type Iter: Iterator<Item = Self::Item>;
 
-    fn iter(&self) -> Self::Iter;
+    fn it(&self) -> Self::Iter;
 
     // provided
 
@@ -89,7 +89,7 @@ where
 
     type Iter = <&'a X as IntoIterator>::IntoIter;
 
-    fn iter(&self) -> Self::Iter {
+    fn it(&self) -> Self::Iter {
         self.into_iter()
     }
 }

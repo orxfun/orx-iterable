@@ -18,7 +18,7 @@ where
 
     type Iter = core::iter::Map<I::Iter, M>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it.iter().map(self.map)
+    fn it(&self) -> Self::Iter {
+        self.it.it().map(self.map)
     }
 }

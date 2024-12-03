@@ -20,8 +20,8 @@ where
 
     type Iter = core::iter::Filter<I::Iter, P>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it.iter().filter(self.filter)
+    fn it(&self) -> Self::Iter {
+        self.it.it().filter(self.filter)
     }
 }
 
@@ -36,6 +36,25 @@ where
     pub(crate) it: E,
     pub(crate) filter: P,
     pub(crate) phantom: PhantomData<I>,
+}
+
+impl<'a, I, E, P> Iterable for &'a FilteredCol<I, E, P>
+where
+    I: IterableCol,
+    E: Exclusive<I>,
+    P: Fn(&I::Item) -> bool + Copy,
+{
+    type Item = &'a I::Item;
+
+    type Iter = FilteredColIter<'a, I, P>;
+
+    fn it(&self) -> Self::Iter {
+        let iter: I::Iter<'_> = self.it.get_ref().iter();
+        FilteredColIter {
+            iter,
+            filter: self.filter,
+        }
+    }
 }
 
 impl<I, E, P> IterableCol for FilteredCol<I, E, P>

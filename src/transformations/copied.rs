@@ -17,8 +17,8 @@ where
 
     type Iter = std::iter::Copied<I::Iter>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it.iter().copied()
+    fn it(&self) -> Self::Iter {
+        self.it.it().copied()
     }
 }
 

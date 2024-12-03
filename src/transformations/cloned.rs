@@ -17,8 +17,8 @@ where
 
     type Iter = std::iter::Cloned<I::Iter>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it.iter().cloned()
+    fn it(&self) -> Self::Iter {
+        self.it.it().cloned()
     }
 }
 

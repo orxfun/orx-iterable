@@ -18,8 +18,8 @@ where
 
     type Iter = core::iter::Skip<I::Iter>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it.iter().skip(self.n)
+    fn it(&self) -> Self::Iter {
+        self.it.it().skip(self.n)
     }
 }
 
@@ -33,6 +33,20 @@ where
     pub(crate) it: E,
     pub(crate) n: usize,
     pub(crate) phantom: PhantomData<I>,
+}
+
+impl<'a, I, E> Iterable for &'a SkippedCol<I, E>
+where
+    I: IterableCol,
+    E: Exclusive<I>,
+{
+    type Item = &'a I::Item;
+
+    type Iter = core::iter::Skip<I::Iter<'a>>;
+
+    fn it(&self) -> Self::Iter {
+        self.it.get_ref().iter().skip(self.n)
+    }
 }
 
 impl<I, E> IterableCol for SkippedCol<I, E>

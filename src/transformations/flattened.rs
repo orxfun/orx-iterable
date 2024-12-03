@@ -19,8 +19,8 @@ where
 
     type Iter = core::iter::Flatten<I::Iter>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it.iter().flatten()
+    fn it(&self) -> Self::Iter {
+        self.it.it().flatten()
     }
 }
 
@@ -36,6 +36,23 @@ where
 {
     pub(crate) it: E,
     pub(crate) phantom: PhantomData<I>,
+}
+
+impl<'a, I, E> Iterable for &'a FlattenedCol<I, E>
+where
+    I: IterableCol,
+    I::Item: IntoIterator,
+    for<'i> &'i I::Item: IntoIterator<Item = &'i <I::Item as IntoIterator>::Item>,
+    for<'i> &'i mut I::Item: IntoIterator<Item = &'i mut <I::Item as IntoIterator>::Item>,
+    E: Exclusive<I>,
+{
+    type Item = &'a <I::Item as IntoIterator>::Item;
+
+    type Iter = core::iter::Flatten<I::Iter<'a>>;
+
+    fn it(&self) -> Self::Iter {
+        self.it.get_ref().iter().flatten()
+    }
 }
 
 impl<I, E> IterableCol for FlattenedCol<I, E>

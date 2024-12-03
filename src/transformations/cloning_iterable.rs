@@ -12,7 +12,7 @@ where
 
     type Iter = I;
 
-    fn iter(&self) -> Self::Iter {
+    fn it(&self) -> Self::Iter {
         self.0.clone()
     }
 }

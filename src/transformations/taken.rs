@@ -18,8 +18,8 @@ where
 
     type Iter = core::iter::Take<I::Iter>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it.iter().take(self.n)
+    fn it(&self) -> Self::Iter {
+        self.it.it().take(self.n)
     }
 }
 
@@ -33,6 +33,20 @@ where
     pub(crate) it: E,
     pub(crate) n: usize,
     pub(crate) phantom: PhantomData<I>,
+}
+
+impl<'a, I, E> Iterable for &'a TakenCol<I, E>
+where
+    I: IterableCol,
+    E: Exclusive<I>,
+{
+    type Item = &'a I::Item;
+
+    type Iter = core::iter::Take<I::Iter<'a>>;
+
+    fn it(&self) -> Self::Iter {
+        self.it.get_ref().iter().take(self.n)
+    }
 }
 
 impl<I, E> IterableCol for TakenCol<I, E>
