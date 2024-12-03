@@ -42,7 +42,7 @@ where
 {
     type Item = &'a I::Item;
 
-    type Iter = core::iter::Take<I::Iter<'a>>;
+    type Iter = core::iter::Take<<I::Iterable<'a> as Iterable>::Iter>;
 
     fn it(&self) -> Self::Iter {
         self.it.get_ref().iter().take(self.n)
@@ -60,15 +60,11 @@ where
     where
         Self: 'i;
 
-    type Iter<'i> = core::iter::Take<I::Iter<'i>>
-    where
-        Self: 'i;
-
     type IterMut<'i> = core::iter::Take<I::IterMut<'i>>
     where
         Self: 'i;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> <Self::Iterable<'_> as Iterable>::Iter {
         self.it.get_ref().iter().take(self.n)
     }
 

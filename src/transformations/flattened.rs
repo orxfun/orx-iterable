@@ -48,7 +48,7 @@ where
 {
     type Item = &'a <I::Item as IntoIterator>::Item;
 
-    type Iter = core::iter::Flatten<I::Iter<'a>>;
+    type Iter = core::iter::Flatten<<I::Iterable<'a> as Iterable>::Iter>;
 
     fn it(&self) -> Self::Iter {
         self.it.get_ref().iter().flatten()
@@ -69,15 +69,11 @@ where
     where
         Self: 'i;
 
-    type Iter<'i> = core::iter::Flatten<I::Iter<'i>>
-    where
-        Self: 'i;
-
     type IterMut<'i> = core::iter::Flatten<I::IterMut<'i>>
     where
         Self: 'i;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> <Self::Iterable<'_> as Iterable>::Iter {
         self.it.get_ref().iter().flatten()
     }
 

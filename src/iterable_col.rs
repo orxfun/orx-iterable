@@ -12,15 +12,15 @@ pub trait IterableCol: Sized {
     where
         Self: 'i;
 
-    type Iter<'i>: Iterator<Item = &'i Self::Item>
-    where
-        Self: 'i;
+    // type Iter<'i>: Iterator<Item = &'i Self::Item>
+    // where
+    //     Self: 'i;
 
     type IterMut<'i>: Iterator<Item = &'i mut Self::Item>
     where
         Self: 'i;
 
-    fn iter(&self) -> Self::Iter<'_>;
+    fn iter(&self) -> <Self::Iterable<'_> as Iterable>::Iter;
 
     fn iter_mut(&mut self) -> Self::IterMut<'_>;
 
@@ -146,15 +146,15 @@ where
     where
         Self: 'i;
 
-    type Iter<'i> = <&'i X as IntoIterator>::IntoIter
-    where
-        Self: 'i;
+    // type Iter<'i> = <&'i X as IntoIterator>::IntoIter
+    // where
+    //     Self: 'i;
 
     type IterMut<'i> = <&'i mut X as IntoIterator>::IntoIter
     where
         Self: 'i;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> <Self::Iterable<'_> as Iterable>::Iter {
         <&X as IntoIterator>::into_iter(self)
     }
 

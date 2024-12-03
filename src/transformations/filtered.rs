@@ -49,7 +49,7 @@ where
     type Iter = FilteredColIter<'a, I, P>;
 
     fn it(&self) -> Self::Iter {
-        let iter: I::Iter<'_> = self.it.get_ref().iter();
+        let iter = self.it.get_ref().iter();
         FilteredColIter {
             iter,
             filter: self.filter,
@@ -69,16 +69,12 @@ where
     where
         Self: 'i;
 
-    type Iter<'i> = FilteredColIter<'i, I, P>
-    where
-        Self: 'i;
-
     type IterMut<'i> = FilteredColIterMut<'i, I, P>
     where
         Self: 'i;
 
-    fn iter(&self) -> Self::Iter<'_> {
-        let iter: I::Iter<'_> = self.it.get_ref().iter();
+    fn iter(&self) -> <Self::Iterable<'_> as Iterable>::Iter {
+        let iter = self.it.get_ref().iter();
         FilteredColIter {
             iter,
             filter: self.filter,
@@ -105,7 +101,7 @@ where
     I: IterableCol + 'a,
     P: Fn(&I::Item) -> bool + Copy,
 {
-    iter: I::Iter<'a>,
+    iter: <I::Iterable<'a> as Iterable>::Iter,
     filter: P,
 }
 
@@ -114,7 +110,7 @@ where
     I: IterableCol,
     P: Fn(&I::Item) -> bool + Copy,
 {
-    type Item = <I::Iter<'a> as Iterator>::Item;
+    type Item = <I::Iterable<'a> as Iterable>::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {

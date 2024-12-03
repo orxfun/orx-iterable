@@ -48,7 +48,10 @@ where
 {
     type Item = &'a I1::Item;
 
-    type Iter = core::iter::Chain<I1::Iter<'a>, I2::Iter<'a>>;
+    type Iter = core::iter::Chain<
+        <I1::Iterable<'a> as Iterable>::Iter,
+        <I2::Iterable<'a> as Iterable>::Iter,
+    >;
 
     fn it(&self) -> Self::Iter {
         self.it1.get_ref().iter().chain(self.it2.get_ref().iter())
@@ -68,15 +71,11 @@ where
     where
         Self: 'i;
 
-    type Iter<'i> = core::iter::Chain<I1::Iter<'i>, I2::Iter<'i>>
-    where
-        Self: 'i;
-
     type IterMut<'i> = core::iter::Chain<I1::IterMut<'i>, I2::IterMut<'i>>
     where
         Self: 'i;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> <Self::Iterable<'_> as Iterable>::Iter {
         self.it1.get_ref().iter().chain(self.it2.get_ref().iter())
     }
 
