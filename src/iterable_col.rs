@@ -3,8 +3,6 @@ use crate::{
     Iterable,
 };
 
-// TODO: consider IterableCol: Iterable bound
-
 pub trait IterableCol: Sized {
     type Item;
 
@@ -12,15 +10,13 @@ pub trait IterableCol: Sized {
     where
         Self: 'i;
 
-    // type Iter<'i>: Iterator<Item = &'i Self::Item>
-    // where
-    //     Self: 'i;
-
     type IterMut<'i>: Iterator<Item = &'i mut Self::Item>
     where
         Self: 'i;
 
-    fn iter(&self) -> <Self::Iterable<'_> as Iterable>::Iter;
+    fn iter(&self) -> <Self::Iterable<'_> as Iterable>::Iter {
+        self.as_iterable().it()
+    }
 
     fn iter_mut(&mut self) -> Self::IterMut<'_>;
 
@@ -145,10 +141,6 @@ where
     type Iterable<'i> = &'i X
     where
         Self: 'i;
-
-    // type Iter<'i> = <&'i X as IntoIterator>::IntoIter
-    // where
-    //     Self: 'i;
 
     type IterMut<'i> = <&'i mut X as IntoIterator>::IntoIter
     where

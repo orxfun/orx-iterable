@@ -64,10 +64,6 @@ where
     where
         Self: 'i;
 
-    fn iter(&self) -> <Self::Iterable<'_> as Iterable>::Iter {
-        self.it.get_ref().iter().take(self.n)
-    }
-
     fn iter_mut(&mut self) -> Self::IterMut<'_> {
         self.it.get_mut().iter_mut().take(self.n)
     }

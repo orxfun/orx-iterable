@@ -73,14 +73,6 @@ where
     where
         Self: 'i;
 
-    fn iter(&self) -> <Self::Iterable<'_> as Iterable>::Iter {
-        let iter = self.it.get_ref().iter();
-        FilteredColIter {
-            iter,
-            filter: self.filter,
-        }
-    }
-
     fn iter_mut(&mut self) -> Self::IterMut<'_> {
         let iter: I::IterMut<'_> = self.it.get_mut().iter_mut();
         FilteredColIterMut {

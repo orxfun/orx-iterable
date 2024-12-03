@@ -75,10 +75,6 @@ where
     where
         Self: 'i;
 
-    fn iter(&self) -> <Self::Iterable<'_> as Iterable>::Iter {
-        self.it1.get_ref().iter().chain(self.it2.get_ref().iter())
-    }
-
     fn iter_mut(&mut self) -> Self::IterMut<'_> {
         self.it1
             .get_mut()

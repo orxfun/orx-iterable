@@ -49,19 +49,19 @@ fn into_skipped() {
     for x in a.iter_mut() {
         *x += 10;
     }
-    test_it(vec![11, 13, 17, 12, 18], a.as_iterable().copied());
+    test_it(vec![11, 13, 17, 12, 18], a.copied());
 
     let a = vec![1, 3, 7, 2, 8];
     let mut a = a.into_skipped(2);
     for x in a.iter_mut() {
         *x += 10;
     }
-    test_it(vec![17, 12, 18], a.as_iterable().copied());
+    test_it(vec![17, 12, 18], a.copied());
 
     let a = vec![1, 3, 7, 2, 8];
     let mut a = a.into_skipped(10);
     for x in a.iter_mut() {
         *x += 10;
     }
-    test_it(vec![], a.as_iterable().copied());
+    test_it(vec![], a.copied());
 }

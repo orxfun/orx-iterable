@@ -10,6 +10,7 @@ mod mapped;
 mod mapped_while;
 mod skipped;
 mod taken;
+mod taken_while;
 
 pub use chained::{Chained, ChainedCol};
 pub use cloned::{Cloned, IntoCloned};
