@@ -64,6 +64,10 @@ where
 {
     type Item = I1::Item;
 
+    type Iterable<'i> = &'i Self
+    where
+        Self: 'i;
+
     type Iter<'i> = core::iter::Chain<I1::Iter<'i>, I2::Iter<'i>>
     where
         Self: 'i;
@@ -83,7 +87,7 @@ where
             .chain(self.it2.get_mut().iter_mut())
     }
 
-    fn as_iterable(&self) -> impl Iterable<Item = &<Self as IterableCol>::Item> {
+    fn as_iterable(&self) -> Self::Iterable<'_> {
         self
     }
 }

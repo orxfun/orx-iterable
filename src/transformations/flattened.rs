@@ -65,6 +65,10 @@ where
 {
     type Item = <I::Item as IntoIterator>::Item;
 
+    type Iterable<'i> = &'i Self
+    where
+        Self: 'i;
+
     type Iter<'i> = core::iter::Flatten<I::Iter<'i>>
     where
         Self: 'i;
@@ -81,7 +85,7 @@ where
         self.it.get_mut().iter_mut().flatten()
     }
 
-    fn as_iterable(&self) -> impl Iterable<Item = &<Self as IterableCol>::Item> {
+    fn as_iterable(&self) -> Self::Iterable<'_> {
         self
     }
 }

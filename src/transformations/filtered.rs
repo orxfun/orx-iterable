@@ -65,6 +65,10 @@ where
 {
     type Item = I::Item;
 
+    type Iterable<'i> = &'i Self
+    where
+        Self: 'i;
+
     type Iter<'i> = FilteredColIter<'i, I, P>
     where
         Self: 'i;
@@ -89,7 +93,7 @@ where
         }
     }
 
-    fn as_iterable(&self) -> impl Iterable<Item = &<Self as IterableCol>::Item> {
+    fn as_iterable(&self) -> Self::Iterable<'_> {
         self
     }
 }

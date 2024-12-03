@@ -56,6 +56,10 @@ where
 {
     type Item = I::Item;
 
+    type Iterable<'i> = &'i Self
+    where
+        Self: 'i;
+
     type Iter<'i> = core::iter::Take<I::Iter<'i>>
     where
         Self: 'i;
@@ -72,7 +76,7 @@ where
         self.it.get_mut().iter_mut().take(self.n)
     }
 
-    fn as_iterable(&self) -> impl Iterable<Item = &<Self as IterableCol>::Item> {
+    fn as_iterable(&self) -> Self::Iterable<'_> {
         self
     }
 }

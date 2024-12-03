@@ -8,6 +8,10 @@ use crate::{
 pub trait IterableCol: Sized {
     type Item;
 
+    type Iterable<'i>: Iterable<Item = &'i Self::Item>
+    where
+        Self: 'i;
+
     type Iter<'i>: Iterator<Item = &'i Self::Item>
     where
         Self: 'i;
@@ -20,7 +24,7 @@ pub trait IterableCol: Sized {
 
     fn iter_mut(&mut self) -> Self::IterMut<'_>;
 
-    fn as_iterable(&self) -> impl Iterable<Item = &<Self as IterableCol>::Item>;
+    fn as_iterable(&self) -> Self::Iterable<'_>;
 
     // provided
 
@@ -138,6 +142,10 @@ where
 {
     type Item = <X as IntoIterator>::Item;
 
+    type Iterable<'i> = &'i X
+    where
+        Self: 'i;
+
     type Iter<'i> = <&'i X as IntoIterator>::IntoIter
     where
         Self: 'i;
@@ -154,7 +162,7 @@ where
         <&mut X as IntoIterator>::into_iter(self)
     }
 
-    fn as_iterable(&self) -> impl Iterable<Item = &<Self as IterableCol>::Item> {
+    fn as_iterable(&self) -> Self::Iterable<'_> {
         self
     }
 }
