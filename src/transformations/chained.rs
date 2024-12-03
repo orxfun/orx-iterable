@@ -82,4 +82,8 @@ where
             .iter_mut()
             .chain(self.it2.get_mut().iter_mut())
     }
+
+    fn as_iterable(&self) -> impl Iterable<Item = &<Self as IterableCol>::Item> {
+        self
+    }
 }

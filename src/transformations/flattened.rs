@@ -80,4 +80,8 @@ where
     fn iter_mut(&mut self) -> Self::IterMut<'_> {
         self.it.get_mut().iter_mut().flatten()
     }
+
+    fn as_iterable(&self) -> impl Iterable<Item = &<Self as IterableCol>::Item> {
+        self
+    }
 }

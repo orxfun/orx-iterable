@@ -88,6 +88,10 @@ where
             filter: self.filter,
         }
     }
+
+    fn as_iterable(&self) -> impl Iterable<Item = &<Self as IterableCol>::Item> {
+        self
+    }
 }
 
 // col - iters

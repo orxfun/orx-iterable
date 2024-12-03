@@ -5,8 +5,7 @@ use crate::{
 
 // TODO: consider IterableCol: Iterable bound
 
-pub trait IterableCol: Sized // for<'a> &'a Self: Iterable<Item = &'a Self::Item>,
-{
+pub trait IterableCol: Sized {
     type Item;
 
     type Iter<'i>: Iterator<Item = &'i Self::Item>
@@ -21,7 +20,9 @@ pub trait IterableCol: Sized // for<'a> &'a Self: Iterable<Item = &'a Self::Item
 
     fn iter_mut(&mut self) -> Self::IterMut<'_>;
 
-    // provided exclusive
+    fn as_iterable(&self) -> impl Iterable<Item = &<Self as IterableCol>::Item>;
+
+    // provided
 
     fn into_chained<I>(self, other: I) -> ChainedCol<Self, I, Self, I>
     where
@@ -151,5 +152,9 @@ where
 
     fn iter_mut(&mut self) -> Self::IterMut<'_> {
         <&mut X as IntoIterator>::into_iter(self)
+    }
+
+    fn as_iterable(&self) -> impl Iterable<Item = &<Self as IterableCol>::Item> {
+        self
     }
 }
