@@ -5,7 +5,7 @@ where
     I: Iterable,
     M: Fn(I::Item) -> U + Copy,
 {
-    pub(crate) iterable: I,
+    pub(crate) it: I,
     pub(crate) map: M,
 }
 
@@ -19,6 +19,6 @@ where
     type Iter = core::iter::Map<I::Iter, M>;
 
     fn iter(&self) -> Self::Iter {
-        self.iterable.iter().map(self.map)
+        self.it.iter().map(self.map)
     }
 }

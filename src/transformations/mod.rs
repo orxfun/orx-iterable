@@ -1,11 +1,25 @@
 mod chained;
 mod cloned;
+mod cloning_iterable;
 mod copied;
+mod filter_mapped;
 mod filtered;
+mod flat_mapped;
+mod flattened;
 mod mapped;
+mod mapped_while;
+mod skipped;
+mod taken;
 
 pub use chained::{Chained, ChainedCol};
 pub use cloned::{Cloned, IntoCloned};
+pub use cloning_iterable::{CloningIterable, IntoCloningIterable};
 pub use copied::{Copied, IntoCopied};
-pub use filtered::Filtered;
+pub use filter_mapped::FilterMapped;
+pub use filtered::{Filtered, FilteredCol, FilteredColIter, FilteredColIterMut};
+pub use flat_mapped::FlatMapped;
+pub use flattened::{Flattened, FlattenedCol};
 pub use mapped::Mapped;
+pub use mapped_while::MappedWhile;
+pub use skipped::{Skipped, SkippedCol};
+pub use taken::{Taken, TakenCol};

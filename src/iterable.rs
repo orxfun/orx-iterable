@@ -1,4 +1,6 @@
-use crate::transformations::{Chained, Filtered, Mapped};
+use crate::transformations::{
+    Chained, FilterMapped, Filtered, FlatMapped, Flattened, Mapped, MappedWhile, Skipped, Taken,
+};
 
 pub trait Iterable: Sized {
     type Item;
@@ -19,13 +21,13 @@ pub trait Iterable: Sized {
         }
     }
 
-    fn mapped<M, U>(self, map: M) -> Mapped<Self, M, U>
+    fn filter_mapped<M, U>(self, filter_map: M) -> FilterMapped<Self, M, U>
     where
-        M: Fn(Self::Item) -> U + Copy,
+        M: Fn(Self::Item) -> Option<U> + Copy,
     {
-        Mapped {
-            iterable: self,
-            map,
+        FilterMapped {
+            it: self,
+            filter_map,
         }
     }
 
@@ -34,6 +36,46 @@ pub trait Iterable: Sized {
         P: Fn(&Self::Item) -> bool + Copy,
     {
         Filtered { it: self, filter }
+    }
+
+    fn flat_mapped<M, U>(self, flat_map: M) -> FlatMapped<Self, M, U>
+    where
+        U: IntoIterator,
+        M: Fn(Self::Item) -> U + Copy,
+    {
+        FlatMapped { it: self, flat_map }
+    }
+
+    fn flattened(self) -> Flattened<Self>
+    where
+        Self::Item: IntoIterator,
+    {
+        Flattened { it: self }
+    }
+
+    fn mapped_while<M, U>(self, map_while: M) -> MappedWhile<Self, M, U>
+    where
+        M: Fn(Self::Item) -> Option<U> + Copy,
+    {
+        MappedWhile {
+            it: self,
+            map_while,
+        }
+    }
+
+    fn mapped<M, U>(self, map: M) -> Mapped<Self, M, U>
+    where
+        M: Fn(Self::Item) -> U + Copy,
+    {
+        Mapped { it: self, map }
+    }
+
+    fn skipped(self, n: usize) -> Skipped<Self> {
+        Skipped { it: self, n }
+    }
+
+    fn taken(self, n: usize) -> Taken<Self> {
+        Taken { it: self, n }
     }
 }
 

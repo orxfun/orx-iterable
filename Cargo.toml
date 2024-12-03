@@ -9,3 +9,4 @@ publish = ["artifactory"]
 
 [dependencies]
 orx-closure = { version = "0.1.4", registry = "artifactory" }
+orx-exclusive = { path = "../orx-exclusive" }

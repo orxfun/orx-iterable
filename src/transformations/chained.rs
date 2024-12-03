@@ -1,4 +1,5 @@
-use crate::{exclusive::Exclusive, Iterable, IterableCol};
+use crate::{Iterable, IterableCol};
+use orx_exclusive::Exclusive;
 use std::marker::PhantomData;
 
 pub struct Chained<I1, I2>
