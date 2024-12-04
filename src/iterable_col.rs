@@ -1,5 +1,8 @@
 use crate::{
-    transformations::{ChainedCol, FilteredCol, FlattenedCol, SkippedCol, TakenCol},
+    transformations::{
+        ChainedCol, FilteredCol, FlattenedCol, FusedCol, ReversedCol, SkippedCol, SkippedWhileCol,
+        SteppedByCol, TakenCol, TakenWhileCol,
+    },
     Iterable,
 };
 
@@ -15,7 +18,7 @@ pub trait IterableCol: Sized {
         Self: 'i;
 
     fn iter(&self) -> <Self::Iterable<'_> as Iterable>::Iter {
-        self.as_iterable().it()
+        self.as_iterable().iter()
     }
 
     fn iter_mut(&mut self) -> Self::IterMut<'_>;
@@ -97,6 +100,42 @@ pub trait IterableCol: Sized {
         }
     }
 
+    fn into_fused(self) -> FusedCol<Self, Self> {
+        FusedCol {
+            it: self,
+            phantom: Default::default(),
+        }
+    }
+
+    fn fused_mut(&mut self) -> FusedCol<Self, &mut Self> {
+        FusedCol {
+            it: self,
+            phantom: Default::default(),
+        }
+    }
+
+    fn into_reversed(self) -> ReversedCol<Self, Self>
+    where
+        for<'b> <Self::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
+        for<'b> Self::IterMut<'b>: DoubleEndedIterator,
+    {
+        ReversedCol {
+            it: self,
+            phantom: Default::default(),
+        }
+    }
+
+    fn reversed_mut(&mut self) -> ReversedCol<Self, &mut Self>
+    where
+        for<'b> <Self::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
+        for<'b> Self::IterMut<'b>: DoubleEndedIterator,
+    {
+        ReversedCol {
+            it: self,
+            phantom: Default::default(),
+        }
+    }
+
     fn into_skipped(self, n: usize) -> SkippedCol<Self, Self> {
         SkippedCol {
             it: self,
@@ -113,6 +152,44 @@ pub trait IterableCol: Sized {
         }
     }
 
+    fn into_skipped_while<P>(self, skip_while: P) -> SkippedWhileCol<Self, Self, P>
+    where
+        P: Fn(&Self::Item) -> bool + Copy,
+    {
+        SkippedWhileCol {
+            it: self,
+            skip_while,
+            phantom: Default::default(),
+        }
+    }
+
+    fn skipped_while_mut<P>(&mut self, skip_while: P) -> SkippedWhileCol<Self, &mut Self, P>
+    where
+        P: Fn(&Self::Item) -> bool + Copy,
+    {
+        SkippedWhileCol {
+            it: self,
+            skip_while,
+            phantom: Default::default(),
+        }
+    }
+
+    fn into_stepped_by(self, step: usize) -> SteppedByCol<Self, Self> {
+        SteppedByCol {
+            it: self,
+            step,
+            phantom: Default::default(),
+        }
+    }
+
+    fn stepped_by_mut(&mut self, step: usize) -> SteppedByCol<Self, &mut Self> {
+        SteppedByCol {
+            it: self,
+            step,
+            phantom: Default::default(),
+        }
+    }
+
     fn into_taken(self, n: usize) -> TakenCol<Self, Self> {
         TakenCol {
             it: self,
@@ -125,6 +202,28 @@ pub trait IterableCol: Sized {
         TakenCol {
             it: self,
             n,
+            phantom: Default::default(),
+        }
+    }
+
+    fn into_taken_while<P>(self, take_while: P) -> TakenWhileCol<Self, Self, P>
+    where
+        P: Fn(&Self::Item) -> bool + Copy,
+    {
+        TakenWhileCol {
+            it: self,
+            take_while,
+            phantom: Default::default(),
+        }
+    }
+
+    fn taken_while_mut<P>(&mut self, take_while: P) -> TakenWhileCol<Self, &mut Self, P>
+    where
+        P: Fn(&Self::Item) -> bool + Copy,
+    {
+        TakenWhileCol {
+            it: self,
+            take_while,
             phantom: Default::default(),
         }
     }

@@ -1,6 +1,6 @@
 use crate::{Iterable, IterableCol};
 use orx_exclusive::Exclusive;
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 pub struct TakenWhile<I, P>
 where
@@ -20,8 +20,8 @@ where
 
     type Iter = core::iter::TakeWhile<I::Iter, P>;
 
-    fn it(&self) -> Self::Iter {
-        self.it.it().take_while(self.take_while)
+    fn iter(&self) -> Self::Iter {
+        self.it.iter().take_while(self.take_while)
     }
 }
 
@@ -31,7 +31,7 @@ pub struct TakenWhileCol<I, E, P>
 where
     I: IterableCol,
     E: Exclusive<I>,
-    P: Fn(&&I::Item) -> bool + Copy,
+    P: Fn(&I::Item) -> bool + Copy,
 {
     pub(crate) it: E,
     pub(crate) take_while: P,
@@ -42,42 +42,92 @@ impl<'a, I, E, P> Iterable for &'a TakenWhileCol<I, E, P>
 where
     I: IterableCol,
     E: Exclusive<I>,
-    P: Fn(&&I::Item) -> bool + Copy,
+    P: Fn(&I::Item) -> bool + Copy,
 {
     type Item = &'a I::Item;
 
-    type Iter = core::iter::TakeWhile<<I::Iterable<'a> as Iterable>::Iter, P>;
+    type Iter = TakenWhileColIter<'a, I, P>;
 
-    fn it(&self) -> Self::Iter {
-        self.it.get_ref().iter().take_while(self.take_while)
+    fn iter(&self) -> Self::Iter {
+        let iter = self.it.get_ref().iter();
+        TakenWhileColIter {
+            iter,
+            filter: self.take_while,
+        }
     }
 }
 
-// impl<I, E, P> IterableCol for TakenWhileCol<I, E, P>
-// where
-//     I: IterableCol,
-//     E: Exclusive<I>,
-//     P: Fn(&&I::Item) -> bool + Copy,
-// {
-//     type Item = I::Item;
+impl<I, E, P> IterableCol for TakenWhileCol<I, E, P>
+where
+    I: IterableCol,
+    E: Exclusive<I>,
+    P: Fn(&I::Item) -> bool + Copy,
+{
+    type Item = I::Item;
 
-//     type Iterable<'i> = &'i Self
-//     where
-//         Self: 'i;
+    type Iterable<'i> = &'i Self
+    where
+        Self: 'i;
 
-//     type IterMut<'i> = core::iter::TakeWhile<I::IterMut<'i>, P>
-//     where
-//         Self: 'i;
+    type IterMut<'i> = TakenWhileColIterMut<'i, I, P>
+    where
+        Self: 'i;
 
-//     fn iter(&self) -> <Self::Iterable<'_> as Iterable>::Iter {
-//         todo!()
-//     }
+    fn iter_mut(&mut self) -> Self::IterMut<'_> {
+        let iter = self.it.get_mut().iter_mut();
+        TakenWhileColIterMut {
+            iter,
+            filter: self.take_while,
+        }
+    }
 
-//     fn iter_mut(&mut self) -> Self::IterMut<'_> {
-//         todo!()
-//     }
+    fn as_iterable(&self) -> Self::Iterable<'_> {
+        self
+    }
+}
 
-//     fn as_iterable(&self) -> Self::Iterable<'_> {
-//         todo!()
-//     }
-// }
+// col - iters
+
+pub struct TakenWhileColIter<'a, I, P>
+where
+    I: IterableCol + 'a,
+    P: Fn(&I::Item) -> bool + Copy,
+{
+    iter: <I::Iterable<'a> as Iterable>::Iter,
+    filter: P,
+}
+
+impl<'a, I, P> Iterator for TakenWhileColIter<'a, I, P>
+where
+    I: IterableCol,
+    P: Fn(&I::Item) -> bool + Copy,
+{
+    type Item = <I::Iterable<'a> as Iterable>::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let x = self.iter.next()?;
+        (self.filter)(x).then_some(x)
+    }
+}
+
+pub struct TakenWhileColIterMut<'a, I, P>
+where
+    I: IterableCol + 'a,
+    P: Fn(&I::Item) -> bool + Copy,
+{
+    iter: I::IterMut<'a>,
+    filter: P,
+}
+
+impl<'a, I, P> Iterator for TakenWhileColIterMut<'a, I, P>
+where
+    I: IterableCol,
+    P: Fn(&I::Item) -> bool + Copy,
+{
+    type Item = <I::IterMut<'a> as Iterator>::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let x = self.iter.next()?;
+        (self.filter)(x).then_some(x)
+    }
+}

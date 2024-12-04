@@ -1,13 +1,15 @@
 use crate::transformations::{
-    Chained, FilterMapped, Filtered, FlatMapped, Flattened, Mapped, MappedWhile, Skipped, Taken,
+    Chained, Enumerated, FilterMapped, Filtered, FlatMapped, Flattened, Fused, Mapped, MappedWhile,
+    Reversed, Skipped, SkippedWhile, SteppedBy, Taken, TakenWhile, Zipped,
 };
 
+/// A trait to define sources which can be iterated over multiple times.
 pub trait Iterable: Sized {
     type Item;
 
     type Iter: Iterator<Item = Self::Item>;
 
-    fn it(&self) -> Self::Iter;
+    fn iter(&self) -> Self::Iter;
 
     // provided
 
@@ -19,6 +21,10 @@ pub trait Iterable: Sized {
             it1: self,
             it2: other,
         }
+    }
+
+    fn enumerated(self) -> Enumerated<Self> {
+        Enumerated { it: self }
     }
 
     fn filter_mapped<M, U>(self, filter_map: M) -> FilterMapped<Self, M, U>
@@ -53,6 +59,10 @@ pub trait Iterable: Sized {
         Flattened { it: self }
     }
 
+    fn fused(self) -> Fused<Self> {
+        Fused { it: self }
+    }
+
     fn mapped_while<M, U>(self, map_while: M) -> MappedWhile<Self, M, U>
     where
         M: Fn(Self::Item) -> Option<U> + Copy,
@@ -70,12 +80,53 @@ pub trait Iterable: Sized {
         Mapped { it: self, map }
     }
 
+    fn reversed(self) -> Reversed<Self>
+    where
+        Self::Iter: DoubleEndedIterator,
+    {
+        Reversed { it: self }
+    }
+
     fn skipped(self, n: usize) -> Skipped<Self> {
         Skipped { it: self, n }
     }
 
+    fn skipped_while<P>(self, skip_while: P) -> SkippedWhile<Self, P>
+    where
+        P: Fn(&Self::Item) -> bool + Copy,
+    {
+        SkippedWhile {
+            it: self,
+            skip_while,
+        }
+    }
+
+    fn stepped_by(self, step: usize) -> SteppedBy<Self> {
+        SteppedBy { it: self, step }
+    }
+
     fn taken(self, n: usize) -> Taken<Self> {
         Taken { it: self, n }
+    }
+
+    fn taken_while<P>(self, take_while: P) -> TakenWhile<Self, P>
+    where
+        P: Fn(&Self::Item) -> bool + Copy,
+    {
+        TakenWhile {
+            it: self,
+            take_while,
+        }
+    }
+
+    fn zipped<I>(self, other: I) -> Zipped<Self, I>
+    where
+        I: Iterable,
+    {
+        Zipped {
+            it1: self,
+            it2: other,
+        }
     }
 }
 
@@ -89,7 +140,7 @@ where
 
     type Iter = <&'a X as IntoIterator>::IntoIter;
 
-    fn it(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         self.into_iter()
     }
 }

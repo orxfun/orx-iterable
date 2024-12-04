@@ -1,6 +1,6 @@
 use crate::{Iterable, IterableCol};
 use orx_exclusive::Exclusive;
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 pub struct Taken<I>
 where
@@ -18,8 +18,8 @@ where
 
     type Iter = core::iter::Take<I::Iter>;
 
-    fn it(&self) -> Self::Iter {
-        self.it.it().take(self.n)
+    fn iter(&self) -> Self::Iter {
+        self.it.iter().take(self.n)
     }
 }
 
@@ -44,7 +44,7 @@ where
 
     type Iter = core::iter::Take<<I::Iterable<'a> as Iterable>::Iter>;
 
-    fn it(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         self.it.get_ref().iter().take(self.n)
     }
 }

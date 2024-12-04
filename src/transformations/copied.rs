@@ -15,10 +15,10 @@ where
 {
     type Item = T;
 
-    type Iter = std::iter::Copied<I::Iter>;
+    type Iter = core::iter::Copied<I::Iter>;
 
-    fn it(&self) -> Self::Iter {
-        self.it.it().copied()
+    fn iter(&self) -> Self::Iter {
+        self.it.iter().copied()
     }
 }
 

@@ -2,54 +2,54 @@ use crate::{Iterable, IterableCol};
 use orx_exclusive::Exclusive;
 use core::marker::PhantomData;
 
-pub struct Skipped<I>
+pub struct SteppedBy<I>
 where
     I: Iterable,
 {
     pub(crate) it: I,
-    pub(crate) n: usize,
+    pub(crate) step: usize,
 }
 
-impl<I> Iterable for Skipped<I>
+impl<I> Iterable for SteppedBy<I>
 where
     I: Iterable,
 {
     type Item = I::Item;
 
-    type Iter = core::iter::Skip<I::Iter>;
+    type Iter = core::iter::StepBy<I::Iter>;
 
     fn iter(&self) -> Self::Iter {
-        self.it.iter().skip(self.n)
+        self.it.iter().step_by(self.step)
     }
 }
 
 // col
 
-pub struct SkippedCol<I, E>
+pub struct SteppedByCol<I, E>
 where
     I: IterableCol,
     E: Exclusive<I>,
 {
     pub(crate) it: E,
-    pub(crate) n: usize,
+    pub(crate) step: usize,
     pub(crate) phantom: PhantomData<I>,
 }
 
-impl<'a, I, E> Iterable for &'a SkippedCol<I, E>
+impl<'a, I, E> Iterable for &'a SteppedByCol<I, E>
 where
     I: IterableCol,
     E: Exclusive<I>,
 {
     type Item = &'a I::Item;
 
-    type Iter = core::iter::Skip<<I::Iterable<'a> as Iterable>::Iter>;
+    type Iter = core::iter::StepBy<<I::Iterable<'a> as Iterable>::Iter>;
 
     fn iter(&self) -> Self::Iter {
-        self.it.get_ref().iter().skip(self.n)
+        self.it.get_ref().iter().step_by(self.step)
     }
 }
 
-impl<I, E> IterableCol for SkippedCol<I, E>
+impl<I, E> IterableCol for SteppedByCol<I, E>
 where
     I: IterableCol,
     E: Exclusive<I>,
@@ -60,12 +60,12 @@ where
     where
         Self: 'i;
 
-    type IterMut<'i> = core::iter::Skip<I::IterMut<'i>>
+    type IterMut<'i> = core::iter::StepBy<I::IterMut<'i>>
     where
         Self: 'i;
 
     fn iter_mut(&mut self) -> Self::IterMut<'_> {
-        self.it.get_mut().iter_mut().skip(self.n)
+        self.it.get_mut().iter_mut().step_by(self.step)
     }
 
     fn as_iterable(&self) -> Self::Iterable<'_> {

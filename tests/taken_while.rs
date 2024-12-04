@@ -10,56 +10,56 @@ fn test_it(values: Vec<usize>, col: impl Iterable<Item = usize>) {
 }
 
 #[test]
-fn taken() {
+fn taken_while() {
     let a = vec![1, 3, 7, 2, 8];
-    test_it(vec![], a.taken(0).copied());
+    test_it(vec![], a.taken_while(|x| **x > 100).copied());
 
     let a = vec![1, 3, 7, 2, 8];
-    test_it(vec![1, 3], a.taken(2).copied());
+    test_it(vec![1, 3], a.taken_while(|x| **x < 5).copied());
 
     let a = vec![1, 3, 7, 2, 8];
-    test_it(vec![1, 3, 7, 2, 8], a.taken(5).copied());
+    test_it(vec![1, 3, 7, 2, 8], a.taken_while(|x| **x < 100).copied());
 }
 
 #[test]
-fn taken_mut() {
+fn taken_while_mut() {
     let mut a = vec![1, 3, 7, 2, 8];
-    for x in a.taken_mut(0).iter_mut() {
+    for x in a.taken_while_mut(|x| *x > 100).iter_mut() {
         *x += 10;
     }
     test_it(vec![1, 3, 7, 2, 8], a.copied());
 
     let mut a = vec![1, 3, 7, 2, 8];
-    for x in a.taken_mut(2).iter_mut() {
+    for x in a.taken_while_mut(|x| *x < 5).iter_mut() {
         *x += 10;
     }
     test_it(vec![11, 13, 7, 2, 8], a.copied());
 
     let mut a = vec![1, 3, 7, 2, 8];
-    for x in a.taken_mut(10).iter_mut() {
+    for x in a.taken_while_mut(|x| *x < 100).iter_mut() {
         *x += 10;
     }
     test_it(vec![11, 13, 17, 12, 18], a.copied());
 }
 
 #[test]
-fn into_taken() {
+fn into_taken_while() {
     let a = vec![1, 3, 7, 2, 8];
-    let mut a = a.into_taken(0);
+    let mut a = a.into_taken_while(|x| *x > 100);
     for x in a.iter_mut() {
         *x += 10;
     }
     test_it(vec![], a.copied());
 
     let a = vec![1, 3, 7, 2, 8];
-    let mut a = a.into_taken(2);
+    let mut a = a.into_taken_while(|x| *x < 5);
     for x in a.iter_mut() {
         *x += 10;
     }
-    test_it(vec![11, 13], a.copied());
+    test_it(vec![], a.copied()); // now they are above 5!
 
     let a = vec![1, 3, 7, 2, 8];
-    let mut a = a.into_taken(10);
+    let mut a = a.into_taken_while(|x| *x < 100);
     for x in a.iter_mut() {
         *x += 10;
     }

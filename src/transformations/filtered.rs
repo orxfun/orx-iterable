@@ -1,6 +1,6 @@
 use crate::{Iterable, IterableCol};
+use core::marker::PhantomData;
 use orx_exclusive::Exclusive;
-use std::marker::PhantomData;
 
 pub struct Filtered<I, P>
 where
@@ -20,8 +20,8 @@ where
 
     type Iter = core::iter::Filter<I::Iter, P>;
 
-    fn it(&self) -> Self::Iter {
-        self.it.it().filter(self.filter)
+    fn iter(&self) -> Self::Iter {
+        self.it.iter().filter(self.filter)
     }
 }
 
@@ -48,7 +48,7 @@ where
 
     type Iter = FilteredColIter<'a, I, P>;
 
-    fn it(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         let iter = self.it.get_ref().iter();
         FilteredColIter {
             iter,

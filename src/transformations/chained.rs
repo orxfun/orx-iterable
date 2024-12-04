@@ -1,6 +1,6 @@
 use crate::{Iterable, IterableCol};
 use orx_exclusive::Exclusive;
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 pub struct Chained<I1, I2>
 where
@@ -20,8 +20,8 @@ where
 
     type Iter = core::iter::Chain<I1::Iter, I2::Iter>;
 
-    fn it(&self) -> Self::Iter {
-        self.it1.it().chain(self.it2.it())
+    fn iter(&self) -> Self::Iter {
+        self.it1.iter().chain(self.it2.iter())
     }
 }
 
@@ -53,7 +53,7 @@ where
         <I2::Iterable<'a> as Iterable>::Iter,
     >;
 
-    fn it(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         self.it1.get_ref().iter().chain(self.it2.get_ref().iter())
     }
 }

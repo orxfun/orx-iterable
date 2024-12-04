@@ -1,6 +1,6 @@
 use crate::{Iterable, IterableCol};
 use orx_exclusive::Exclusive;
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 pub struct Flattened<I>
 where
@@ -19,8 +19,8 @@ where
 
     type Iter = core::iter::Flatten<I::Iter>;
 
-    fn it(&self) -> Self::Iter {
-        self.it.it().flatten()
+    fn iter(&self) -> Self::Iter {
+        self.it.iter().flatten()
     }
 }
 
@@ -50,7 +50,7 @@ where
 
     type Iter = core::iter::Flatten<<I::Iterable<'a> as Iterable>::Iter>;
 
-    fn it(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         self.it.get_ref().iter().flatten()
     }
 }

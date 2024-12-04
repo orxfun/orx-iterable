@@ -10,56 +10,56 @@ fn test_it(values: Vec<usize>, col: impl Iterable<Item = usize>) {
 }
 
 #[test]
-fn skipped() {
+fn skipped_while() {
     let a = vec![1, 3, 7, 2, 8];
-    test_it(vec![1, 3, 7, 2, 8], a.skipped(0).copied());
+    test_it(vec![1, 3, 7, 2, 8], a.skipped_while(|x| **x > 100).copied());
 
     let a = vec![1, 3, 7, 2, 8];
-    test_it(vec![7, 2, 8], a.skipped(2).copied());
+    test_it(vec![7, 2, 8], a.skipped_while(|x| **x < 5).copied());
 
     let a = vec![1, 3, 7, 2, 8];
-    test_it(vec![], a.skipped(5).copied());
+    test_it(vec![], a.skipped_while(|x| **x < 10).copied());
 }
 
 #[test]
-fn skipped_mut() {
+fn skipped_while_mut() {
     let mut a = vec![1, 3, 7, 2, 8];
-    for x in a.skipped_mut(0).iter_mut() {
+    for x in a.skipped_while_mut(|x| *x > 100).iter_mut() {
         *x += 10;
     }
     test_it(vec![11, 13, 17, 12, 18], a.copied());
 
     let mut a = vec![1, 3, 7, 2, 8];
-    for x in a.skipped_mut(2).iter_mut() {
+    for x in a.skipped_while_mut(|x| *x < 5).iter_mut() {
         *x += 10;
     }
     test_it(vec![1, 3, 17, 12, 18], a.copied());
 
     let mut a = vec![1, 3, 7, 2, 8];
-    for x in a.skipped_mut(10).iter_mut() {
+    for x in a.skipped_while_mut(|x| *x < 100).iter_mut() {
         *x += 10;
     }
     test_it(vec![1, 3, 7, 2, 8], a.copied());
 }
 
 #[test]
-fn into_skipped() {
+fn into_skipped_while() {
     let a = vec![1, 3, 7, 2, 8];
-    let mut a = a.into_skipped(0);
+    let mut a = a.into_skipped_while(|x| *x > 100);
     for x in a.iter_mut() {
         *x += 10;
     }
     test_it(vec![11, 13, 17, 12, 18], a.copied());
 
     let a = vec![1, 3, 7, 2, 8];
-    let mut a = a.into_skipped(2);
+    let mut a = a.into_skipped_while(|x| *x < 5);
     for x in a.iter_mut() {
         *x += 10;
     }
     test_it(vec![17, 12, 18], a.copied());
 
     let a = vec![1, 3, 7, 2, 8];
-    let mut a = a.into_skipped(10);
+    let mut a = a.into_skipped_while(|x| *x < 100);
     for x in a.iter_mut() {
         *x += 10;
     }
