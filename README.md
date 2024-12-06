@@ -3,39 +3,13 @@
 [![orx-iterable crate](https://img.shields.io/crates/v/orx-iterable.svg)](https://crates.io/crates/orx-iterable)
 [![orx-iterable documentation](https://docs.rs/orx-iterable/badge.svg)](https://docs.rs/orx-iterable)
 
-Iterable and IterableCol traits to define types which can be iterated over multiple times.
+Iterable and IterableCol traits to generalize types which can be iterated over multiple times.
 
 ## Motivation
 
-There exists many situations where we need to iterate over an abstract type multiple times. For a very simple example, consider the following `statistics` method.
+There exist numerous situations where we need to iterate over an abstract type multiple times.
 
-```rust
-struct Stats {
-    count: usize,
-    mean: i64,
-    std_dev: i64,
-}
-
-fn statistics(numbers: &[i64]) -> Stats {
-    let count = numbers.iter().count() as i64;
-    let sum = numbers.iter().sum::<i64>();
-    let mean = sum / count;
-    let sum_sq_errors: i64 = numbers.iter().map(|x| (x - mean) * (x - mean)).sum();
-    let std_dev = f64::sqrt(sum_sq_errors as f64 / (count - 1) as f64) as i64;
-    Stats {
-        count: count as usize,
-        mean,
-        std_dev,
-    }
-}
-```
-
-Here, we used the slice as the way to abstract over the actual data type. However, this is too limiting. For instance, the following relevant and actually fitting concrete types cannot be used with this method:
-* Collections that cannot be represented as a single contagious block of memory, such as `HashSet`, `VecDeque` or `LinkedList` or `SplitVec`.
-* `Range<i64>`
-* `vec.iter().filter(|x| *x < 100)` where `vec` is `Vec<i64>`
-
-This crate defines iterable traits so that the following abstraction is possible.
+For a very simple example, consider a method that computes certain statistics of an iterable of numbers. The `Iterable` trait defines the shared iterable behavior so that the following abstraction is available.
 
 ```rust
 use orx_iterable::*;
@@ -47,6 +21,9 @@ struct Stats {
     std_dev: i64,
 }
 
+/// we need multiple iterations over numbers to compute the stats
+/// * we can compute count & sum in one go
+/// * but we need the second iteration at least for std_dev
 fn statistics(numbers: impl Iterable<Item = i64>) -> Stats {
     let count = numbers.iter().count() as i64;
     let sum = numbers.iter().sum::<i64>();
@@ -74,80 +51,88 @@ statistics(numbers.copied());
 
 let numbers = 7..20i64;
 statistics(numbers);
+
+let numbers = (0..4)
+    .into_iter()
+    .flat_map(|x| [-2 * x, x, 2 * x + 1])
+    .into_iterable();
+statistics(numbers);
 ```
 
-## Missing Traits
+Furthermore, a more restrictive and stronger `IterableCol` trait is defined to additionally allow `iter_mut` calls.
 
-Iterable traits seem to be from the standard library.
+```rust
+use orx_iterable::*;
+use std::collections::{LinkedList, VecDeque};
 
-First, we have the `Iterator` trait which builds extremely useful functionalities around its core method `next`. We can iterate over elements of an iterator once.
+/// first computes sum, and then adds it to each of the elements
+fn increment_by_sum(numbers: &mut impl IterableCol<Item = i32>) {
+    let sum: i32 = numbers.iter().sum();
 
-```rust ignore
-fn next(&mut self) -> Option<Self::Item>`;
+    for x in numbers.iter_mut() {
+        *x += sum;
+    }
+}
+
+let mut vec = vec![1, 2, 3];
+increment_by_sum(&mut vec);
+assert_eq!(vec, [7, 8, 9]);
+
+let mut vec_deq = VecDeque::from_iter([1, 2, 3]);
+increment_by_sum(&mut vec_deq);
+assert_eq!(vec_deq, VecDeque::from_iter([7, 8, 9]));
+
+let mut list = LinkedList::from_iter([1, 2, 3]);
+increment_by_sum(&mut list);
+assert_eq!(list, LinkedList::from_iter([7, 8, 9]));
 ```
 
-Second, we have the `IntoIterator` trait which transforms an instance of its type into an iterator through the trait method `into_iter`. This method consumes the instance of the type to create the corresponding iterator, which again can be iterated over once.
+## Iterable Traits
 
-```rust ignore
-fn into_iter(self) -> Self::IntoIter;
-```
+Iterable traits currently seem to be lacking in the standard library. 
+Luckily, rust type system is powerful ❤️🦀 to introduce these traits conveniently for types existed and to ever exist.
 
-**How can we iterate over a type multiple times?**
+* `Iterable` => `iter`
+  * an iterable can be any type that can create iterators repeatedly.
+* `IterableCol` => `iter + iter_mut`
+  * more restrictive & more powerful.
+  * requires the type to store each element that it can yield, and hence, represents the iterable behavior of the collections.
+  * a potential super trait of a `Collection` trait that can represent shared behavior of collections.
 
-We call `iter(&self)` or `iter_mut(&mut self)` as many times as we want. 
+### Iterable
 
-However, these are not trait methods. This is nothing but a nice **convention** that the standard library follows. A much stronger design would be through defining this common behavior through corresponding traits.
+> An `Iterable` is any type which can return a new iterator that yields elements of the associated type `Item` every time the `iter` is called.
 
-Luckily, rust type system is powerful ❤️🦀 to introduce these missing traits for types existed and to ever exist.
+Note that this is the core and least restrictive iterable definition which represents a wide range of types that can be investigated in three categories:
 
-This create defines two traits:
+* collections
+* cloneable iterators
+* element producing iterables
 
-* `Iterable`: an iterable type implements the `iter` method allowing to create an immutable iterator from a shared reference.
-  * If `X` implements `Iterable<Item = T>` then,
-  * `iter` returns `impl Iterator<Item = T>`.
-* `IterableCol`: an iterable collection owns its elements and implements both the `iter` and `iter_mut` methods to create immutable and mutable iterators.
-  * If `X` implements `Iterable<Item = T>` then,
-  * `iter` returns `impl Iterator<Item = &T>`, and
-  * `iter_mut` returns `impl Iterator<Item = &mut T>`.
-
-## Iterable
-
-Iterables implement the `iter` method which returns a new iterator every time it is called. Created iterators yield elements of type `Item` which can be a reference to a stored element or a value created during iteration.
-
-We can investigate the iterables in three categories.
-
-### A. Collections as Iterable
+#### A. Collections as Iterable
 
 Let `X` be a collection storing every one of its elements of type `T`, such as a vector, a set or a linked list. Then, `&X` implements `Iterable<Item = &T>`.
 
-The formal requirement for collections to implement Iterable is as simple as the following:
+The formal requirement is as follows:
 
 ```rust ignore
-impl<'a, X> Iterable for &'a X
-where
-    &'a X: IntoIterator,
-{
-    type Item = <&'a X as IntoIterator>::Item;
-
-    type Iter = <&'a X as IntoIterator>::IntoIter;
-
-    fn iter(&self) -> Self::Iter {
-        self.into_iter()
-    }
-}
+&X: IntoIterator<Item = &T> =====> &X: Iterable<Item = &T>
 ```
 
-Therefore, if we are implementing a new collection `X` and if we implement `IntoIterator` on `&X`, the `iter` method will readily be available for our collection.
+Therefore, if we are implementing a new collection `X`:
+* once we implement `IntoIterator` on `&X`,
+* then, `&X` will automatically implement `Iterable`, and hence, the `iter` method will be readily available for our collection.
 
-This condition is satisfied by std collections, as well as, many collections outside the standard library, such as `SmallVec`, `ArrayVec` or `SplitVec` to name a few.
-
-This generic implementation allows for passing collections to polymorphic functions accepting any iterable.
+This condition is satisfied by std collections, as well as, many collections outside the standard library, such as `SmallVec`, `ArrayVec` or `SplitVec` to name a few. You may see some examples below.
 
 ```rust
 use orx_iterable::*;
 use std::collections::{HashSet, LinkedList, VecDeque};
 
-fn process_names<'a>(names: impl Iterable<Item = &'a String>) { /* ... */ }
+/// fn requiring multiple immutable iterations over names
+fn process_names<'a>(names: impl Iterable<Item = &'a String>) { }
+
+// we can call it with (presumably) all collections
 
 let names = [String::from("xox"), String::from("oxo")];
 process_names(&names);
@@ -165,44 +150,45 @@ let names: VecDeque<_> = [String::from("xox")].into_iter().collect();
 process_names(&names);
 ```
 
-### B. Cloneable Iterators
+#### B. Cloneable Iterators
 
-An iterator is not limited to visiting all elements of a collection. Due to ergonomic chaining methods such as `filter` or `map` that transforms one iterator to another, iterators often hold a definition of a computation.
+An iterator is not limited to visiting elements of a collection. Thanks to ergonomic methods that can be chained, such as `filter` or `map`, which transform one iterator to another, iterators often hold a definition of a computation over some data.
 
-It would be awesome if we could use such an iterator multiple times. This is also simply possible in rust. We define `CloningIterable` which is a wrapper around an iterator, and returns a clone of this iterator whenever `iter` is called. We can transform any cloneable iterator into an `Iterable` by calling `into_iterable` method.
+It would be awesome if we could use such an iterator multiple times.
 
-```rust ignore
-impl<I> IntoCloningIterable for I
-where
-    I: IntoIterator,
-    I::IntoIter: Clone,
-{
-    fn into_iterable(self) -> CloningIterable<<Self as IntoIterator>::IntoIter> {
-        CloningIterable(self.into_iter())
-    }
-}
-```
+This is also conveniently possible.
 
-Consider the `process_names` function in the example above, and assume we have a collection of names; however, we want to filter the names to be processed. One way to achieve this is to define the filtered iterator and convert it into an iterable as demonstrated below.
+Consider a type which can be converted into an iterator that in turn can be cloned (`I: IntoIterator, I::IntoIter: Clone`). This type can be converted into an iterable by simply calling the `into_iterable` method.
+
+For most practical cases, this briefly means that any cloneable iterator can be an Iterable.
+
+Consider the generic `process_names` function in the example above. This time we want to call it using a collection of names; however, we want to filter the names to be processed. One way to achieve this is to define the filtered iterator and convert it into an iterable as demonstrated below.
 
 ```rust
 use orx_iterable::*;
 
-fn process_names<'a>(names: impl Iterable<Item = &'a String>) { /* ... */ }
+/// fn requiring multiple immutable iterations over names
+fn process_names<'a>(names: impl Iterable<Item = &'a String>) { }
 
+// the source data
 let names = vec![String::from("xox"), String::from("oxo")];
 
-// names.iter().filter(|x| x.starts_with('x'))
-// is the iterator, the definition, that we want to create multiple times
+// the iterator that we want to use multiple times
+let iter = names.iter().filter(|x| x.starts_with('x'));
+
 // so we convert it into an iterable
-let filtered_names = names.iter().filter(|x| x.starts_with('x')).into_iterable();
+let filtered_names = iter.into_iterable();
 
 process_names(filtered_names);
 ```
 
-### C. Element Producing Iterables
+#### C. Element Producing Iterables
 
-Some iterators yield elements which are created on the fly, rather than being read from a memory location. A very common example is the range, `Range<usize>` for instance. Consider the range `3..7`. Although it seems like a collection, it does not hold elements (3, 4, 5, 6) anywhere in memory. These elements are produced on the fly during the iteration. Such types need to explicitly implement the `Iterable` trait.
+Some iterators yield elements which are created on the fly, rather than being read from a memory location.
+
+Types creating such iterators also share the common behavior of the `Iterable` trait.
+
+A common example is the range. Consider, for instance, the range `3..7`. Although it looks like a collection, it does not hold elements (3, 4, 5, 6) anywhere in memory. These elements are produced on the fly during the iteration.
 
 ```rust
 use orx_iterable::*;
@@ -214,45 +200,98 @@ assert_eq!(range.iter().sum::<usize>(), 18);
 assert_eq!(range.iter().product::<usize>(), 360);
 ```
 
-## IterableCol
+As a second example, consider the custom iterator `FibUntilIter` which produces Fibonacci numbers until an upper bound. `FibUntil` struct can create this iterator any time `iter` is called, and hence, it is an iterable, although it does not store any elements.
 
-IterableCol has a more restrictive definition:
-* An iterable collection is a collection that stores each of its elements and is able to produce shared and mutable references for them.
-  * Notice that element producing iterables such as the `Range<usize>` does not satisfy this requirement.
-  * Furthermore, cloneable iterators that produce elements on the fly, such as `numbers.iter().map(|x| x + 1)`, does not satisfy it either.
-* Type of its elements is `Item`:
-  * the `iter` method yields `&Item`, and
-  * the `iter_mut` method yields `&mut Item`.
+```rust
+use orx_iterable::*;
 
-Any collection type `X` satisfying the following conditions automatically implements `IterableCol`:
-* `X: IntoIterator`
-* `&X: IntoIterator<Item = &<X as IntoIterator>::Item>`
-* `&mut X: IntoIterator<Item = &mut <X as IntoIterator>::Item>`
+struct FibUntilIter {
+    curr: u32,
+    next: u32,
+    until: u32,
+}
 
-Therefore, if we are implementing a new collection X and if we implement IntoIterator on X, &X and &mut X, the `iter` and `iter_mut` methods will readily be available.
+impl Iterator for FibUntilIter {
+    type Item = u32;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let current = self.curr;
+        self.curr = self.next;
+        self.next = current + self.next;
+        match current > self.until {
+            false => Some(current),
+            true => None,
+        }
+    }
+}
+
+struct FibUntil(u32);
+
+impl Iterable for FibUntil {
+    type Item = u32;
+
+    type Iter = FibUntilIter;
+
+    fn iter(&self) -> Self::Iter {
+        FibUntilIter { curr: 0, next: 1, until: self.0 }
+    }
+}
+
+let fib = FibUntil(10); // Iterable
+
+assert_eq!(fib.iter().count(), 7);
+assert_eq!(fib.iter().max(), Some(8));
+assert_eq!(fib.iter().collect::<Vec<_>>(), [0, 1, 1, 2, 3, 5, 8]);
+```
+
+### IterableCol
+
+IterableCol has more restrictive requirements than Iterable. However, in addition to `iter`, iterable collections also allow multiple mutable iterations through the `iter_mut` method.
+
+> An `IterableCol` is a collection that stores elements and is able to produce shared and mutable references for each one of its elements.
+
+Any collection type `X` having elements of type `T` that satisfies the following conditions automatically implements `IterableCol`:
+* `X: IntoIterator<Item = T>`
+* `&X: IntoIterator<Item = &T>`
+* `&mut X: IntoIterator<Item = &mut T>`
 
 These conditions are satisfied by std collections, as well as, many collections outside the standard library, such as `SmallVec`, `ArrayVec` or `SplitVec` to name a few.
 
-Notice that the second condition is almost identical to the required condition for `Iterable`. Therefore, relation among these two traits is as follows.
-* If `X` implements `IterableCol<Item = T>`, then `&X` implements `Iterable<Item = &T>`.
-* However, an Iterable type is not necessarily a collection and does not need to implement `IterableCol`.
+If we are implementing a new collection `X`:
+* once we implement IntoIterator on X, &X and &mut X,
+* `X` will automatically implement `IterableCol`, and hence, the `iter` and `iter_mut` methods will readily be available.
 
-## Chainable Transformations
+*Note that element producing iterables such as the `Range<usize>` does not satisfy this requirement. Furthermore, cloneable iterators that produce elements on the fly, such as `numbers.iter().map(|x| x + 1)`, does not satisfy it either. This also clarifies the requirement for the Iterable trait.*
 
-The standard `Iterator` trait provides a wide variety of methods which transforms one iterator into another, such as `filter`, `map` or `flat_map`. Furthermore, these transformations can ergonomically be chained to create views defined by lazy computations.
+### Chainable Transformations
+
+The standard `Iterator` trait provides a wide variety of methods which transforms one iterator into another, such as `filter`, `map` or `flat_map`. These transformations can nicely be chained to compose lazy computation definitions.
 
 `Iterable` and `IterableCol` traits follow the same design and provide these chainable transformation methods.
 
 ```rust
 use orx_iterable::*;
 
-let data = vec![3, 7, 11, 8, 2, 5];
+let a = vec![3, 7, 1];
+let b = vec![8];
+let c = [true, false, false, true];
 
-let it = data
-    .copied()
-    .filtered(|x| x % 2 == 1)
-    .flat_mapped(|x| [x, -x]);
+let it = a
+    .chained(&b)                // [&3, &7, &1, &8]
+    .zipped(&c)                 // [(&3, &t), (&7, &f), (&1, &f), (&8, &t)]
+    .filtered(|(_, b)| **b)     // [(&3, &t), (&8, &t)]
+    .mapped(|(a, _)| a)         // [&3, &8]
+    .copied()                   // [3, 8]
+    .flat_mapped(|x| [x, -x]);  // [3, -3, 8, -8]
 
-assert_eq!(it.iter().count(), 8);
+assert_eq!(it.iter().count(), 4);
 assert_eq!(it.iter().sum::<i32>(), 0);
 ```
+
+## Contributing
+
+Contributions are welcome! If you notice an error, have a question or think something could be improved, please open an [issue](https://github.com/orxfun/orx-iterable/issues/new) or create a PR.
+
+## License
+
+This library is licensed under MIT license. See LICENSE for details.

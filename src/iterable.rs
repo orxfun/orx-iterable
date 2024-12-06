@@ -584,3 +584,13 @@ where
         self.into_iter()
     }
 }
+
+impl<'a, X> Iterable for &'a [X] {
+    type Item = &'a X;
+
+    type Iter = core::slice::Iter<'a, X>;
+
+    fn iter(&self) -> Self::Iter {
+        return <[X]>::iter(self);
+    }
+}

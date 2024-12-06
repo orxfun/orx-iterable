@@ -1,5 +1,5 @@
 mod common_testers;
-use common_testers::test_it;
+use common_testers::{test_it, test_it_val};
 mod custom_iterables;
 use std::collections::{BTreeSet, HashSet, LinkedList, VecDeque};
 
@@ -23,4 +23,16 @@ fn custom_collection() {
     };
 
     test_it(vec![4, 12, 8, 2, 1, 7], &col);
+}
+
+#[test]
+fn slice() {
+    let vec = vec![1, 3, 7, 8];
+    let slice = vec.as_slice();
+    test_it(vec![1, 3, 7, 8], slice);
+}
+
+#[test]
+fn range() {
+    test_it_val(vec![1, 2, 3, 4], 1..5usize);
 }

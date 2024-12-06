@@ -3,10 +3,10 @@ name = "orx-iterable"
 version = "1.0.0"
 edition = "2021"
 authors = ["orxfun <orx.ugur.arikan@gmail.com>"]
-description = "TODO"
+description = "Iterable and IterableCol traits to generalize types which can be iterated over multiple times."
 license = "MIT"
 repository = "https://github.com/orxfun/orx-iterable/"
-keywords = ["vec", "pinned", "bag", "container", "split"]
+keywords = ["iterable", "collection", "iterator", "intoiterator", "enumerable"]
 categories = ["data-structures", "rust-patterns", "no-std"]
 
 [dependencies]
