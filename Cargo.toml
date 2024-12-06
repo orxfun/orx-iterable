@@ -1,6 +1,6 @@
 [package]
 name = "orx-iterable"
-version = "2.8.0"
+version = "1.0.0"
 edition = "2021"
 authors = ["orxfun <orx.ugur.arikan@gmail.com>"]
 description = "TODO"
@@ -10,5 +10,4 @@ keywords = ["vec", "pinned", "bag", "container", "split"]
 categories = ["data-structures", "rust-patterns", "no-std"]
 
 [dependencies]
-orx-closure = { version = "0.1.4", registry = "artifactory" }
-orx-exclusive = { path = "../orx-exclusive" }
+orx-self-or = "1.0"

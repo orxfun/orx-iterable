@@ -1,6 +1,6 @@
 use crate::{Iterable, IterableCol};
 use core::marker::PhantomData;
-use orx_exclusive::Exclusive;
+use orx_self_or::SoM;
 
 /// Wraps an `Iterable` and creates a new `Iterable` which yields elements of
 /// the original iterable by stepping by a given step size.
@@ -32,7 +32,7 @@ where
 pub struct SteppedByCol<I, E>
 where
     I: IterableCol,
-    E: Exclusive<I>,
+    E: SoM<I>,
 {
     pub(crate) it: E,
     pub(crate) step: usize,
@@ -42,7 +42,7 @@ where
 impl<'a, I, E> Iterable for &'a SteppedByCol<I, E>
 where
     I: IterableCol,
-    E: Exclusive<I>,
+    E: SoM<I>,
 {
     type Item = &'a I::Item;
 
@@ -56,7 +56,7 @@ where
 impl<I, E> IterableCol for SteppedByCol<I, E>
 where
     I: IterableCol,
-    E: Exclusive<I>,
+    E: SoM<I>,
 {
     type Item = I::Item;
 

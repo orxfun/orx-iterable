@@ -1,6 +1,6 @@
 use crate::{Iterable, IterableCol};
 use core::marker::PhantomData;
-use orx_exclusive::Exclusive;
+use orx_self_or::SoM;
 
 /// Wraps an `Iterable` and creates a new `Iterable` which yields the elements
 /// of the original iterable in reverse order.
@@ -33,7 +33,7 @@ where
 pub struct ReversedCol<I, E>
 where
     I: IterableCol,
-    E: Exclusive<I>,
+    E: SoM<I>,
     for<'b> <I::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
     for<'b> I::IterMut<'b>: DoubleEndedIterator,
 {
@@ -44,7 +44,7 @@ where
 impl<'a, I, E> Iterable for &'a ReversedCol<I, E>
 where
     I: IterableCol,
-    E: Exclusive<I>,
+    E: SoM<I>,
     for<'b> <I::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
     for<'b> I::IterMut<'b>: DoubleEndedIterator,
 {
@@ -60,7 +60,7 @@ where
 impl<I, E> IterableCol for ReversedCol<I, E>
 where
     I: IterableCol,
-    E: Exclusive<I>,
+    E: SoM<I>,
     for<'b> <I::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
     for<'b> I::IterMut<'b>: DoubleEndedIterator,
 {

@@ -1,6 +1,6 @@
 use crate::{Iterable, IterableCol};
 use core::marker::PhantomData;
-use orx_exclusive::Exclusive;
+use orx_self_or::SoM;
 
 /// Wraps an `Iterable` and creates a new `Iterable` which flattens the elements of
 /// the original iterable filtered by a predicate.
@@ -36,7 +36,7 @@ where
     I::Item: IntoIterator,
     for<'i> &'i I::Item: IntoIterator<Item = &'i <I::Item as IntoIterator>::Item>,
     for<'i> &'i mut I::Item: IntoIterator<Item = &'i mut <I::Item as IntoIterator>::Item>,
-    E: Exclusive<I>,
+    E: SoM<I>,
 {
     pub(crate) it: E,
     pub(crate) phantom: PhantomData<I>,
@@ -48,7 +48,7 @@ where
     I::Item: IntoIterator,
     for<'i> &'i I::Item: IntoIterator<Item = &'i <I::Item as IntoIterator>::Item>,
     for<'i> &'i mut I::Item: IntoIterator<Item = &'i mut <I::Item as IntoIterator>::Item>,
-    E: Exclusive<I>,
+    E: SoM<I>,
 {
     type Item = &'a <I::Item as IntoIterator>::Item;
 
@@ -65,7 +65,7 @@ where
     I::Item: IntoIterator,
     for<'i> &'i I::Item: IntoIterator<Item = &'i <I::Item as IntoIterator>::Item>,
     for<'i> &'i mut I::Item: IntoIterator<Item = &'i mut <I::Item as IntoIterator>::Item>,
-    E: Exclusive<I>,
+    E: SoM<I>,
 {
     type Item = <I::Item as IntoIterator>::Item;
 

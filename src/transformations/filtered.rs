@@ -1,6 +1,6 @@
 use crate::{Iterable, IterableCol};
 use core::marker::PhantomData;
-use orx_exclusive::Exclusive;
+use orx_self_or::SoM;
 
 /// Wraps an `Iterable` and creates a new `Iterable` which yields elements of
 /// the original iterable filtered by a predicate.
@@ -34,7 +34,7 @@ where
 pub struct FilteredCol<I, E, P>
 where
     I: IterableCol,
-    E: Exclusive<I>,
+    E: SoM<I>,
     P: Fn(&I::Item) -> bool + Copy,
 {
     pub(crate) it: E,
@@ -45,7 +45,7 @@ where
 impl<'a, I, E, P> Iterable for &'a FilteredCol<I, E, P>
 where
     I: IterableCol,
-    E: Exclusive<I>,
+    E: SoM<I>,
     P: Fn(&I::Item) -> bool + Copy,
 {
     type Item = &'a I::Item;
@@ -64,7 +64,7 @@ where
 impl<I, E, P> IterableCol for FilteredCol<I, E, P>
 where
     I: IterableCol,
-    E: Exclusive<I>,
+    E: SoM<I>,
     P: Fn(&I::Item) -> bool + Copy,
 {
     type Item = I::Item;

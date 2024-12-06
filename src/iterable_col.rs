@@ -649,24 +649,3 @@ where
         self
     }
 }
-
-use crate::*;
-
-struct Stats {
-    count: usize,
-    mean: i64,
-    std_dev: i64,
-}
-
-fn statistics(numbers: impl Iterable<Item = i64>) -> Stats {
-    let count = numbers.iter().count() as i64;
-    let sum = numbers.iter().sum::<i64>();
-    let mean = sum / count;
-    let sum_sq_errors: i64 = numbers.iter().map(|x| (x - mean) * (x - mean)).sum();
-    let std_dev = f64::sqrt(sum_sq_errors as f64 / (count - 1) as f64) as i64;
-    Stats {
-        count: count as usize,
-        mean,
-        std_dev,
-    }
-}

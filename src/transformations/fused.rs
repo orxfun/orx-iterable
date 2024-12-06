@@ -1,6 +1,6 @@
 use crate::{Iterable, IterableCol};
 use core::marker::PhantomData;
-use orx_exclusive::Exclusive;
+use orx_self_or::SoM;
 
 /// Wraps an `Iterable` and transforms into a fused `Iterable`.
 pub struct Fused<I>
@@ -29,7 +29,7 @@ where
 pub struct FusedCol<I, E>
 where
     I: IterableCol,
-    E: Exclusive<I>,
+    E: SoM<I>,
 {
     pub(crate) it: E,
     pub(crate) phantom: PhantomData<I>,
@@ -38,7 +38,7 @@ where
 impl<'a, I, E> Iterable for &'a FusedCol<I, E>
 where
     I: IterableCol,
-    E: Exclusive<I>,
+    E: SoM<I>,
 {
     type Item = &'a I::Item;
 
@@ -52,7 +52,7 @@ where
 impl<I, E> IterableCol for FusedCol<I, E>
 where
     I: IterableCol,
-    E: Exclusive<I>,
+    E: SoM<I>,
 {
     type Item = I::Item;
 
