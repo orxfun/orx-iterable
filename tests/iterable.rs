@@ -1,7 +1,7 @@
 mod common_testers;
 use common_testers::test_it;
 mod custom_iterables;
-use std::collections::{LinkedList, VecDeque};
+use std::collections::{BTreeSet, HashSet, LinkedList, VecDeque};
 
 #[test]
 fn std_collections() {
@@ -11,6 +11,8 @@ fn std_collections() {
     test_it(values(), &vec![1, 3, 7]);
     test_it(values(), &VecDeque::from_iter([1, 3, 7].into_iter()));
     test_it(values(), &LinkedList::from_iter([1, 3, 7].into_iter()));
+    test_it(values(), &HashSet::<_>::from_iter([1, 3, 7].into_iter()));
+    test_it(values(), &BTreeSet::<_>::from_iter([1, 3, 7].into_iter()));
 }
 
 #[test]

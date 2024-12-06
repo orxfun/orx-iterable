@@ -1,7 +1,10 @@
 use crate::{Iterable, IterableCol};
-use orx_exclusive::Exclusive;
 use core::marker::PhantomData;
+use orx_exclusive::Exclusive;
 
+/// Wraps an `Iterable` and creates a new `Iterable` which skips the elements
+/// of the original iterable that satisfy a given predicate and yields the
+/// remaining.
 pub struct SkippedWhile<I, P>
 where
     I: Iterable,
@@ -27,6 +30,9 @@ where
 
 // col
 
+/// Wraps an `IterableCol` and creates a new `IterableCol` which skips the elements
+/// of the original iterable that satisfy a given predicate and yields the
+/// remaining.
 pub struct SkippedWhileCol<I, E, P>
 where
     I: IterableCol,
@@ -90,6 +96,7 @@ where
 
 // col - iters
 
+/// Immutable iterator for skipped while iterable collection.
 pub struct SkippedWhileColIter<'a, I, P>
 where
     I: IterableCol + 'a,
@@ -129,6 +136,7 @@ where
     }
 }
 
+/// Mutable iterator for skipped while iterable collection.
 pub struct SkippedWhileColIterMut<'a, I, P>
 where
     I: IterableCol + 'a,

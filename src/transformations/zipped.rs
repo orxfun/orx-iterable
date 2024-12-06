@@ -1,5 +1,6 @@
 use crate::Iterable;
 
+/// An iterable created by zipping two iterables.
 pub struct Zipped<I1, I2>
 where
     I1: Iterable,

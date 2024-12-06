@@ -1,7 +1,9 @@
 use crate::{Iterable, IterableCol};
-use orx_exclusive::Exclusive;
 use core::marker::PhantomData;
+use orx_exclusive::Exclusive;
 
+/// Wraps an `Iterable` and creates a new `Iterable` which flattens the elements of
+/// the original iterable filtered by a predicate.
 pub struct Flattened<I>
 where
     I: Iterable,
@@ -26,6 +28,8 @@ where
 
 // col
 
+/// Wraps an `IterableCol` and creates a new `IterableCol` which flattens the elements of
+/// the original iterable filtered by a predicate.
 pub struct FlattenedCol<I, E>
 where
     I: IterableCol,

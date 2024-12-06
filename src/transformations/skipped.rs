@@ -1,7 +1,9 @@
 use crate::{Iterable, IterableCol};
-use orx_exclusive::Exclusive;
 use core::marker::PhantomData;
+use orx_exclusive::Exclusive;
 
+/// Wraps an `Iterable` and creates a new `Iterable` which skips first `n` the elements
+/// of the original iterable.
 pub struct Skipped<I>
 where
     I: Iterable,
@@ -25,6 +27,8 @@ where
 
 // col
 
+/// Wraps an `IterableCol` and creates a new `IterableCol` which skips first `n` the elements
+/// of the original iterable.
 pub struct SkippedCol<I, E>
 where
     I: IterableCol,

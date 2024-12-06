@@ -2,6 +2,8 @@ use crate::{Iterable, IterableCol};
 use core::marker::PhantomData;
 use orx_exclusive::Exclusive;
 
+/// Wraps an `Iterable` and creates a new `Iterable` which yields elements of
+/// the original iterable filtered by a predicate.
 pub struct Filtered<I, P>
 where
     I: Iterable,
@@ -27,6 +29,8 @@ where
 
 // col
 
+/// Wraps an `IterableCol` and creates a new `IterableCol` which yields elements of
+/// the original iterable filtered by a predicate.
 pub struct FilteredCol<I, E, P>
 where
     I: IterableCol,
@@ -88,6 +92,7 @@ where
 
 // col - iters
 
+/// Immutable iterator over the filtered iterable collection.
 pub struct FilteredColIter<'a, I, P>
 where
     I: IterableCol + 'a,
@@ -114,6 +119,7 @@ where
     }
 }
 
+/// Mutable iterator over the filtered iterable collection.
 pub struct FilteredColIterMut<'a, I, P>
 where
     I: IterableCol + 'a,

@@ -1,7 +1,8 @@
 use crate::{Iterable, IterableCol};
-use orx_exclusive::Exclusive;
 use core::marker::PhantomData;
+use orx_exclusive::Exclusive;
 
+/// An iterable created by chaining two iterables.
 pub struct Chained<I1, I2>
 where
     I1: Iterable,
@@ -27,6 +28,7 @@ where
 
 // col
 
+/// An iterable collection created by chaining two iterable collections.
 pub struct ChainedCol<I1, I2, E1, E2>
 where
     I1: IterableCol,

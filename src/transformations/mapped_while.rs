@@ -1,5 +1,7 @@
 use crate::Iterable;
 
+/// Wraps an `Iterable` and creates a new `Iterable` which maps the elements of
+/// the original iterable as long as the map-while condition is satisfied.
 pub struct MappedWhile<I, M, U>
 where
     I: Iterable,

@@ -1,5 +1,7 @@
 use crate::Iterable;
 
+/// Wraps an `Iterable` and creates a new `Iterable` which maps the elements of
+/// the original iterable.
 pub struct Mapped<I, M, U>
 where
     I: Iterable,

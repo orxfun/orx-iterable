@@ -1,5 +1,7 @@
 use crate::Iterable;
 
+/// Wraps an `Iterable` and creates a new `Iterable` which yields the element indices
+/// together with the elements.
 pub struct Enumerated<I>
 where
     I: Iterable,

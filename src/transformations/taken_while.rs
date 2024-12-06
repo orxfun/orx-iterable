@@ -1,7 +1,9 @@
 use crate::{Iterable, IterableCol};
-use orx_exclusive::Exclusive;
 use core::marker::PhantomData;
+use orx_exclusive::Exclusive;
 
+/// Wraps an `Iterable` and creates a new `Iterable` which yields elements of
+/// the original iterable as long as a predicate is satisfied.
 pub struct TakenWhile<I, P>
 where
     I: Iterable,
@@ -27,6 +29,8 @@ where
 
 // col
 
+/// Wraps an `IterableCol` and creates a new `IterableCol` which yields elements of
+/// the original iterable as long as a predicate is satisfied.
 pub struct TakenWhileCol<I, E, P>
 where
     I: IterableCol,
@@ -88,6 +92,7 @@ where
 
 // col - iters
 
+/// Immutable iterator for taken while iterable collections.
 pub struct TakenWhileColIter<'a, I, P>
 where
     I: IterableCol + 'a,
@@ -110,6 +115,7 @@ where
     }
 }
 
+/// Mutable iterator for taken while iterable collections.
 pub struct TakenWhileColIterMut<'a, I, P>
 where
     I: IterableCol + 'a,

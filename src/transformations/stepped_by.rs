@@ -1,7 +1,9 @@
 use crate::{Iterable, IterableCol};
-use orx_exclusive::Exclusive;
 use core::marker::PhantomData;
+use orx_exclusive::Exclusive;
 
+/// Wraps an `Iterable` and creates a new `Iterable` which yields elements of
+/// the original iterable by stepping by a given step size.
 pub struct SteppedBy<I>
 where
     I: Iterable,
@@ -25,6 +27,8 @@ where
 
 // col
 
+/// Wraps an `IterableCol` and creates a new `IterableCol` which yields elements of
+/// the original iterable by stepping by a given step size.
 pub struct SteppedByCol<I, E>
 where
     I: IterableCol,

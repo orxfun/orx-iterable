@@ -19,9 +19,9 @@ mod taken_while;
 mod zipped;
 
 pub use chained::{Chained, ChainedCol};
-pub use cloned::{Cloned, IntoCloned};
+pub use cloned::Cloned;
 pub use cloning_iterable::{CloningIterable, IntoCloningIterable};
-pub use copied::{Copied, IntoCopied};
+pub use copied::Copied;
 pub use enumerated::Enumerated;
 pub use filter_mapped::FilterMapped;
 pub use filtered::{Filtered, FilteredCol, FilteredColIter, FilteredColIterMut};

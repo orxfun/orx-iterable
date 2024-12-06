@@ -2,6 +2,7 @@ use crate::{Iterable, IterableCol};
 use core::marker::PhantomData;
 use orx_exclusive::Exclusive;
 
+/// Wraps an `Iterable` and transforms into a fused `Iterable`.
 pub struct Fused<I>
 where
     I: Iterable,
@@ -24,6 +25,7 @@ where
 
 // col
 
+/// Wraps an `IterableCol` and transforms into a fused `IterableCol`.
 pub struct FusedCol<I, E>
 where
     I: IterableCol,

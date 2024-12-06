@@ -1,5 +1,7 @@
 use crate::Iterable;
 
+/// Wraps an `Iterable` and creates a new `Iterable` which filters-and-maps the elements
+/// of the original iterable.
 pub struct FilterMapped<I, M, U>
 where
     I: Iterable,
