@@ -1,4 +1,4 @@
-use crate::{Iterable, Collection};
+use crate::{Collection, CollectionMut, Iterable};
 use core::marker::PhantomData;
 use orx_self_or::SoM;
 
@@ -21,8 +21,8 @@ where
 
     type Iter = core::iter::Chain<I1::Iter, I2::Iter>;
 
-    fn iterate(&self) -> Self::Iter {
-        self.it1.iterate().chain(self.it2.iterate())
+    fn iter(&self) -> Self::Iter {
+        self.it1.iter().chain(self.it2.iter())
     }
 }
 
@@ -55,7 +55,7 @@ where
         <I2::Iterable<'a> as Iterable>::Iter,
     >;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         self.it1.get_ref().iter().chain(self.it2.get_ref().iter())
     }
 }
@@ -73,6 +73,18 @@ where
     where
         Self: 'i;
 
+    fn as_iterable(&self) -> Self::Iterable<'_> {
+        self
+    }
+}
+
+impl<I1, I2, E1, E2> CollectionMut for ChainedCol<I1, I2, E1, E2>
+where
+    I1: CollectionMut,
+    I2: CollectionMut<Item = I1::Item>,
+    E1: SoM<I1>,
+    E2: SoM<I2>,
+{
     type IterMut<'i> = core::iter::Chain<I1::IterMut<'i>, I2::IterMut<'i>>
     where
         Self: 'i;
@@ -82,9 +94,5 @@ where
             .get_mut()
             .iter_mut()
             .chain(self.it2.get_mut().iter_mut())
-    }
-
-    fn as_iterable(&self) -> Self::Iterable<'_> {
-        self
     }
 }

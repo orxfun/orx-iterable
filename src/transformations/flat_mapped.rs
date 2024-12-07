@@ -22,8 +22,8 @@ where
 
     type Iter = FlatMappedIter<I, M, U>;
 
-    fn iterate(&self) -> Self::Iter {
-        let mut iter1 = self.it.iterate();
+    fn iter(&self) -> Self::Iter {
+        let mut iter1 = self.it.iter();
         let iterable2: Option<U> = iter1.next().map(self.flat_map);
         let iter2: Option<U::IntoIter> = iterable2.map(|x| x.into_iter());
 

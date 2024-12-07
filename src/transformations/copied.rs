@@ -19,7 +19,7 @@ where
 
     type Iter = core::iter::Copied<I::Iter>;
 
-    fn iterate(&self) -> Self::Iter {
-        self.it.iterate().copied()
+    fn iter(&self) -> Self::Iter {
+        self.it.iter().copied()
     }
 }

@@ -3,107 +3,169 @@ use crate::transformations::{
     Mapped, MappedWhile, Reversed, Skipped, SkippedWhile, SteppedBy, Taken, TakenWhile, Zipped,
 };
 
-/// A type implementing the `Iterable` trait is characterized by the following characteristics:
-/// * Its [`iterate`] method creates an iterator yielding elements of type [`Item`].
-/// * Since it is an iterable, rather than an iterator, `iter` method can
-///   be called any number of times to create new iterators.
-/// * It does not necessarily own the data; see [`Collection`] for iterable collections.
-///   A straightforward example is the range `0..4` which is an iterable creating iterators that
-///   would yield values 0, 1 and 2. However, these elements are not actually stored in memory;
-///   in this sense, range is not a collection.
-/// * On the other hand, collections owning the data can and will most likely implement `Iterable`.
-///   See the **Relation among Iterables** section for details.
+/// An `Iterable` is any type which can return a new iterator that yields elements of the associated type [`Item`] every time [`iter`] method is called.
 ///
-/// [`iterate`]: crate::Iterable::iterate
 /// [`Item`]: crate::Iterable::Item
-/// [`Collection`]: crate::Collection
+/// [`iter`]: crate::Iterable::iter
 ///
-/// # Relation among Iterables
+/// Notice that this is the least restrictive and most general iterable definition.
 ///
-/// Main similarity and difference between [`Iterable`] and [`Collection`] traits are as follows:
-/// * Both `Iterable` and `Collection` implements the `iter` method.
-/// * However, only `Collection` implements `iter_mut`. This is natural as `Iterable` promises to create an
-///   iterator yielding elements of type `Item`; however, does not promise to own them. On the other hand,
-///   `Collection` is a special case which promises to own memory of the elements that it yields.
+/// Three categories of types implement the Iterable trait:
 ///
-/// Practically, these definitions correspond to the following relations:
-/// * if a collection `X` implements [`Collection<Item = T>`], then `&X` implements [`Iterable<Item = &T>`];
-/// * on the other hand, a type implementing [`Iterable`] may not be a collection at all, such as [`Range<usize>`],
-///   and hence, does not necessarily implement [`Collection`].
+/// * references of collections
+/// * cloneable iterators
+/// * lazy generators
 ///
-/// [`Range<usize>`]: core::ops::Range
+/// # Auto Implementations
 ///
-/// # Types that implement Iterable
+/// ## References of collections
 ///
-/// Consider a type, most likely a collection, `X` that satisfies the following:
-/// * `&X: IntoIterator` => a reference to the collection can be converted to an iterator.
-///   * for our instance `x`, we can use `(&x).into_iter()` to get an iterator over references of elements;
-///   * however, almost always `x.iter()` is conventionally available to create the same iterator.
+/// First, consider a collection type `X` storing elements of type `T`.
+/// Provided that the following implementation is provided:
 ///
-/// Then, `X` auto-implements `Iterable`.
+/// * `&X: IntoIterator<Item = &T>`
 ///
-/// Other than collections, any source that can create an iterator can be an `Iterable`.
-/// For instance `Range<usize>` implements `Iterable<Item = usize>`.
+/// Then, `&X` implements `Iterable<Item = &T>`.
 ///
-/// Also consider an `Iterator` which is cheap to `Clone`.
-/// For instance, let `x` be an instance of a vector and `let iter = x.iter().map(|x| 2 * x)` be our iterator.
-/// Notice that `iter` holds a reference to the vector and a function pointer; and hence, a cheap to clone type.
-/// Now, consider that we want to consume `iter` more than once; i.e., we want an `Iterable` rather than an `Iterator`.
-/// Unfortunately, `iter` cannot directly implement `Iterable`.
-/// However, it can easily be transformed into one by calling `let it = iter.into_iterable()`.
-/// Now, `it` carries the definition of the lazy computation and we can call `it.iter()` as many times as we require.
+/// In other words, a reference of a collection is an `Iterable`.
+///
+/// ## Cloneable iterators
+///
+/// Second, consider an iterator that can be cloned; i.e., `Iterator + Clone`.
+/// This iterator can be converted into an `Iterable` which can be iterated over
+/// repeatedly by calling `into_iterable` method.
+///
+/// ## Lazy Generators
+///
+/// Third, consider types iterators of which create values on the fly during the
+/// iteration. One such example is the range.
+/// Consider, for instance, the range 3..7.
+/// Although it looks like a collection, it does not hold elements (3, 4, 5, 6) anywhere in memory. These elements are produced on the fly during the iteration.
+/// `Iterable` trait implementations for the ranges are provided in this crate.
+///
+/// For similar custom types, the trait needs to be implemented explicitly.
 ///
 /// # Examples
 ///
-/// The following example illustrates the main functionality of the trait
-/// allowing to create multiple iterators.
-///
 /// ```
 /// use orx_iterable::*;
-/// use std::collections::HashSet;
+/// use arrayvec::ArrayVec;
+/// use smallvec::{smallvec, SmallVec};
+/// use std::collections::{BTreeSet, BinaryHeap, HashSet, LinkedList, VecDeque};
 ///
-/// fn sum_and_count<'a>(numbers: impl Iterable<Item = &'a u32>) -> (u32, usize) {
-///     let count = numbers.iterate().count();
-///     let sum: u32 = numbers.iterate().sum();
-///     (sum, count)
+/// struct Stats {
+///     count: usize,
+///     mean: i64,
+///     std_dev: i64,
+/// }
+///
+/// /// we need multiple iterations over numbers to compute the stats
+/// fn statistics(numbers: impl Iterable<Item = i64>) -> Stats {
+///     let count = numbers.iter().count() as i64;
+///     let sum = numbers.iter().sum::<i64>();
+///     let mean = sum / count;
+///     let sum_sq_errors: i64 = numbers.iter().map(|x| (x - mean) * (x - mean)).sum();
+///     let std_dev = f64::sqrt(sum_sq_errors as f64 / (count - 1) as f64) as i64;
+///     Stats {
+///         count: count as usize,
+///         mean,
+///         std_dev,
+///     }
 /// }
 ///
 /// // collections as Iterable
 ///
-/// let array = [1, 4, 7];
-/// assert_eq!(sum_and_count(&array), (12, 3));
+/// let x = [3, 5, 7];
+/// statistics(x.copied()); // see Iterable's transformation methods such as copied, mapped, etc.
 ///
-/// let vec = vec![1, 4, 7];
-/// assert_eq!(sum_and_count(&vec), (12, 3));
+/// let x = vec![3, 5, 7];
+/// statistics(x.copied());
 ///
-/// let set: HashSet<_> = [1, 4, 7].into_iter().collect();
-/// assert_eq!(sum_and_count(&set), (12, 3));
+/// let x = LinkedList::from_iter([3, 5, 7]);
+/// statistics(x.copied());
 ///
-/// // Iterator's as Iterable
-/// let iter = vec.iter().filter(|x| **x < 5);
-/// assert_eq!(sum_and_count(iter.into_iterable()), (5, 2));
+/// let x = VecDeque::from_iter([3, 5, 7]);
+/// statistics(x.copied());
+///
+/// let x = HashSet::<_>::from_iter([3, 5, 7]);
+/// statistics(x.copied());
+///
+/// let x = BTreeSet::from_iter([3, 5, 7]);
+/// statistics(x.copied());
+///
+/// let x = BinaryHeap::from_iter([3, 5, 7]);
+/// statistics(x.copied());
+///
+/// let x: SmallVec<[_; 128]> = smallvec![3, 5, 7];
+/// statistics(x.copied());
+///
+/// let mut x = ArrayVec::<_, 16>::new();
+/// x.extend([3, 5, 7]);
+/// statistics(x.copied());
+///
+/// // cloneable iterators as Iterable
+///
+/// let x = (0..10).map(|x| x * 2).into_iterable();
+/// statistics(x);
+///
+/// let x = vec![1, 2, 3];
+/// let y = x
+///     .iter()
+///     .copied()
+///     .filter(|x| x % 2 == 1)
+///     .flat_map(|x| [-x, x])
+///     .into_iterable();
+/// statistics(y);
+///
+/// // lazy generators as Iterable
+///
+/// statistics(7..21i64);
 /// ```
 ///
-/// The second example demonstrates chaining iterables.
+/// The following example represents an explicit implementation of the Iterable
+/// trait for a lazy generator, which generates a sequence of Fibonacci numbers
+/// up to a set bound.
 ///
 /// ```
 /// use orx_iterable::*;
 ///
-/// fn sum_and_count(numbers: impl Iterable<Item = u32>) -> (u32, usize) {
-///     let count = numbers.iterate().count();
-///     let sum: u32 = numbers.iterate().sum();
-///     (sum, count)
+/// struct FibUntilIter {
+///     curr: u32,
+///     next: u32,
+///     until: u32,
 /// }
 ///
-/// let vec = vec![1, 5, 3, 9, 8, 3, 7, 6];
+/// impl Iterator for FibUntilIter {
+///     type Item = u32;
 ///
-/// let iter = vec
-///     .skipped(1)                 // [5, 3, 9, 8, 3, 7, 6]
-///     .taken_while(|x| **x != 7)  // [5, 3, 9, 8, 3]
-///     .filtered(|x| **x % 2 == 1) // [5, 3, 9, 3]
-///     .mapped(|x| x * 2);         // [10, 6, 18, 6]
+///     fn next(&mut self) -> Option<Self::Item> {
+///         let current = self.curr;
+///         self.curr = self.next;
+///         self.next = current + self.next;
+///         match current > self.until {
+///             false => Some(current),
+///             true => None,
+///         }
+///     }
+/// }
 ///
-/// assert_eq!(sum_and_count(iter), (40, 4));
+/// struct FibUntil(u32);
+///
+/// impl Iterable for FibUntil {
+///     type Item = u32;
+///
+///     type Iter = FibUntilIter;
+///
+///     fn iter(&self) -> Self::Iter {
+///         FibUntilIter { curr: 0, next: 1, until: self.0 }
+///     }
+/// }
+///
+/// let fib = FibUntil(10); // Iterable
+///
+/// assert_eq!(fib.iter().count(), 7);
+/// assert_eq!(fib.iter().max(), Some(8));
+/// assert_eq!(fib.iter().collect::<Vec<_>>(), [0, 1, 1, 2, 3, 5, 8]);
 /// ```
 pub trait Iterable: Sized {
     /// Type of the item that the iterators created by the [`iter`] method yields.
@@ -117,14 +179,7 @@ pub trait Iterable: Sized {
     type Iter: Iterator<Item = Self::Item>;
 
     /// Creates a new iterator from this iterable yielding elements of type `Iterable::Item`.
-    fn iterate(&self) -> Self::Iter;
-
-    fn iter2(self) -> Self::Iter
-    where
-        Self: Copy,
-    {
-        self.iterate()
-    }
+    fn iter(&self) -> Self::Iter;
 
     // provided
 
@@ -145,8 +200,8 @@ pub trait Iterable: Sized {
     /// let b = ['c', 'd', 'e'];
     ///
     /// let it = a.chained(&b).copied();
-    /// assert_eq!(it.iterate().count(), 5);
-    /// assert_eq!(it.iterate().collect::<Vec<_>>(), vec!['a', 'b', 'c', 'd', 'e']);
+    /// assert_eq!(it.iter().count(), 5);
+    /// assert_eq!(it.iter().collect::<Vec<_>>(), vec!['a', 'b', 'c', 'd', 'e']);
     /// ```
     fn chained<I>(self, other: I) -> Chained<Self, I>
     where
@@ -168,7 +223,7 @@ pub trait Iterable: Sized {
     /// use orx_iterable::*;
     ///
     /// fn count_and_sum(data: impl Iterable<Item = i32>) -> (usize, i32) {
-    ///     (data.iterate().count(), data.iterate().sum())
+    ///     (data.iter().count(), data.iter().sum())
     /// }
     ///
     /// let a = vec![1, 3, 7, 15];
@@ -195,7 +250,7 @@ pub trait Iterable: Sized {
     /// use orx_iterable::*;
     ///
     /// fn count_and_sum(data: impl Iterable<Item = i32>) -> (usize, i32) {
-    ///     (data.iterate().count(), data.iterate().sum())
+    ///     (data.iter().count(), data.iter().sum())
     /// }
     ///
     /// let a = vec![1, 3, 7, 15];
@@ -225,8 +280,8 @@ pub trait Iterable: Sized {
     /// let a = ['a', 'b', 'c'];
     /// let it = a.enumerated();
     ///
-    /// assert_eq!(it.iterate().count(), 3);
-    /// assert_eq!(it.iterate().collect::<Vec<_>>(), vec![(0, &'a'), (1, &'b'), (2, &'c')]);
+    /// assert_eq!(it.iter().count(), 3);
+    /// assert_eq!(it.iter().collect::<Vec<_>>(), vec![(0, &'a'), (1, &'b'), (2, &'c')]);
     /// ```
     fn enumerated(self) -> Enumerated<Self> {
         Enumerated { it: self }
@@ -249,8 +304,8 @@ pub trait Iterable: Sized {
     ///
     /// let it = a.filter_mapped(|s| s.parse::<u32>().ok());
     ///
-    /// assert_eq!(it.iterate().count(), 2);
-    /// assert_eq!(it.iterate().collect::<Vec<_>>(), vec![1, 5]);
+    /// assert_eq!(it.iter().count(), 2);
+    /// assert_eq!(it.iter().collect::<Vec<_>>(), vec![1, 5]);
     /// ```
     fn filter_mapped<M, U>(self, filter_map: M) -> FilterMapped<Self, M, U>
     where
@@ -276,8 +331,8 @@ pub trait Iterable: Sized {
     ///
     /// let it = a.filtered(|x| x.is_positive());
     ///
-    /// assert_eq!(it.iterate().count(), 2);
-    /// assert_eq!(it.iterate().collect::<Vec<_>>(), [&1, &2]);
+    /// assert_eq!(it.iter().count(), 2);
+    /// assert_eq!(it.iter().collect::<Vec<_>>(), [&1, &2]);
     /// ```
     fn filtered<P>(self, filter: P) -> Filtered<Self, P>
     where
@@ -305,8 +360,8 @@ pub trait Iterable: Sized {
     ///
     /// let it = words.flat_mapped(|s| s.chars());
     ///
-    /// assert_eq!(it.iterate().count(), 5);
-    /// assert_eq!(it.iterate().collect::<String>().as_str(), "alpha");
+    /// assert_eq!(it.iter().count(), 5);
+    /// assert_eq!(it.iter().collect::<String>().as_str(), "alpha");
     /// ```
     fn flat_mapped<M, U>(self, flat_map: M) -> FlatMapped<Self, M, U>
     where
@@ -330,8 +385,8 @@ pub trait Iterable: Sized {
     ///
     /// let it = data.flattened();
     ///
-    /// assert_eq!(it.iterate().count(), 6);
-    /// assert_eq!(it.iterate().sum::<u32>(), 21);
+    /// assert_eq!(it.iter().count(), 6);
+    /// assert_eq!(it.iter().sum::<u32>(), 21);
     /// ```
     fn flattened(self) -> Flattened<Self>
     where
@@ -365,8 +420,8 @@ pub trait Iterable: Sized {
     ///
     /// let it = a.mapped_while(|x| u32::try_from(*x).ok());
     ///
-    /// assert_eq!(it.iterate().count(), 3);
-    /// assert_eq!(it.iterate().collect::<Vec<_>>(), [0, 1, 2]);
+    /// assert_eq!(it.iter().count(), 3);
+    /// assert_eq!(it.iter().collect::<Vec<_>>(), [0, 1, 2]);
     /// ```
     fn mapped_while<M, U>(self, map_while: M) -> MappedWhile<Self, M, U>
     where
@@ -393,8 +448,8 @@ pub trait Iterable: Sized {
     ///
     /// let it = a.mapped(|x| 2 * x);
     ///
-    /// assert_eq!(it.iterate().sum::<i32>(), 20);
-    /// assert_eq!(it.iterate().collect::<Vec<_>>(), [2, 6, 12]);
+    /// assert_eq!(it.iter().sum::<i32>(), 20);
+    /// assert_eq!(it.iter().collect::<Vec<_>>(), [2, 6, 12]);
     /// ```
     fn mapped<M, U>(self, map: M) -> Mapped<Self, M, U>
     where
@@ -416,10 +471,10 @@ pub trait Iterable: Sized {
     /// let a = [1, 2, 3];
     ///
     /// let it = a.reversed();
-    /// assert_eq!(it.iterate().collect::<Vec<_>>(), [&3, &2, &1]);
+    /// assert_eq!(it.iter().collect::<Vec<_>>(), [&3, &2, &1]);
     ///
     /// let it = it.reversed();
-    /// assert_eq!(it.iterate().collect::<Vec<_>>(), [&1, &2, &3]);
+    /// assert_eq!(it.iter().collect::<Vec<_>>(), [&1, &2, &3]);
     /// ```
     fn reversed(self) -> Reversed<Self>
     where
@@ -444,8 +499,8 @@ pub trait Iterable: Sized {
     ///
     /// let it = a.skipped(2);
     ///
-    /// assert_eq!(it.iterate().count(), 1);
-    /// assert_eq!(it.iterate().next(), Some(&3));
+    /// assert_eq!(it.iter().count(), 1);
+    /// assert_eq!(it.iter().next(), Some(&3));
     /// ```
     fn skipped(self, n: usize) -> Skipped<Self> {
         Skipped { it: self, n }
@@ -467,7 +522,7 @@ pub trait Iterable: Sized {
     ///
     /// let it = a.skipped_while(|x| x.is_negative());
     ///
-    /// assert_eq!(it.iterate().collect::<Vec<_>>(), [&0, &1]);
+    /// assert_eq!(it.iter().collect::<Vec<_>>(), [&0, &1]);
     /// ```
     fn skipped_while<P>(self, skip_while: P) -> SkippedWhile<Self, P>
     where
@@ -492,7 +547,7 @@ pub trait Iterable: Sized {
     ///
     /// let it = a.stepped_by(2);
     ///
-    /// assert_eq!(it.iterate().collect::<Vec<_>>(), [&0, &2, &4]);
+    /// assert_eq!(it.iter().collect::<Vec<_>>(), [&0, &2, &4]);
     /// ```
     fn stepped_by(self, step: usize) -> SteppedBy<Self> {
         SteppedBy { it: self, step }
@@ -509,7 +564,7 @@ pub trait Iterable: Sized {
     ///
     /// let it = a.taken(2);
     ///
-    /// assert_eq!(it.iterate().collect::<Vec<_>>(), [&1, &2]);
+    /// assert_eq!(it.iter().collect::<Vec<_>>(), [&1, &2]);
     /// ```
     fn taken(self, n: usize) -> Taken<Self> {
         Taken { it: self, n }
@@ -531,8 +586,8 @@ pub trait Iterable: Sized {
     ///
     /// let it = a.taken_while(|x| x.is_negative());
     ///
-    /// assert_eq!(it.iterate().count(), 1);
-    /// assert_eq!(it.iterate().next(), Some(&-1));
+    /// assert_eq!(it.iter().count(), 1);
+    /// assert_eq!(it.iter().next(), Some(&-1));
     /// ```
     fn taken_while<P>(self, take_while: P) -> TakenWhile<Self, P>
     where
@@ -563,8 +618,8 @@ pub trait Iterable: Sized {
     ///
     /// let it = a1.zipped(&b1);
     ///
-    /// assert_eq!(it.iterate().count(), 3);
-    /// assert_eq!(it.iterate().collect::<Vec<_>>(), [(&1, &4), (&2, &5), (&3, &6)]);
+    /// assert_eq!(it.iter().count(), 3);
+    /// assert_eq!(it.iter().collect::<Vec<_>>(), [(&1, &4), (&2, &5), (&3, &6)]);
     /// ```
     fn zipped<I>(self, other: I) -> Zipped<Self, I>
     where
@@ -587,7 +642,7 @@ where
 
     type Iter = <&'a X as IntoIterator>::IntoIter;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         self.into_iter()
     }
 }
@@ -597,7 +652,7 @@ impl<'a, X> Iterable for &'a [X] {
 
     type Iter = core::slice::Iter<'a, X>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         return <[X]>::iter(self);
     }
 }

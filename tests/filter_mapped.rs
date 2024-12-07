@@ -5,8 +5,8 @@ fn test_it(values: Vec<usize>, col: impl Iterable<Item = usize>) {
     let count = values.len();
 
     // tests
-    assert_eq!(col.iterate().count(), count);
-    assert_eq!(col.iterate().sum::<usize>(), sum);
+    assert_eq!(col.iter().count(), count);
+    assert_eq!(col.iter().sum::<usize>(), sum);
 }
 
 #[test]
@@ -20,7 +20,7 @@ fn filter_mapped() {
         vec![4.to_string()],
         [1, 4, 7, 11]
             .filter_mapped(|x| (*x % 2 == 0).then_some(x.to_string()))
-            .iterate()
+            .iter()
             .collect::<Vec<_>>(),
     );
 }

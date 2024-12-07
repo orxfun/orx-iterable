@@ -1,4 +1,4 @@
-use crate::{Iterable, Collection};
+use crate::{Collection, CollectionMut, Iterable};
 
 /// An iterable which yields a wrapped value only once.
 pub struct Once<T>
@@ -16,7 +16,7 @@ where
 
     type Iter = core::iter::Once<T>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         core::iter::once(self.value.clone())
     }
 }
@@ -29,7 +29,7 @@ where
 
     type Iter = core::iter::Once<T>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         self.clone()
     }
 }
@@ -46,7 +46,7 @@ impl<'a, T> Iterable for &'a OnceCol<T> {
 
     type Iter = core::iter::Once<Self::Item>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         core::iter::once(&self.value)
     }
 }
@@ -58,16 +58,18 @@ impl<T> Collection for OnceCol<T> {
     where
         Self: 'i;
 
+    fn as_iterable(&self) -> Self::Iterable<'_> {
+        self
+    }
+}
+
+impl<T> CollectionMut for OnceCol<T> {
     type IterMut<'i> = core::iter::Once<&'i mut T>
     where
         Self: 'i;
 
     fn iter_mut(&mut self) -> Self::IterMut<'_> {
         core::iter::once(&mut self.value)
-    }
-
-    fn as_iterable(&self) -> Self::Iterable<'_> {
-        self
     }
 }
 

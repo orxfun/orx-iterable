@@ -17,7 +17,7 @@ where
 
     type Iter = core::iter::Enumerate<I::Iter>;
 
-    fn iterate(&self) -> Self::Iter {
-        self.it.iterate().enumerate()
+    fn iter(&self) -> Self::Iter {
+        self.it.iter().enumerate()
     }
 }

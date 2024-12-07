@@ -16,7 +16,7 @@ where
 
     type Iter = core::iter::Repeat<T>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         core::iter::repeat(self.value.clone())
     }
 }
@@ -29,7 +29,7 @@ where
 
     type Iter = core::iter::Repeat<T>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         self.clone()
     }
 }

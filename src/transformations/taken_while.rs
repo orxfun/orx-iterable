@@ -1,4 +1,4 @@
-use crate::{Iterable, Collection};
+use crate::{Collection, CollectionMut, Iterable};
 use core::marker::PhantomData;
 use orx_self_or::SoM;
 
@@ -22,8 +22,8 @@ where
 
     type Iter = core::iter::TakeWhile<I::Iter, P>;
 
-    fn iterate(&self) -> Self::Iter {
-        self.it.iterate().take_while(self.take_while)
+    fn iter(&self) -> Self::Iter {
+        self.it.iter().take_while(self.take_while)
     }
 }
 
@@ -52,7 +52,7 @@ where
 
     type Iter = TakenWhileColIter<'a, I, P>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         let iter = self.it.get_ref().iter();
         TakenWhileColIter {
             iter,
@@ -73,6 +73,17 @@ where
     where
         Self: 'i;
 
+    fn as_iterable(&self) -> Self::Iterable<'_> {
+        self
+    }
+}
+
+impl<I, E, P> CollectionMut for TakenWhileCol<I, E, P>
+where
+    I: CollectionMut,
+    E: SoM<I>,
+    P: Fn(&I::Item) -> bool + Copy,
+{
     type IterMut<'i> = TakenWhileColIterMut<'i, I, P>
     where
         Self: 'i;
@@ -83,10 +94,6 @@ where
             iter,
             filter: self.take_while,
         }
-    }
-
-    fn as_iterable(&self) -> Self::Iterable<'_> {
-        self
     }
 }
 
@@ -118,7 +125,7 @@ where
 /// Mutable iterator for taken while iterable collections.
 pub struct TakenWhileColIterMut<'a, I, P>
 where
-    I: Collection + 'a,
+    I: CollectionMut + 'a,
     P: Fn(&I::Item) -> bool + Copy,
 {
     iter: I::IterMut<'a>,
@@ -127,7 +134,7 @@ where
 
 impl<'a, I, P> Iterator for TakenWhileColIterMut<'a, I, P>
 where
-    I: Collection,
+    I: CollectionMut,
     P: Fn(&I::Item) -> bool + Copy,
 {
     type Item = <I::IterMut<'a> as Iterator>::Item;

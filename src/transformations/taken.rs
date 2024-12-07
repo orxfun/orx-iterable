@@ -1,4 +1,4 @@
-use crate::{Iterable, Collection};
+use crate::{Collection, CollectionMut, Iterable};
 use core::marker::PhantomData;
 use orx_self_or::SoM;
 
@@ -20,8 +20,8 @@ where
 
     type Iter = core::iter::Take<I::Iter>;
 
-    fn iterate(&self) -> Self::Iter {
-        self.it.iterate().take(self.n)
+    fn iter(&self) -> Self::Iter {
+        self.it.iter().take(self.n)
     }
 }
 
@@ -48,7 +48,7 @@ where
 
     type Iter = core::iter::Take<<I::Iterable<'a> as Iterable>::Iter>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         self.it.get_ref().iter().take(self.n)
     }
 }
@@ -64,15 +64,21 @@ where
     where
         Self: 'i;
 
+    fn as_iterable(&self) -> Self::Iterable<'_> {
+        self
+    }
+}
+
+impl<I, E> CollectionMut for TakenCol<I, E>
+where
+    I: CollectionMut,
+    E: SoM<I>,
+{
     type IterMut<'i> = core::iter::Take<I::IterMut<'i>>
     where
         Self: 'i;
 
     fn iter_mut(&mut self) -> Self::IterMut<'_> {
         self.it.get_mut().iter_mut().take(self.n)
-    }
-
-    fn as_iterable(&self) -> Self::Iterable<'_> {
-        self
     }
 }

@@ -3,17 +3,44 @@
 [![orx-iterable crate](https://img.shields.io/crates/v/orx-iterable.svg)](https://crates.io/crates/orx-iterable)
 [![orx-iterable documentation](https://docs.rs/orx-iterable/badge.svg)](https://docs.rs/orx-iterable)
 
-Iterable and Collection traits to generalize types which can be iterated over multiple times.
+Defines and implements Iterable, Collection and CollectionMut traits to represent types that can be iterated over multiple times.
 
-## Motivation
+There exist numerous situations where we need to iterate over an abstract type multiple times. Currently most collections allow this by `iter` and `iter_mut` methods; however, this is a convention rather than a shared behavior defined by a trait method.
 
-There exist numerous situations where we need to iterate over an abstract type multiple times.
+> `Collection` and `CollectionMut` traits are defined and automatically implemented for all collections enabling abstraction over repeatedly iterable collection types.
 
-For a very simple example, consider a method that computes certain statistics of an iterable of numbers. The `Iterable` trait defines the shared iterable behavior so that the following abstraction is available.
+However, not all iterables are collections storing elements. For instance, a *Range* is iterable which cannot return a reference to its elements since the elements are not stored. Similarly, consider an iterator mapping elements of a collection to new values. As these values are not stored in memory and computed on the fly during iteration, they do not fit in the definition of collections.
+
+> More general immutable iterable trait `Iterable` is defined and implemented for most common relevant types.
+
+## A. Collection and CollectionMut
+
+The core method of the Collection trait is `iter(&self)` which returns an iterator yielding shared references; i.e., `&Item`.
+
+CollectionMut trait extends Collection with the `iter_mut(&mut self)` method that creates an iterator yielding mutable references; i.e., `&mut Item`.
+
+Definitions of the collection traits are based on the IntoIterator trait as follows. Consider a collection of type `X` which implements `IntoIterator<Item = T>`. Then, the following conditions automatically hold.
+
+```rust ignore
+&X: IntoIterator<Item = &T>           ===>   X: Collection
+&mut X: IntoIterator<Item = &mut T>   ===>   X: CollectionMut
+```
+
+Note that the implications are straightforward. Provided that `&X` can be converted into an iterator yielding references to elements, then we can automatically implement `iter(&self)`. The same follows for the mutable extension.
+
+Collections in the standard library satisfy these conditions (*see below the note for maps*). Further, most collection crates follow the IntoIterator pattern, and hence, automatically implement collection traits. Some examples are SmallVec, ArrayVec, StackVec, SmallOrdSet, etc.
+
+<br />
+<details>
+<summary style="font-weight:bold;"><code>Collection</code> Example</summary>
+
+Consider, for instance, a method which creates statistics from a collection of numbers. In order to be able to compute the required values, it needs at least two iterations over the data. In the following example, we use the Collection trait to define this requirement.
 
 ```rust
 use orx_iterable::*;
-use std::collections::{VecDeque, LinkedList};
+use arrayvec::ArrayVec;
+use smallvec::{smallvec, SmallVec};
+use std::collections::{BinaryHeap, BTreeSet, HashSet, LinkedList, VecDeque};
 
 struct Stats {
     count: usize,
@@ -22,13 +49,11 @@ struct Stats {
 }
 
 /// we need multiple iterations over numbers to compute the stats
-/// * we can compute count & sum in one go
-/// * but we need the second iteration at least for std_dev
-fn statistics(numbers: impl Iterable<Item = i64>) -> Stats {
-    let count = numbers.iterate().count() as i64;
-    let sum = numbers.iterate().sum::<i64>();
+fn statistics(numbers: &impl Collection<Item = i64>) -> Stats {
+    let count = numbers.iter().count() as i64;
+    let sum = numbers.iter().sum::<i64>();
     let mean = sum / count;
-    let sum_sq_errors: i64 = numbers.iterate().map(|x| (x - mean) * (x - mean)).sum();
+    let sum_sq_errors: i64 = numbers.iter().map(|x| (x - mean) * (x - mean)).sum();
     let std_dev = f64::sqrt(sum_sq_errors as f64 / (count - 1) as f64) as i64;
     Stats {
         count: count as usize,
@@ -37,36 +62,40 @@ fn statistics(numbers: impl Iterable<Item = i64>) -> Stats {
     }
 }
 
-let numbers = vec![3, 5, 7, 10, 2, 11];
-statistics(numbers.copied());
+// example collections that automatically implement Collection
 
-let evens = numbers.filtered(|x| *x % 2 == 0);
-statistics(evens.copied());
+statistics(&[3, 5, 7]);
+statistics(&vec![3, 5, 7]);
+statistics(&LinkedList::from_iter([3, 5, 7]));
+statistics(&VecDeque::from_iter([3, 5, 7]));
+statistics(&HashSet::<_>::from_iter([3, 5, 7]));
+statistics(&BTreeSet::<_>::from_iter([3, 5, 7]));
+statistics(&BinaryHeap::<_>::from_iter([3, 5, 7]));
 
-let doubles = numbers.mapped(|x| 2 * x);
-statistics(doubles);
+let x: SmallVec<[_; 128]> = smallvec![3, 5, 7];
+statistics(&x);
 
-let numbers: LinkedList<i64> = [3, 5, 7].into_iter().collect();
-statistics(numbers.copied());
-
-let numbers = 7..20i64;
-statistics(numbers);
-
-let numbers = (0..4)
-    .into_iter()
-    .flat_map(|x| [-2 * x, x, 2 * x + 1])
-    .into_iterable();
-statistics(numbers);
+let mut x = ArrayVec::<_, 16>::new();
+x.extend([3, 5, 7]);
+statistics(&x);
 ```
+</details>
+<br />
 
-Furthermore, a more restrictive and stronger `Collection` trait is defined to additionally allow for mutable iterations using `iter_mut`.
+<br />
+<details>
+<summary style="font-weight:bold;"><code>CollectionMut</code> Example</summary>
+
+The `increment_by_sum` method below first computes the sum of all elements and then increments each element by this sum. Therefore, we require both the iter and iter_mut methods, which can be represented by the `CollectionMut` trait.
 
 ```rust
 use orx_iterable::*;
+use arrayvec::ArrayVec;
+use smallvec::{smallvec, SmallVec};
 use std::collections::{LinkedList, VecDeque};
 
 /// first computes sum, and then adds it to each of the elements
-fn increment_by_sum(numbers: &mut impl Collection<Item = i32>) {
+fn increment_by_sum(numbers: &mut impl CollectionMut<Item = i32>) {
     let sum: i32 = numbers.iter().sum();
 
     for x in numbers.iter_mut() {
@@ -74,132 +103,163 @@ fn increment_by_sum(numbers: &mut impl Collection<Item = i32>) {
     }
 }
 
-let mut vec = vec![1, 2, 3];
-increment_by_sum(&mut vec);
-assert_eq!(vec, [7, 8, 9]);
+// example collections that automatically implement CollectionMut
 
-let mut vec_deq = VecDeque::from_iter([1, 2, 3]);
-increment_by_sum(&mut vec_deq);
-assert_eq!(vec_deq, VecDeque::from_iter([7, 8, 9]));
+let mut x = [1, 2, 3];
+increment_by_sum(&mut x);
+assert_eq!(x, [7, 8, 9]);
 
-let mut list = LinkedList::from_iter([1, 2, 3]);
-increment_by_sum(&mut list);
-assert_eq!(list, LinkedList::from_iter([7, 8, 9]));
+let mut x = vec![1, 2, 3];
+increment_by_sum(&mut x);
+
+let mut x = LinkedList::from_iter([1, 2, 3]);
+increment_by_sum(&mut x);
+
+let mut x = VecDeque::from_iter([1, 2, 3]);
+increment_by_sum(&mut x);
+
+let mut x: SmallVec<[_; 128]> = smallvec![3, 5, 7];
+increment_by_sum(&mut x);
+
+let mut x = ArrayVec::<_, 16>::new();
+x.extend([3, 5, 7]);
+increment_by_sum(&mut x);
 ```
+</details>
+<br />
 
-## Iterable Traits
+*Maps do not follow the definition above as their iterators behave slightly differently, and hence, they deserve their own trait.*
 
-Currently, the standard library is lacking the iterable traits.
+## B. Iterable
 
-This create introduces `Iterable` and Collection` traits. Thanks to the powerful rust type system ❤️🦀, these traits are automatically implemented for relevant types that are defined and to be defined.
-
-* `Iterable` => `iter`
-  * an iterable can be any type that can create iterators repeatedly.
-  * lightweight & more inclusive.
-* `Collection` => `iter + iter_mut`
-  * an iterable collection which stores the elements that it yields.
-  * more restrictive & more powerful.
-
-### A. Iterable
+Collection traits are useful; however, they do not cover all iterables. By definition, they are bound to yield shared or mutable references to their elements. However, some iterators produce elements on the fly during iteration. Therefore, they cannot return a reference to the temporarily computed values. Further, mutable references is irrelevant. Therefore, we require a more general definition for immutable iterables.
 
 > An `Iterable` is any type which can return a new iterator that yields elements of the associated type `Item` every time `iter` method is called.
 
-Note that this is the core and least restrictive iterable definition which represents a wide range of types. We can investigate types implementing Iterable in three categories:
+Three categories of types implement the Iterable trait:
 
-* collections
+* references of collections
 * cloneable iterators
-* element producing iterables
+* lazy generators
 
-#### A.1. Collections as Iterable
+<br />
+<details>
+<summary style="font-weight:bold;"><code>Iterable</code> Example</summary>
 
-Let `X` be a collection type storing elements of type `T`, such as a vector, a set or a linked list. Then, `&X` implements `Iterable<Item = &T>`.
+In the following example, we relax the `Collection` requirement on numbers to `Iterable`. The example demonstrates the flexibility of the Iterable trait abstracting the input over the three categories of implementing types listed above.
 
-The auto implementation requirement is as follows:
+```rust
+use orx_iterable::*;
+use arrayvec::ArrayVec;
+use smallvec::{smallvec, SmallVec};
+use std::collections::{BTreeSet, BinaryHeap, HashSet, LinkedList, VecDeque};
+
+struct Stats {
+    count: usize,
+    mean: i64,
+    std_dev: i64,
+}
+
+/// we need multiple iterations over numbers to compute the stats
+fn statistics(numbers: impl Iterable<Item = i64>) -> Stats {
+    let count = numbers.iter().count() as i64;
+    let sum = numbers.iter().sum::<i64>();
+    let mean = sum / count;
+    let sum_sq_errors: i64 = numbers.iter().map(|x| (x - mean) * (x - mean)).sum();
+    let std_dev = f64::sqrt(sum_sq_errors as f64 / (count - 1) as f64) as i64;
+    Stats {
+        count: count as usize,
+        mean,
+        std_dev,
+    }
+}
+
+// collections as Iterable
+
+let x = [3, 5, 7];
+statistics(x.copied()); // see section C for details of copied()
+
+let x = vec![3, 5, 7];
+statistics(x.copied());
+
+let x = LinkedList::from_iter([3, 5, 7]);
+statistics(x.copied());
+
+let x = VecDeque::from_iter([3, 5, 7]);
+statistics(x.copied());
+
+let x = HashSet::<_>::from_iter([3, 5, 7]);
+statistics(x.copied());
+
+let x = BTreeSet::from_iter([3, 5, 7]);
+statistics(x.copied());
+
+let x = BinaryHeap::from_iter([3, 5, 7]);
+statistics(x.copied());
+
+let x: SmallVec<[_; 128]> = smallvec![3, 5, 7];
+statistics(x.copied());
+
+let mut x = ArrayVec::<_, 16>::new();
+x.extend([3, 5, 7]);
+statistics(x.copied());
+
+// cloneable iterators as Iterable
+
+let x = (0..10).map(|x| x * 2).into_iterable();
+statistics(x);
+
+let x = vec![1, 2, 3];
+let y = x
+    .iter()
+    .copied()
+    .filter(|x| x % 2 == 1)
+    .flat_map(|x| [-x, x])
+    .into_iterable();
+statistics(y);
+
+// lazy generators as Iterable
+
+statistics(7..21i64);
+
+// also see FibUntil example in section B3
+```
+</details>
+<br />
+
+### B.1. Collections as Iterable
+
+References of collections automatically implement Iterable, again based on the IntoIterator implementation.
 
 ```rust ignore
-&X: IntoIterator<Item = &T> =====> &X: Iterable<Item = &T>
+&X: IntoIterator<Item = &T>           ===>   &X: Iterable
+// equivalently
+X: Collection<Item = T>               ===>   &X: Iterable
 ```
 
-Note that this implication is straightforward: provided that `&self` can be converted into an iterator, then we can define `iter(&self)` method returning the same iterator.
+Note that the implication is straightforward. If we can implement `iter(&self)` for the collection itself, we can implement it for its reference too. This implementation is useful in allowing to create the more general Iterable's from Collection's; we can simply use a reference of a collection when we require an Iterable.
 
-This condition is satisfied by std collections, as well as, many collections outside the standard library, such as `SmallVec`, `ArrayVec` or `SplitVec` to name a few. You may see some examples below.
+### B.2. Cloneable Iterators
 
-TODO: link new collection
+An iterator is not limited to visiting elements of a collection. Thanks to chainable methods transforming one iterator to another, such as `filter` or `map`, iterators are capable of carrying definition of a computation over some data.
 
-```rust
-use orx_iterable::*;
-use std::collections::{HashSet, LinkedList, VecDeque};
+The trouble is, iterators are not repeatedly iterable. However, the conversion is conveniently possible.
 
-/// fn requiring multiple immutable iterations over names
-fn process_names<'a>(names: impl Iterable<Item = &'a String>) { }
+Any iterator that can be cloned (`Iterator + Clone`) can be converted into an iterable by calling the `into_iterable` method.
 
-// we can call it with (presumably) all collections
+### B.3. Lazy Generators
 
-let names = [String::from("xox"), String::from("oxo")];
-process_names(&names);
+Some iterators yield elements which are computed and created each time its *next* method is called. These types can be represented as an Iterable; however, there is no generic implementation for them.
 
-let names = vec![String::from("xox"), String::from("oxo")];
-process_names(&names);
+A common example from core library is range. Consider, for instance, the range 3..7. Although it looks like a collection, it does not hold elements (3, 4, 5, 6) anywhere in memory. These elements are produced on the fly during the iteration. `Iterable` trait implementations for the ranges are provided in this crate.
 
-let names: HashSet<_> = [String::from("xox")].into_iter().collect();
-process_names(&names);
+For similar custom types, the trait needs to be implemented explicitly.
 
-let names: LinkedList<_> = [String::from("xox")].into_iter().collect();
-process_names(&names);
+<br />
+<details>
+<summary style="font-weight:bold;">Custom lazy generator as <code>Iterable</code></summary>
 
-let names: VecDeque<_> = [String::from("xox")].into_iter().collect();
-process_names(&names);
-```
-
-#### A.2. Cloneable Iterators
-
-An iterator is not limited to visiting elements of a collection. Thanks to chainable methods transforming one iterator to another, such as `filter` or `map`, iterators often hold a definition of a computation over some data.
-
-It would be awesome if we could use such an iterator multiple times.
-
-This is also conveniently possible.
-
-Any iterator that can be cloned (`I: Iterator + Clone`) can be converted into an iterable by simply calling the `into_iterable` method.
-
-Consider the generic `process_names` function in the example above. This time we want to call it using a collection of names; however, we want to filter the names to be processed. One way to achieve this is to define the filtered iterator and convert it into an iterable as demonstrated below.
-
-```rust
-use orx_iterable::*;
-
-/// fn requiring multiple immutable iterations over names
-fn process_names<'a>(names: impl Iterable<Item = &'a String>) { }
-
-// the source data
-let names = vec![String::from("xox"), String::from("oxo")];
-
-// the iterator that we want to use multiple times
-let iter = names.iter().filter(|x| x.starts_with('x'));
-
-// so we convert it into an iterable
-let filtered_names = iter.into_iterable();
-
-process_names(filtered_names);
-```
-
-#### A.3. Element Producing Iterables
-
-Some iterators yield elements which are created on the fly, rather than being read from a memory location.
-
-Types creating such iterators also share the common behavior of the `Iterable` trait.
-
-A common example is the range. Consider, for instance, the range `3..7`. Although it looks like a collection, it does not hold elements (3, 4, 5, 6) anywhere in memory. These elements are produced on the fly during the iteration.
-
-```rust
-use orx_iterable::*;
-
-let range = 3..7usize;
-
-assert_eq!(range.iterate().max(), Some(6));
-assert_eq!(range.iterate().sum::<usize>(), 18);
-assert_eq!(range.iterate().product::<usize>(), 360);
-```
-
-As a second example, consider the custom iterator `FibUntilIter` which produces Fibonacci numbers until an upper bound. `FibUntil` struct can create this iterator any time `iter` is called, and hence, it is an Iterable.
+In the following example, `FibUntilIter` is an iterator which computes its elements on the fly. `FibUntil` knows how to create this iterator repeatedly. In other words, it is an iterable, and hence, explicitly implements `Iterable`.
 
 ```rust
 use orx_iterable::*;
@@ -231,100 +291,25 @@ impl Iterable for FibUntil {
 
     type Iter = FibUntilIter;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         FibUntilIter { curr: 0, next: 1, until: self.0 }
     }
 }
 
 let fib = FibUntil(10); // Iterable
 
-assert_eq!(fib.iterate().count(), 7);
-assert_eq!(fib.iterate().max(), Some(8));
-assert_eq!(fib.iterate().collect::<Vec<_>>(), [0, 1, 1, 2, 3, 5, 8]);
+assert_eq!(fib.iter().count(), 7);
+assert_eq!(fib.iter().max(), Some(8));
+assert_eq!(fib.iter().collect::<Vec<_>>(), [0, 1, 1, 2, 3, 5, 8]);
 ```
+</details>
+<br />
 
-### B. Collection
+## C. Chainable Transformations
 
-> An `Collection` is a collection that is able to produce iterators yielding shared and mutable references to its elements.
+`Iterator` trait provides a wide variety of methods which transforms one iterator into another, such as `filter`, `map` or `flat_map`. These transformations can nicely be chained to compose computations.
 
-Collection has more restrictive requirements than Iterable. However, in addition to `iter`, iterable collections also allow multiple mutable iterations through the `iter_mut` method.
-
-Any collection type `X` having elements of type `T` that satisfies the following conditions automatically implements `Collection`:
-* `X: IntoIterator<Item = T>`
-* `&X: IntoIterator<Item = &T>`
-* `&mut X: IntoIterator<Item = &mut T>`
-
-These conditions are satisfied by std collections, as well as, many collections outside the standard library, such as `SmallVec`, `ArrayVec` or `SplitVec` to name a few.
-
-## Custom Iterables
-
-In the previous section, we mentioned the wide range of types that already implement `Iterable` and `Collection` traits. This has been possible thanks to the joyful rust type system, consistent use of `IntoIterator` trait in the standard library and almost all collection crates that follow this nice design pattern.
-
-What about the new types? We can discuss this in three cases: (i) immutable collections, (ii) mutable collections and (iii) others.
-
-### Custom Immutable Collection
-
-For custom collections, we should not need to implement iterable traits. Better approach is to provide the `IntoIterator` implementations, and iterable traits will be automatically implemented.
-
-For an immutable collection, it suffices to implement `IntoIterator` for `&X` where `X` is our immutable collection.
-
-```rust
-
-```
-
-### Custom Collection
-
-For custom collections, we should not need to implement iterable traits. Better approach is to provide the `IntoIterator` implementations, and iterable traits will be automatically implemented.
-
-Consider for instance a custom collection of numbers which yields evens first, odds later.
-
-```rust
-use orx_iterable::*;
-
-pub struct EvensThenOdds {
-    pub evens: Vec<usize>,
-    pub odds: Vec<usize>,
-}
-
-impl IntoIterator for EvensThenOdds {
-    type Item = usize;
-
-    type IntoIter = core::iter::Chain<std::vec::IntoIter<usize>, std::vec::IntoIter<usize>>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.evens.into_iter().chain(self.odds.into_iter())
-    }
-}
-
-impl<'a> IntoIterator for &'a EvensThenOdds {
-    type Item = &'a usize;
-
-    type IntoIter = core::iter::Chain<core::slice::Iter<'a, usize>, core::slice::Iter<'a, usize>>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.evens.iter().chain(self.odds.iter())
-    }
-}
-
-impl<'a> IntoIterator for &'a mut EvensThenOdds {
-    type Item = &'a mut usize;
-
-    type IntoIter =
-        core::iter::Chain<core::slice::IterMut<'a, usize>, core::slice::IterMut<'a, usize>>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.evens.iter_mut().chain(self.odds.iter_mut())
-    }
-}
-```
-
-
-
-## Chainable Transformations
-
-`Iterator` trait provides a wide variety of methods which transforms one iterator into another, such as `filter`, `map` or `flat_map`. These transformations can nicely be chained to compose lazy computation definitions.
-
-`Iterable` and `Collection` traits follow the same design and provide these chainable transformation methods.
+`Iterable`, `Collection` and `CollectionMut` traits follow the same design and provide these chainable transformation methods.
 
 ```rust
 use orx_iterable::*;
@@ -341,9 +326,160 @@ let it = a
     .copied()                   // [3, 8]
     .flat_mapped(|x| [x, -x]);  // [3, -3, 8, -8]
 
-assert_eq!(it.iterate().count(), 4);
-assert_eq!(it.iterate().sum::<i32>(), 0);
+assert_eq!(it.iter().count(), 4);
+assert_eq!(it.iter().sum::<i32>(), 0);
 ```
+
+Also see consuming and mutable variants such as `into_filtered` or `filtered_mut`.
+
+## D. Defining New Custom Collections
+
+This crate aims to bring in the missing iterable and collection traits while keeping manual implementations as few as possible. Rust's joyful type system ❤️🦀 and the consistent usage of the IntoIterator trait in standard library and collection crates allow us to achieve this almost effortlessly.
+
+When developing a new collection type, iterable and collection traits and corresponding iter and iter_mut methods will be readily available once we provide the relevant IntoIterator implementations.
+
+### D.1. Custom Collection
+
+Assume that our collection `X` does not allow for iter_mut such as the `HashSet`. In this case, once we provide the following implementations:
+
+* `X: IntoIterator`
+* `&X: IntoIterator<Item = &<X as IntoIterator>::Item>`
+
+then our collection will automatically implement `Collection`; and hence, its reference will implement `Iterable`.
+
+<br />
+<details>
+<summary style="font-weight:bold;">Example Custom Collection</summary>
+
+Consider the following collection of numbers, iterators of which yield first even numbers then odds. We implement `IntoIterator` on the type and on its reference. This qualifies `EvenThenOdds` as a `Collection` and provides the `iter` method.
+
+```rust
+use orx_iterable::*;
+
+#[derive(Default)]
+pub struct EvensThenOdds {
+    pub evens: Vec<i32>,
+    pub odds: Vec<i32>,
+}
+
+impl EvensThenOdds {
+    fn push(&mut self, number: i32) {
+        match number % 2 == 0 {
+            true => self.evens.push(number),
+            false => self.odds.push(number),
+        }
+    }
+}
+
+impl IntoIterator for EvensThenOdds {
+    type Item = i32;
+    type IntoIter = core::iter::Chain<std::vec::IntoIter<i32>, std::vec::IntoIter<i32>>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.evens.into_iter().chain(self.odds.into_iter())
+    }
+}
+
+impl<'a> IntoIterator for &'a EvensThenOdds {
+    type Item = &'a i32;
+    type IntoIter = core::iter::Chain<core::slice::Iter<'a, i32>, core::slice::Iter<'a, i32>>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.evens.iter().chain(self.odds.iter())
+    }
+}
+
+let mut numbers = EvensThenOdds::default();
+numbers.push(4);
+numbers.push(7);
+numbers.push(2);
+
+assert_eq!(numbers.iter().collect::<Vec<_>>(), [&4, &2, &7]);
+```
+</details>
+<br />
+
+### D.2. Custom CollectionMut
+
+If our new collection allows both immutable and mutable iterations, we need to additionally provide the following implementation:
+
+* `&mut X: IntoIterator<Item = &mut <X as IntoIterator>::Item>`
+
+Then our collection will automatically implement `CollectionMut`.
+
+<br />
+<details>
+<summary style="font-weight:bold;">Example Custom CollectionMut</summary>
+
+Consider the following custom collection which keeps at most four largest numbers. In this case, we provide three of the `IntoIterator` implementations and `Top4` automatically implements `Collection` and `CollectionMut`.
+
+```rust
+use orx_iterable::*;
+
+#[derive(Default)]
+pub struct Top4 {
+    numbers: Vec<i32>,
+}
+
+impl Top4 {
+    fn push(&mut self, number: i32) {
+        match self.numbers.len() < 4 {
+            true => self.numbers.push(number),
+            false => {
+                let (i, &min) = self
+                    .numbers
+                    .iter()
+                    .enumerate()
+                    .min_by_key(|(_, x)| *x)
+                    .unwrap();
+                if min < number {
+                    self.numbers.remove(i);
+                    self.numbers.push(number);
+                }
+            }
+        }
+    }
+}
+
+impl IntoIterator for Top4 {
+    type Item = i32;
+    type IntoIter = std::vec::IntoIter<i32>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.numbers.into_iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a Top4 {
+    type Item = &'a i32;
+    type IntoIter = core::slice::Iter<'a, i32>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.numbers.iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a mut Top4 {
+    type Item = &'a mut i32;
+    type IntoIter = core::slice::IterMut<'a, i32>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.numbers.iter_mut()
+    }
+}
+
+let mut numbers = Top4::default();
+numbers.push(4);
+numbers.push(7);
+numbers.push(1);
+numbers.push(3);
+numbers.push(2);
+
+assert_eq!(numbers.iter().collect::<Vec<_>>(), [&4, &7, &3, &2]);
+
+for x in numbers.iter_mut() {
+    *x += 1;
+}
+
+assert_eq!(numbers.iter().collect::<Vec<_>>(), [&5, &8, &4, &3]);
+```
+</details>
+<br />
 
 ## Contributing
 

@@ -5,8 +5,8 @@ fn test_it(values: Vec<usize>, col: impl Iterable<Item = usize>) {
     let count = values.len();
 
     // tests
-    assert_eq!(col.iterate().count(), count);
-    assert_eq!(col.iterate().sum::<usize>(), sum);
+    assert_eq!(col.iter().count(), count);
+    assert_eq!(col.iter().sum::<usize>(), sum);
 }
 
 #[test]
@@ -21,7 +21,7 @@ fn flat_mapped() {
     assert_eq!(
         indices
             .flat_mapped(|idx| &data[*idx])
-            .iterate()
+            .iter()
             .copied()
             .collect::<Vec<_>>(),
         vec![1, 4, 2, 8, 8, 3]
@@ -30,7 +30,7 @@ fn flat_mapped() {
         indices
             .flat_mapped(|idx| &data[*idx])
             .copied()
-            .iterate()
+            .iter()
             .collect::<Vec<_>>(),
         vec![1, 4, 2, 8, 8, 3]
     );

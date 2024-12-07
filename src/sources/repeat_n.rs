@@ -17,7 +17,7 @@ where
 
     type Iter = core::iter::RepeatN<T>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         core::iter::repeat_n(self.value.clone(), self.count)
     }
 }
@@ -30,7 +30,7 @@ where
 
     type Iter = core::iter::RepeatN<T>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         self.clone()
     }
 }

@@ -1,4 +1,4 @@
-use crate::{Iterable, Collection};
+use crate::{Collection, CollectionMut, Iterable};
 use core::marker::PhantomData;
 use orx_self_or::SoM;
 
@@ -23,8 +23,8 @@ where
 
     type Iter = core::iter::SkipWhile<I::Iter, P>;
 
-    fn iterate(&self) -> Self::Iter {
-        self.it.iterate().skip_while(self.skip_while)
+    fn iter(&self) -> Self::Iter {
+        self.it.iter().skip_while(self.skip_while)
     }
 }
 
@@ -54,7 +54,7 @@ where
 
     type Iter = SkippedWhileColIter<'a, I, P>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         let iter = self.it.get_ref().iter();
         SkippedWhileColIter {
             iter,
@@ -76,6 +76,17 @@ where
     where
         Self: 'i;
 
+    fn as_iterable(&self) -> Self::Iterable<'_> {
+        self
+    }
+}
+
+impl<I, E, P> CollectionMut for SkippedWhileCol<I, E, P>
+where
+    I: CollectionMut,
+    E: SoM<I>,
+    P: Fn(&I::Item) -> bool + Copy,
+{
     type IterMut<'i> = SkippedWhileColIterMut<'i, I, P>
     where
         Self: 'i;
@@ -87,10 +98,6 @@ where
             skip_while: self.skip_while,
             skipped: false,
         }
-    }
-
-    fn as_iterable(&self) -> Self::Iterable<'_> {
-        self
     }
 }
 
@@ -139,7 +146,7 @@ where
 /// Mutable iterator for skipped while iterable collection.
 pub struct SkippedWhileColIterMut<'a, I, P>
 where
-    I: Collection + 'a,
+    I: CollectionMut + 'a,
     P: Fn(&I::Item) -> bool + Copy,
 {
     iter: I::IterMut<'a>,
@@ -149,7 +156,7 @@ where
 
 impl<'a, I, P> Iterator for SkippedWhileColIterMut<'a, I, P>
 where
-    I: Collection,
+    I: CollectionMut,
     P: Fn(&I::Item) -> bool + Copy,
 {
     type Item = <I::IterMut<'a> as Iterator>::Item;

@@ -1,4 +1,4 @@
-use crate::{Iterable, Collection};
+use crate::{Collection, CollectionMut, Iterable};
 use core::marker::PhantomData;
 use orx_self_or::SoM;
 
@@ -21,8 +21,8 @@ where
 
     type Iter = core::iter::Flatten<I::Iter>;
 
-    fn iterate(&self) -> Self::Iter {
-        self.it.iterate().flatten()
+    fn iter(&self) -> Self::Iter {
+        self.it.iter().flatten()
     }
 }
 
@@ -35,7 +35,6 @@ where
     I: Collection,
     I::Item: IntoIterator,
     for<'i> &'i I::Item: IntoIterator<Item = &'i <I::Item as IntoIterator>::Item>,
-    for<'i> &'i mut I::Item: IntoIterator<Item = &'i mut <I::Item as IntoIterator>::Item>,
     E: SoM<I>,
 {
     pub(crate) it: E,
@@ -47,14 +46,13 @@ where
     I: Collection,
     I::Item: IntoIterator,
     for<'i> &'i I::Item: IntoIterator<Item = &'i <I::Item as IntoIterator>::Item>,
-    for<'i> &'i mut I::Item: IntoIterator<Item = &'i mut <I::Item as IntoIterator>::Item>,
     E: SoM<I>,
 {
     type Item = &'a <I::Item as IntoIterator>::Item;
 
     type Iter = core::iter::Flatten<<I::Iterable<'a> as Iterable>::Iter>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         self.it.get_ref().iter().flatten()
     }
 }
@@ -64,7 +62,6 @@ where
     I: Collection,
     I::Item: IntoIterator,
     for<'i> &'i I::Item: IntoIterator<Item = &'i <I::Item as IntoIterator>::Item>,
-    for<'i> &'i mut I::Item: IntoIterator<Item = &'i mut <I::Item as IntoIterator>::Item>,
     E: SoM<I>,
 {
     type Item = <I::Item as IntoIterator>::Item;
@@ -73,15 +70,24 @@ where
     where
         Self: 'i;
 
+    fn as_iterable(&self) -> Self::Iterable<'_> {
+        self
+    }
+}
+
+impl<I, E> CollectionMut for FlattenedCol<I, E>
+where
+    I: CollectionMut,
+    I::Item: IntoIterator,
+    for<'i> &'i I::Item: IntoIterator<Item = &'i <I::Item as IntoIterator>::Item>,
+    for<'i> &'i mut I::Item: IntoIterator<Item = &'i mut <I::Item as IntoIterator>::Item>,
+    E: SoM<I>,
+{
     type IterMut<'i> = core::iter::Flatten<I::IterMut<'i>>
     where
         Self: 'i;
 
     fn iter_mut(&mut self) -> Self::IterMut<'_> {
         self.it.get_mut().iter_mut().flatten()
-    }
-
-    fn as_iterable(&self) -> Self::Iterable<'_> {
-        self
     }
 }

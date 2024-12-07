@@ -1,4 +1,4 @@
-use crate::{Iterable, Collection};
+use crate::{Collection, CollectionMut, Iterable};
 use core::marker::PhantomData;
 
 /// An iterable which does not yield any element.
@@ -11,7 +11,7 @@ impl<T> Iterable for Empty<T> {
 
     type Iter = core::iter::Empty<T>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         Default::default()
     }
 }
@@ -21,7 +21,7 @@ impl<T> Iterable for core::iter::Empty<T> {
 
     type Iter = core::iter::Empty<T>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         Default::default()
     }
 }
@@ -38,7 +38,7 @@ impl<'a, T> Iterable for &'a EmptyCol<T> {
 
     type Iter = core::iter::Empty<Self::Item>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         Default::default()
     }
 }
@@ -50,16 +50,18 @@ impl<T> Collection for EmptyCol<T> {
     where
         Self: 'i;
 
+    fn as_iterable(&self) -> Self::Iterable<'_> {
+        self
+    }
+}
+
+impl<T> CollectionMut for EmptyCol<T> {
     type IterMut<'i> = core::iter::Empty<&'i mut T>
     where
         Self: 'i;
 
     fn iter_mut(&mut self) -> Self::IterMut<'_> {
         Default::default()
-    }
-
-    fn as_iterable(&self) -> Self::Iterable<'_> {
-        self
     }
 }
 

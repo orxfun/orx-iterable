@@ -1,4 +1,4 @@
-use crate::{Collection, Iterable};
+use crate::{Collection, CollectionMut, Iterable};
 use core::marker::PhantomData;
 use orx_self_or::SoM;
 
@@ -22,8 +22,8 @@ where
 
     type Iter = core::iter::Filter<I::Iter, P>;
 
-    fn iterate(&self) -> Self::Iter {
-        self.it.iterate().filter(self.filter)
+    fn iter(&self) -> Self::Iter {
+        self.it.iter().filter(self.filter)
     }
 }
 
@@ -52,7 +52,7 @@ where
 
     type Iter = FilteredColIter<'a, I, P>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         let iter = self.it.get_ref().iter();
         FilteredColIter {
             iter,
@@ -73,6 +73,17 @@ where
     where
         Self: 'i;
 
+    fn as_iterable(&self) -> Self::Iterable<'_> {
+        self
+    }
+}
+
+impl<I, E, P> CollectionMut for FilteredCol<I, E, P>
+where
+    I: CollectionMut,
+    E: SoM<I>,
+    P: Fn(&I::Item) -> bool + Copy,
+{
     type IterMut<'i> = FilteredColIterMut<'i, I, P>
     where
         Self: 'i;
@@ -83,10 +94,6 @@ where
             iter,
             filter: self.filter,
         }
-    }
-
-    fn as_iterable(&self) -> Self::Iterable<'_> {
-        self
     }
 }
 
@@ -122,7 +129,7 @@ where
 /// Mutable iterator over the filtered iterable collection.
 pub struct FilteredColIterMut<'a, I, P>
 where
-    I: Collection + 'a,
+    I: CollectionMut + 'a,
     P: Fn(&I::Item) -> bool + Copy,
 {
     iter: I::IterMut<'a>,
@@ -131,7 +138,7 @@ where
 
 impl<'a, I, P> Iterator for FilteredColIterMut<'a, I, P>
 where
-    I: Collection,
+    I: CollectionMut,
     P: Fn(&I::Item) -> bool + Copy,
 {
     type Item = <I::IterMut<'a> as Iterator>::Item;

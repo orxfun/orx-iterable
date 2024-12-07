@@ -1,4 +1,4 @@
-use crate::{Collection, Iterable};
+use crate::{Collection, CollectionMut, Iterable};
 use core::marker::PhantomData;
 use orx_self_or::SoM;
 
@@ -21,8 +21,8 @@ where
 
     type Iter = core::iter::Rev<I::Iter>;
 
-    fn iterate(&self) -> Self::Iter {
-        self.it.iterate().rev()
+    fn iter(&self) -> Self::Iter {
+        self.it.iter().rev()
     }
 }
 
@@ -35,7 +35,6 @@ where
     I: Collection,
     E: SoM<I>,
     for<'b> <I::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
-    for<'b> I::IterMut<'b>: DoubleEndedIterator,
 {
     pub(crate) it: E,
     pub(crate) phantom: PhantomData<I>,
@@ -46,13 +45,12 @@ where
     I: Collection,
     E: SoM<I>,
     for<'b> <I::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
-    for<'b> I::IterMut<'b>: DoubleEndedIterator,
 {
     type Item = &'a I::Item;
 
     type Iter = core::iter::Rev<<I::Iterable<'a> as Iterable>::Iter>;
 
-    fn iterate(&self) -> Self::Iter {
+    fn iter(&self) -> Self::Iter {
         self.it.get_ref().iter().rev()
     }
 }
@@ -62,7 +60,6 @@ where
     I: Collection,
     E: SoM<I>,
     for<'b> <I::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
-    for<'b> I::IterMut<'b>: DoubleEndedIterator,
 {
     type Item = I::Item;
 
@@ -70,15 +67,23 @@ where
     where
         Self: 'i;
 
+    fn as_iterable(&self) -> Self::Iterable<'_> {
+        self
+    }
+}
+
+impl<I, E> CollectionMut for ReversedCol<I, E>
+where
+    I: CollectionMut,
+    E: SoM<I>,
+    for<'b> <I::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
+    for<'b> I::IterMut<'b>: DoubleEndedIterator,
+{
     type IterMut<'i> = core::iter::Rev<I::IterMut<'i>>
     where
         Self: 'i;
 
     fn iter_mut(&mut self) -> Self::IterMut<'_> {
         self.it.get_mut().iter_mut().rev()
-    }
-
-    fn as_iterable(&self) -> Self::Iterable<'_> {
-        self
     }
 }
