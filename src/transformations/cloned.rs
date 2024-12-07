@@ -19,7 +19,7 @@ where
 
     type Iter = core::iter::Cloned<I::Iter>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it.iter().cloned()
+    fn iterate(&self) -> Self::Iter {
+        self.it.iterate().cloned()
     }
 }

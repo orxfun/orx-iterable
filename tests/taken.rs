@@ -5,8 +5,8 @@ fn test_it(values: Vec<usize>, col: impl Iterable<Item = usize>) {
     let count = values.len();
 
     // tests
-    assert_eq!(col.iter().count(), count);
-    assert_eq!(col.iter().sum::<usize>(), sum);
+    assert_eq!(col.iterate().count(), count);
+    assert_eq!(col.iterate().sum::<usize>(), sum);
 }
 
 #[test]

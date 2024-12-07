@@ -6,9 +6,9 @@ fn test_it<'a>(values: Vec<(usize, bool)>, col: impl Iterable<Item = (&'a usize,
     let count = values.len();
 
     // tests
-    assert_eq!(col.iter().count(), count);
-    assert_eq!(col.iter().map(|x| x.0).sum::<usize>(), sum);
-    assert_eq!(col.iter().filter(|x| *x.1).count(), num_true);
+    assert_eq!(col.iterate().count(), count);
+    assert_eq!(col.iterate().map(|x| x.0).sum::<usize>(), sum);
+    assert_eq!(col.iterate().filter(|x| *x.1).count(), num_true);
 }
 
 #[test]

@@ -8,7 +8,7 @@ macro_rules! impl_for_range_of {
 
             type Iter = Self;
 
-            fn iter(&self) -> Self::Iter {
+            fn iterate(&self) -> Self::Iter {
                 self.clone()
             }
         }

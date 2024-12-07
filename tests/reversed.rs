@@ -5,11 +5,11 @@ fn test_it(mut values: Vec<usize>, col: impl Iterable<Item = usize>) {
     let count = values.len();
 
     // tests
-    assert_eq!(col.iter().count(), count);
-    assert_eq!(col.iter().sum::<usize>(), sum);
+    assert_eq!(col.iterate().count(), count);
+    assert_eq!(col.iterate().sum::<usize>(), sum);
 
     values.reverse();
-    assert_eq!(values, col.iter().collect::<Vec<_>>());
+    assert_eq!(values, col.iterate().collect::<Vec<_>>());
 }
 
 #[test]
@@ -140,5 +140,6 @@ fn def() {
 
     // numbers.iter_it();
 
-    assert_eq!((&numbers).iter().collect::<Vec<_>>(), [&4, &2, &7]);
+    assert_eq!(numbers.iter2().collect::<Vec<_>>(), [&4, &2, &7]);
+    assert_eq!((&numbers).iterate().collect::<Vec<_>>(), [&4, &2, &7]);
 }

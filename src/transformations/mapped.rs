@@ -20,7 +20,7 @@ where
 
     type Iter = core::iter::Map<I::Iter, M>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it.iter().map(self.map)
+    fn iterate(&self) -> Self::Iter {
+        self.it.iterate().map(self.map)
     }
 }

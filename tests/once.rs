@@ -4,13 +4,13 @@ use orx_iterable::*;
 fn once() {
     let it = orx_iterable::once::<usize>(42);
 
-    assert_eq!(it.iter().count(), 1);
-    assert_eq!(it.iter().sum::<usize>(), 42);
+    assert_eq!(it.iterate().count(), 1);
+    assert_eq!(it.iterate().sum::<usize>(), 42);
 
     let it = core::iter::once::<usize>(42);
 
-    assert_eq!(it.iter().count(), 1);
-    assert_eq!(it.iter().sum::<usize>(), 42);
+    assert_eq!(it.iterate().count(), 1);
+    assert_eq!(it.iterate().sum::<usize>(), 42);
 }
 
 #[test]

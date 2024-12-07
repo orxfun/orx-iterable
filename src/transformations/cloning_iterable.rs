@@ -18,10 +18,10 @@ use crate::Iterable;
 /// // evens below is an `Iterable` which can be iterated over many times
 /// let evens = numbers.iter().filter(|x| *x % 2 == 0).into_iterable();
 ///
-/// assert_eq!(4, evens.iter().count());
-/// assert_eq!(26, evens.iter().sum());
-/// assert_eq!(Some(&2), evens.iter().min());
-/// assert_eq!(Some(&10), evens.iter().max());
+/// assert_eq!(4, evens.iterate().count());
+/// assert_eq!(26, evens.iterate().sum());
+/// assert_eq!(Some(&2), evens.iterate().min());
+/// assert_eq!(Some(&10), evens.iterate().max());
 /// ```
 pub struct CloningIterable<I>(I)
 where
@@ -35,7 +35,7 @@ where
 
     type Iter = I;
 
-    fn iter(&self) -> Self::Iter {
+    fn iterate(&self) -> Self::Iter {
         self.0.clone()
     }
 }

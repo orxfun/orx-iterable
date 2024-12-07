@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableCol};
+use crate::{Collection, Iterable};
 use core::marker::PhantomData;
 use orx_self_or::SoM;
 
@@ -18,17 +18,17 @@ where
 
     type Iter = core::iter::Fuse<I::Iter>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it.iter().fuse()
+    fn iterate(&self) -> Self::Iter {
+        self.it.iterate().fuse()
     }
 }
 
 // col
 
-/// Wraps an `IterableCol` and transforms into a fused `IterableCol`.
+/// Wraps an `Collection` and transforms into a fused `Collection`.
 pub struct FusedCol<I, E>
 where
-    I: IterableCol,
+    I: Collection,
     E: SoM<I>,
 {
     pub(crate) it: E,
@@ -37,21 +37,21 @@ where
 
 impl<'a, I, E> Iterable for &'a FusedCol<I, E>
 where
-    I: IterableCol,
+    I: Collection,
     E: SoM<I>,
 {
     type Item = &'a I::Item;
 
     type Iter = core::iter::Fuse<<I::Iterable<'a> as Iterable>::Iter>;
 
-    fn iter(&self) -> Self::Iter {
+    fn iterate(&self) -> Self::Iter {
         self.it.get_ref().iter().fuse()
     }
 }
 
-impl<I, E> IterableCol for FusedCol<I, E>
+impl<I, E> Collection for FusedCol<I, E>
 where
-    I: IterableCol,
+    I: Collection,
     E: SoM<I>,
 {
     type Item = I::Item;

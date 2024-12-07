@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableCol};
+use crate::{Iterable, Collection};
 use core::marker::PhantomData;
 use orx_self_or::SoM;
 
@@ -20,18 +20,18 @@ where
 
     type Iter = core::iter::Skip<I::Iter>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it.iter().skip(self.n)
+    fn iterate(&self) -> Self::Iter {
+        self.it.iterate().skip(self.n)
     }
 }
 
 // col
 
-/// Wraps an `IterableCol` and creates a new `IterableCol` which skips first `n` the elements
+/// Wraps an `Collection` and creates a new `Collection` which skips first `n` the elements
 /// of the original iterable.
 pub struct SkippedCol<I, E>
 where
-    I: IterableCol,
+    I: Collection,
     E: SoM<I>,
 {
     pub(crate) it: E,
@@ -41,21 +41,21 @@ where
 
 impl<'a, I, E> Iterable for &'a SkippedCol<I, E>
 where
-    I: IterableCol,
+    I: Collection,
     E: SoM<I>,
 {
     type Item = &'a I::Item;
 
     type Iter = core::iter::Skip<<I::Iterable<'a> as Iterable>::Iter>;
 
-    fn iter(&self) -> Self::Iter {
+    fn iterate(&self) -> Self::Iter {
         self.it.get_ref().iter().skip(self.n)
     }
 }
 
-impl<I, E> IterableCol for SkippedCol<I, E>
+impl<I, E> Collection for SkippedCol<I, E>
 where
-    I: IterableCol,
+    I: Collection,
     E: SoM<I>,
 {
     type Item = I::Item;

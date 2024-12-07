@@ -12,16 +12,16 @@
 )]
 #![no_std]
 
+mod collection;
 mod iterable;
-mod iterable_col;
 mod producing_iterables;
 /// Module defining types implementing iterable traits behaving as source of iterables.
 pub mod sources;
 /// Module defining transformations among iterables.
 pub mod transformations;
 
+pub use collection::Collection;
 pub use iterable::Iterable;
-pub use iterable_col::IterableCol;
 
 pub use sources::{empty, empty_col, once, once_col, repeat, repeat_n};
 pub use transformations::IntoCloningIterable;

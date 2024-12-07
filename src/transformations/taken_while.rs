@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableCol};
+use crate::{Iterable, Collection};
 use core::marker::PhantomData;
 use orx_self_or::SoM;
 
@@ -22,18 +22,18 @@ where
 
     type Iter = core::iter::TakeWhile<I::Iter, P>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it.iter().take_while(self.take_while)
+    fn iterate(&self) -> Self::Iter {
+        self.it.iterate().take_while(self.take_while)
     }
 }
 
 // col
 
-/// Wraps an `IterableCol` and creates a new `IterableCol` which yields elements of
+/// Wraps an `Collection` and creates a new `Collection` which yields elements of
 /// the original iterable as long as a predicate is satisfied.
 pub struct TakenWhileCol<I, E, P>
 where
-    I: IterableCol,
+    I: Collection,
     E: SoM<I>,
     P: Fn(&I::Item) -> bool + Copy,
 {
@@ -44,7 +44,7 @@ where
 
 impl<'a, I, E, P> Iterable for &'a TakenWhileCol<I, E, P>
 where
-    I: IterableCol,
+    I: Collection,
     E: SoM<I>,
     P: Fn(&I::Item) -> bool + Copy,
 {
@@ -52,7 +52,7 @@ where
 
     type Iter = TakenWhileColIter<'a, I, P>;
 
-    fn iter(&self) -> Self::Iter {
+    fn iterate(&self) -> Self::Iter {
         let iter = self.it.get_ref().iter();
         TakenWhileColIter {
             iter,
@@ -61,9 +61,9 @@ where
     }
 }
 
-impl<I, E, P> IterableCol for TakenWhileCol<I, E, P>
+impl<I, E, P> Collection for TakenWhileCol<I, E, P>
 where
-    I: IterableCol,
+    I: Collection,
     E: SoM<I>,
     P: Fn(&I::Item) -> bool + Copy,
 {
@@ -95,7 +95,7 @@ where
 /// Immutable iterator for taken while iterable collections.
 pub struct TakenWhileColIter<'a, I, P>
 where
-    I: IterableCol + 'a,
+    I: Collection + 'a,
     P: Fn(&I::Item) -> bool + Copy,
 {
     iter: <I::Iterable<'a> as Iterable>::Iter,
@@ -104,7 +104,7 @@ where
 
 impl<'a, I, P> Iterator for TakenWhileColIter<'a, I, P>
 where
-    I: IterableCol,
+    I: Collection,
     P: Fn(&I::Item) -> bool + Copy,
 {
     type Item = <I::Iterable<'a> as Iterable>::Item;
@@ -118,7 +118,7 @@ where
 /// Mutable iterator for taken while iterable collections.
 pub struct TakenWhileColIterMut<'a, I, P>
 where
-    I: IterableCol + 'a,
+    I: Collection + 'a,
     P: Fn(&I::Item) -> bool + Copy,
 {
     iter: I::IterMut<'a>,
@@ -127,7 +127,7 @@ where
 
 impl<'a, I, P> Iterator for TakenWhileColIterMut<'a, I, P>
 where
-    I: IterableCol,
+    I: Collection,
     P: Fn(&I::Item) -> bool + Copy,
 {
     type Item = <I::IterMut<'a> as Iterator>::Item;

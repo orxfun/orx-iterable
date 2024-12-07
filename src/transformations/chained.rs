@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableCol};
+use crate::{Iterable, Collection};
 use core::marker::PhantomData;
 use orx_self_or::SoM;
 
@@ -21,8 +21,8 @@ where
 
     type Iter = core::iter::Chain<I1::Iter, I2::Iter>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it1.iter().chain(self.it2.iter())
+    fn iterate(&self) -> Self::Iter {
+        self.it1.iterate().chain(self.it2.iterate())
     }
 }
 
@@ -31,8 +31,8 @@ where
 /// An iterable collection created by chaining two iterable collections.
 pub struct ChainedCol<I1, I2, E1, E2>
 where
-    I1: IterableCol,
-    I2: IterableCol<Item = I1::Item>,
+    I1: Collection,
+    I2: Collection<Item = I1::Item>,
     E1: SoM<I1>,
     E2: SoM<I2>,
 {
@@ -43,8 +43,8 @@ where
 
 impl<'a, I1, I2, E1, E2> Iterable for &'a ChainedCol<I1, I2, E1, E2>
 where
-    I1: IterableCol,
-    I2: IterableCol<Item = I1::Item>,
+    I1: Collection,
+    I2: Collection<Item = I1::Item>,
     E1: SoM<I1>,
     E2: SoM<I2>,
 {
@@ -55,15 +55,15 @@ where
         <I2::Iterable<'a> as Iterable>::Iter,
     >;
 
-    fn iter(&self) -> Self::Iter {
+    fn iterate(&self) -> Self::Iter {
         self.it1.get_ref().iter().chain(self.it2.get_ref().iter())
     }
 }
 
-impl<I1, I2, E1, E2> IterableCol for ChainedCol<I1, I2, E1, E2>
+impl<I1, I2, E1, E2> Collection for ChainedCol<I1, I2, E1, E2>
 where
-    I1: IterableCol,
-    I2: IterableCol<Item = I1::Item>,
+    I1: Collection,
+    I2: Collection<Item = I1::Item>,
     E1: SoM<I1>,
     E2: SoM<I2>,
 {

@@ -19,7 +19,7 @@ where
 
     type Iter = core::iter::Zip<I1::Iter, I2::Iter>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it1.iter().zip(self.it2.iter())
+    fn iterate(&self) -> Self::Iter {
+        self.it1.iterate().zip(self.it2.iterate())
     }
 }

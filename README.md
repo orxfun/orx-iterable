@@ -3,7 +3,7 @@
 [![orx-iterable crate](https://img.shields.io/crates/v/orx-iterable.svg)](https://crates.io/crates/orx-iterable)
 [![orx-iterable documentation](https://docs.rs/orx-iterable/badge.svg)](https://docs.rs/orx-iterable)
 
-Iterable and IterableCol traits to generalize types which can be iterated over multiple times.
+Iterable and Collection traits to generalize types which can be iterated over multiple times.
 
 ## Motivation
 
@@ -25,10 +25,10 @@ struct Stats {
 /// * we can compute count & sum in one go
 /// * but we need the second iteration at least for std_dev
 fn statistics(numbers: impl Iterable<Item = i64>) -> Stats {
-    let count = numbers.iter().count() as i64;
-    let sum = numbers.iter().sum::<i64>();
+    let count = numbers.iterate().count() as i64;
+    let sum = numbers.iterate().sum::<i64>();
     let mean = sum / count;
-    let sum_sq_errors: i64 = numbers.iter().map(|x| (x - mean) * (x - mean)).sum();
+    let sum_sq_errors: i64 = numbers.iterate().map(|x| (x - mean) * (x - mean)).sum();
     let std_dev = f64::sqrt(sum_sq_errors as f64 / (count - 1) as f64) as i64;
     Stats {
         count: count as usize,
@@ -59,14 +59,14 @@ let numbers = (0..4)
 statistics(numbers);
 ```
 
-Furthermore, a more restrictive and stronger `IterableCol` trait is defined to additionally allow for mutable iterations using `iter_mut`.
+Furthermore, a more restrictive and stronger `Collection` trait is defined to additionally allow for mutable iterations using `iter_mut`.
 
 ```rust
 use orx_iterable::*;
 use std::collections::{LinkedList, VecDeque};
 
 /// first computes sum, and then adds it to each of the elements
-fn increment_by_sum(numbers: &mut impl IterableCol<Item = i32>) {
+fn increment_by_sum(numbers: &mut impl Collection<Item = i32>) {
     let sum: i32 = numbers.iter().sum();
 
     for x in numbers.iter_mut() {
@@ -91,12 +91,12 @@ assert_eq!(list, LinkedList::from_iter([7, 8, 9]));
 
 Currently, the standard library is lacking the iterable traits.
 
-This create introduces `Iterable` and IterableCol` traits. Thanks to the powerful rust type system ❤️🦀, these traits are automatically implemented for relevant types that are defined and to be defined.
+This create introduces `Iterable` and Collection` traits. Thanks to the powerful rust type system ❤️🦀, these traits are automatically implemented for relevant types that are defined and to be defined.
 
 * `Iterable` => `iter`
   * an iterable can be any type that can create iterators repeatedly.
   * lightweight & more inclusive.
-* `IterableCol` => `iter + iter_mut`
+* `Collection` => `iter + iter_mut`
   * an iterable collection which stores the elements that it yields.
   * more restrictive & more powerful.
 
@@ -194,9 +194,9 @@ use orx_iterable::*;
 
 let range = 3..7usize;
 
-assert_eq!(range.iter().max(), Some(6));
-assert_eq!(range.iter().sum::<usize>(), 18);
-assert_eq!(range.iter().product::<usize>(), 360);
+assert_eq!(range.iterate().max(), Some(6));
+assert_eq!(range.iterate().sum::<usize>(), 18);
+assert_eq!(range.iterate().product::<usize>(), 360);
 ```
 
 As a second example, consider the custom iterator `FibUntilIter` which produces Fibonacci numbers until an upper bound. `FibUntil` struct can create this iterator any time `iter` is called, and hence, it is an Iterable.
@@ -231,25 +231,25 @@ impl Iterable for FibUntil {
 
     type Iter = FibUntilIter;
 
-    fn iter(&self) -> Self::Iter {
+    fn iterate(&self) -> Self::Iter {
         FibUntilIter { curr: 0, next: 1, until: self.0 }
     }
 }
 
 let fib = FibUntil(10); // Iterable
 
-assert_eq!(fib.iter().count(), 7);
-assert_eq!(fib.iter().max(), Some(8));
-assert_eq!(fib.iter().collect::<Vec<_>>(), [0, 1, 1, 2, 3, 5, 8]);
+assert_eq!(fib.iterate().count(), 7);
+assert_eq!(fib.iterate().max(), Some(8));
+assert_eq!(fib.iterate().collect::<Vec<_>>(), [0, 1, 1, 2, 3, 5, 8]);
 ```
 
-### B. IterableCol
+### B. Collection
 
-> An `IterableCol` is a collection that is able to produce iterators yielding shared and mutable references to its elements.
+> An `Collection` is a collection that is able to produce iterators yielding shared and mutable references to its elements.
 
-IterableCol has more restrictive requirements than Iterable. However, in addition to `iter`, iterable collections also allow multiple mutable iterations through the `iter_mut` method.
+Collection has more restrictive requirements than Iterable. However, in addition to `iter`, iterable collections also allow multiple mutable iterations through the `iter_mut` method.
 
-Any collection type `X` having elements of type `T` that satisfies the following conditions automatically implements `IterableCol`:
+Any collection type `X` having elements of type `T` that satisfies the following conditions automatically implements `Collection`:
 * `X: IntoIterator<Item = T>`
 * `&X: IntoIterator<Item = &T>`
 * `&mut X: IntoIterator<Item = &mut T>`
@@ -258,7 +258,7 @@ These conditions are satisfied by std collections, as well as, many collections 
 
 ## Custom Iterables
 
-In the previous section, we mentioned the wide range of types that already implement `Iterable` and `IterableCol` traits. This has been possible thanks to the joyful rust type system, consistent use of `IntoIterator` trait in the standard library and almost all collection crates that follow this nice design pattern.
+In the previous section, we mentioned the wide range of types that already implement `Iterable` and `Collection` traits. This has been possible thanks to the joyful rust type system, consistent use of `IntoIterator` trait in the standard library and almost all collection crates that follow this nice design pattern.
 
 What about the new types? We can discuss this in three cases: (i) immutable collections, (ii) mutable collections and (iii) others.
 
@@ -324,7 +324,7 @@ impl<'a> IntoIterator for &'a mut EvensThenOdds {
 
 `Iterator` trait provides a wide variety of methods which transforms one iterator into another, such as `filter`, `map` or `flat_map`. These transformations can nicely be chained to compose lazy computation definitions.
 
-`Iterable` and `IterableCol` traits follow the same design and provide these chainable transformation methods.
+`Iterable` and `Collection` traits follow the same design and provide these chainable transformation methods.
 
 ```rust
 use orx_iterable::*;
@@ -341,8 +341,8 @@ let it = a
     .copied()                   // [3, 8]
     .flat_mapped(|x| [x, -x]);  // [3, -3, 8, -8]
 
-assert_eq!(it.iter().count(), 4);
-assert_eq!(it.iter().sum::<i32>(), 0);
+assert_eq!(it.iterate().count(), 4);
+assert_eq!(it.iterate().sum::<i32>(), 0);
 ```
 
 ## Contributing

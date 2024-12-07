@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableCol};
+use crate::{Iterable, Collection};
 use core::marker::PhantomData;
 
 /// An iterable which does not yield any element.
@@ -11,7 +11,7 @@ impl<T> Iterable for Empty<T> {
 
     type Iter = core::iter::Empty<T>;
 
-    fn iter(&self) -> Self::Iter {
+    fn iterate(&self) -> Self::Iter {
         Default::default()
     }
 }
@@ -21,7 +21,7 @@ impl<T> Iterable for core::iter::Empty<T> {
 
     type Iter = core::iter::Empty<T>;
 
-    fn iter(&self) -> Self::Iter {
+    fn iterate(&self) -> Self::Iter {
         Default::default()
     }
 }
@@ -38,12 +38,12 @@ impl<'a, T> Iterable for &'a EmptyCol<T> {
 
     type Iter = core::iter::Empty<Self::Item>;
 
-    fn iter(&self) -> Self::Iter {
+    fn iterate(&self) -> Self::Iter {
         Default::default()
     }
 }
 
-impl<T> IterableCol for EmptyCol<T> {
+impl<T> Collection for EmptyCol<T> {
     type Item = T;
 
     type Iterable<'i> = &'i Self

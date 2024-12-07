@@ -6,7 +6,7 @@ use crate::{
     Iterable,
 };
 
-/// Types implementing the `IterableCol` trait share the following key properties:
+/// Types implementing the `Collection` trait share the following key properties:
 /// * It is a collection that owns its elements or [`Item`]s. Of course, the items themselves can be
 ///   references, in which case the references are owned by the iterable collection.
 /// * Its [`iter`] method creates an iterator yielding references to elements of the collection;
@@ -16,26 +16,26 @@ use crate::{
 /// * Since it is an iterable, rather than an iterator, both `iter` and `iter_mut` methods can
 ///   be called any number of times to create new iterators.
 ///
-/// [`Item`]: crate::IterableCol::Item
-/// [`iter`]: crate::IterableCol::iter
-/// [`iter_mut`]: crate::IterableCol::iter_mut
+/// [`Item`]: crate::Collection::Item
+/// [`iter`]: crate::Collection::iter
+/// [`iter_mut`]: crate::Collection::iter_mut
 ///
 /// # Relation among Iterables
 ///
-/// Main similarity and difference between [`Iterable`] and [`IterableCol`] traits are as follows:
-/// * Both `Iterable` and `IterableCol` implements the `iter` method.
-/// * However, only `IterableCol` implements `iter_mut`. This is natural as `Iterable` promises to create an
+/// Main similarity and difference between [`Iterable`] and [`Collection`] traits are as follows:
+/// * Both `Iterable` and `Collection` implements the `iter` method.
+/// * However, only `Collection` implements `iter_mut`. This is natural as `Iterable` promises to create an
 ///   iterator yielding elements of type `Item`; however, does not promise to own them. On the other hand,
-///   `IterableCol` is a special case which promises to own memory of the elements that it yields.
+///   `Collection` is a special case which promises to own memory of the elements that it yields.
 ///
 /// Practically, these definitions correspond to the following relations:
-/// * if a collection `X` implements [`IterableCol<Item = T>`], then `&X` implements [`Iterable<Item = &T>`];
+/// * if a collection `X` implements [`Collection<Item = T>`], then `&X` implements [`Iterable<Item = &T>`];
 /// * on the other hand, a type implementing [`Iterable`] may not be a collection at all, such as [`Range<usize>`],
-///   and hence, does not necessarily implement [`IterableCol`].
+///   and hence, does not necessarily implement [`Collection`].
 ///
 /// [`Range<usize>`]: core::ops::Range
 ///
-/// # Types that auto-implement IterableCol
+/// # Types that auto-implement Collection
 ///
 /// Consider a collection `X` which implements the following traits:
 /// * `X: IntoIterator` => it can be consumed and turned into an iterator.
@@ -52,19 +52,19 @@ use crate::{
 /// Some examples from the standard library are `Vec<T>`, `[T; N]`, `VecDeque<T>`, `LinkedList<T>`.
 ///
 /// Or if you are using a collection outside std which satisfies the three requirements above, they will be
-/// automatically implementing `IterableCol`. Some examples are `SmallVec`, `ArrayVec` or `SplitVec`.
-pub trait IterableCol: Sized {
+/// automatically implementing `Collection`. Some examples are `SmallVec`, `ArrayVec` or `SplitVec`.
+pub trait Collection: Sized {
     /// Type of elements stored by the collection.
     type Item;
 
     /// Related type implementing `Iterable` trait that the `as_iterable` method returns.
-    /// If the type of the `IterableCol` is `X`, the corresponding `Iterable` type is almost
+    /// If the type of the `Collection` is `X`, the corresponding `Iterable` type is almost
     /// always `&X` due to the following relation among the both traits.
     ///
     /// Practically, these definitions correspond to the following relations:
-    /// * if a collection `X` implements [`IterableCol<Item = T>`], then `&X` implements [`Iterable<Item = &T>`];
+    /// * if a collection `X` implements [`Collection<Item = T>`], then `&X` implements [`Iterable<Item = &T>`];
     /// * on the other hand, a type implementing [`Iterable`] may not be a collection at all, such as [`Range<usize>`],
-    ///   and hence, does not necessarily implement [`IterableCol`].
+    ///   and hence, does not necessarily implement [`Collection`].
     ///
     /// [`Range<usize>`]: core::ops::Range
     type Iterable<'i>: Iterable<Item = &'i Self::Item>
@@ -73,19 +73,19 @@ pub trait IterableCol: Sized {
 
     /// Type of the iterator yielding mutable references created by the [`iter_mut`] method.
     ///
-    /// [`iter_mut`]: crate::IterableCol::iter_mut
+    /// [`iter_mut`]: crate::Collection::iter_mut
     type IterMut<'i>: Iterator<Item = &'i mut Self::Item>
     where
         Self: 'i;
 
     /// Creates a new iterator yielding references to the elements of the collection; i.e.,
-    /// type of elements is `&IterableCol::Item`.
+    /// type of elements is `&Collection::Item`.
     fn iter(&self) -> <Self::Iterable<'_> as Iterable>::Iter {
-        self.as_iterable().iter()
+        self.as_iterable().iterate()
     }
 
     /// Creates a new iterator yielding mutable references to the elements of the collection; i.e.,
-    /// type of elements is `&mut IterableCol::Item`.
+    /// type of elements is `&mut Collection::Item`.
     fn iter_mut(&mut self) -> Self::IterMut<'_>;
 
     /// Returns the corresponding `Iterable` type of this collection, which is often nothing but `&Self`.
@@ -116,7 +116,7 @@ pub trait IterableCol: Sized {
     /// ```
     fn into_chained<I>(self, other: I) -> ChainedCol<Self, I, Self, I>
     where
-        I: IterableCol<Item = Self::Item>,
+        I: Collection<Item = Self::Item>,
         for<'a> &'a I: Iterable<Item = &'a Self::Item>,
     {
         ChainedCol {
@@ -156,7 +156,7 @@ pub trait IterableCol: Sized {
         other: &'a mut I,
     ) -> ChainedCol<Self, I, &'a mut Self, &'a mut I>
     where
-        I: IterableCol<Item = Self::Item>,
+        I: Collection<Item = Self::Item>,
         for<'b> &'b I: Iterable<Item = &'b Self::Item>,
     {
         ChainedCol {
@@ -621,7 +621,7 @@ pub trait IterableCol: Sized {
     }
 }
 
-impl<X> IterableCol for X
+impl<X> Collection for X
 where
     X: IntoIterator,
     for<'a> &'a X: IntoIterator<Item = &'a <X as IntoIterator>::Item>,

@@ -1,4 +1,4 @@
-use crate::{Iterable, IterableCol};
+use crate::{Collection, Iterable};
 use core::marker::PhantomData;
 use orx_self_or::SoM;
 
@@ -21,18 +21,18 @@ where
 
     type Iter = core::iter::Rev<I::Iter>;
 
-    fn iter(&self) -> Self::Iter {
-        self.it.iter().rev()
+    fn iterate(&self) -> Self::Iter {
+        self.it.iterate().rev()
     }
 }
 
 // col
 
-/// Wraps an `IterableCol` and creates a new `IterableCol` which yields the elements
+/// Wraps an `Collection` and creates a new `Collection` which yields the elements
 /// of the original iterable in reverse order.
 pub struct ReversedCol<I, E>
 where
-    I: IterableCol,
+    I: Collection,
     E: SoM<I>,
     for<'b> <I::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
     for<'b> I::IterMut<'b>: DoubleEndedIterator,
@@ -43,7 +43,7 @@ where
 
 impl<'a, I, E> Iterable for &'a ReversedCol<I, E>
 where
-    I: IterableCol,
+    I: Collection,
     E: SoM<I>,
     for<'b> <I::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
     for<'b> I::IterMut<'b>: DoubleEndedIterator,
@@ -52,14 +52,14 @@ where
 
     type Iter = core::iter::Rev<<I::Iterable<'a> as Iterable>::Iter>;
 
-    fn iter(&self) -> Self::Iter {
+    fn iterate(&self) -> Self::Iter {
         self.it.get_ref().iter().rev()
     }
 }
 
-impl<I, E> IterableCol for ReversedCol<I, E>
+impl<I, E> Collection for ReversedCol<I, E>
 where
-    I: IterableCol,
+    I: Collection,
     E: SoM<I>,
     for<'b> <I::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
     for<'b> I::IterMut<'b>: DoubleEndedIterator,
