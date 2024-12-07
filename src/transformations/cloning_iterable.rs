@@ -55,10 +55,9 @@ where
 
 impl<I> IntoCloningIterable for I
 where
-    I: IntoIterator,
-    I::IntoIter: Clone,
+    I: Iterator + Clone,
 {
     fn into_iterable(self) -> CloningIterable<<Self as IntoIterator>::IntoIter> {
-        CloningIterable(self.into_iter())
+        CloningIterable(self)
     }
 }

@@ -59,7 +59,7 @@ let numbers = (0..4)
 statistics(numbers);
 ```
 
-Furthermore, a more restrictive and stronger `IterableCol` trait is defined to additionally allow `iter_mut` calls.
+Furthermore, a more restrictive and stronger `IterableCol` trait is defined to additionally allow for mutable iterations using `iter_mut`.
 
 ```rust
 use orx_iterable::*;
@@ -89,41 +89,42 @@ assert_eq!(list, LinkedList::from_iter([7, 8, 9]));
 
 ## Iterable Traits
 
-Iterable traits currently seem to be lacking in the standard library. 
-Luckily, rust type system is powerful ❤️🦀 to introduce these traits conveniently for types existed and to ever exist.
+Currently, the standard library is lacking the iterable traits.
+
+This create introduces `Iterable` and IterableCol` traits. Thanks to the powerful rust type system ❤️🦀, these traits are automatically implemented for relevant types that are defined and to be defined.
 
 * `Iterable` => `iter`
   * an iterable can be any type that can create iterators repeatedly.
+  * lightweight & more inclusive.
 * `IterableCol` => `iter + iter_mut`
+  * an iterable collection which stores the elements that it yields.
   * more restrictive & more powerful.
-  * requires the type to store each element that it can yield, and hence, represents the iterable behavior of the collections.
-  * a potential super trait of a `Collection` trait that can represent shared behavior of collections.
 
-### Iterable
+### A. Iterable
 
-> An `Iterable` is any type which can return a new iterator that yields elements of the associated type `Item` every time the `iter` is called.
+> An `Iterable` is any type which can return a new iterator that yields elements of the associated type `Item` every time `iter` method is called.
 
-Note that this is the core and least restrictive iterable definition which represents a wide range of types that can be investigated in three categories:
+Note that this is the core and least restrictive iterable definition which represents a wide range of types. We can investigate types implementing Iterable in three categories:
 
 * collections
 * cloneable iterators
 * element producing iterables
 
-#### A. Collections as Iterable
+#### A.1. Collections as Iterable
 
-Let `X` be a collection storing every one of its elements of type `T`, such as a vector, a set or a linked list. Then, `&X` implements `Iterable<Item = &T>`.
+Let `X` be a collection type storing elements of type `T`, such as a vector, a set or a linked list. Then, `&X` implements `Iterable<Item = &T>`.
 
-The formal requirement is as follows:
+The auto implementation requirement is as follows:
 
 ```rust ignore
 &X: IntoIterator<Item = &T> =====> &X: Iterable<Item = &T>
 ```
 
-Therefore, if we are implementing a new collection `X`:
-* once we implement `IntoIterator` on `&X`,
-* then, `&X` will automatically implement `Iterable`, and hence, the `iter` method will be readily available for our collection.
+Note that this implication is straightforward: provided that `&self` can be converted into an iterator, then we can define `iter(&self)` method returning the same iterator.
 
 This condition is satisfied by std collections, as well as, many collections outside the standard library, such as `SmallVec`, `ArrayVec` or `SplitVec` to name a few. You may see some examples below.
+
+TODO: link new collection
 
 ```rust
 use orx_iterable::*;
@@ -150,17 +151,15 @@ let names: VecDeque<_> = [String::from("xox")].into_iter().collect();
 process_names(&names);
 ```
 
-#### B. Cloneable Iterators
+#### A.2. Cloneable Iterators
 
-An iterator is not limited to visiting elements of a collection. Thanks to ergonomic methods that can be chained, such as `filter` or `map`, which transform one iterator to another, iterators often hold a definition of a computation over some data.
+An iterator is not limited to visiting elements of a collection. Thanks to chainable methods transforming one iterator to another, such as `filter` or `map`, iterators often hold a definition of a computation over some data.
 
 It would be awesome if we could use such an iterator multiple times.
 
 This is also conveniently possible.
 
-Consider a type which can be converted into an iterator that in turn can be cloned (`I: IntoIterator, I::IntoIter: Clone`). This type can be converted into an iterable by simply calling the `into_iterable` method.
-
-For most practical cases, this briefly means that any cloneable iterator can be an Iterable.
+Any iterator that can be cloned (`I: Iterator + Clone`) can be converted into an iterable by simply calling the `into_iterable` method.
 
 Consider the generic `process_names` function in the example above. This time we want to call it using a collection of names; however, we want to filter the names to be processed. One way to achieve this is to define the filtered iterator and convert it into an iterable as demonstrated below.
 
@@ -182,7 +181,7 @@ let filtered_names = iter.into_iterable();
 process_names(filtered_names);
 ```
 
-#### C. Element Producing Iterables
+#### A.3. Element Producing Iterables
 
 Some iterators yield elements which are created on the fly, rather than being read from a memory location.
 
@@ -200,7 +199,7 @@ assert_eq!(range.iter().sum::<usize>(), 18);
 assert_eq!(range.iter().product::<usize>(), 360);
 ```
 
-As a second example, consider the custom iterator `FibUntilIter` which produces Fibonacci numbers until an upper bound. `FibUntil` struct can create this iterator any time `iter` is called, and hence, it is an iterable, although it does not store any elements.
+As a second example, consider the custom iterator `FibUntilIter` which produces Fibonacci numbers until an upper bound. `FibUntil` struct can create this iterator any time `iter` is called, and hence, it is an Iterable.
 
 ```rust
 use orx_iterable::*;
@@ -244,11 +243,11 @@ assert_eq!(fib.iter().max(), Some(8));
 assert_eq!(fib.iter().collect::<Vec<_>>(), [0, 1, 1, 2, 3, 5, 8]);
 ```
 
-### IterableCol
+### B. IterableCol
+
+> An `IterableCol` is a collection that is able to produce iterators yielding shared and mutable references to its elements.
 
 IterableCol has more restrictive requirements than Iterable. However, in addition to `iter`, iterable collections also allow multiple mutable iterations through the `iter_mut` method.
-
-> An `IterableCol` is a collection that stores elements and is able to produce shared and mutable references for each one of its elements.
 
 Any collection type `X` having elements of type `T` that satisfies the following conditions automatically implements `IterableCol`:
 * `X: IntoIterator<Item = T>`
@@ -257,15 +256,73 @@ Any collection type `X` having elements of type `T` that satisfies the following
 
 These conditions are satisfied by std collections, as well as, many collections outside the standard library, such as `SmallVec`, `ArrayVec` or `SplitVec` to name a few.
 
-If we are implementing a new collection `X`:
-* once we implement IntoIterator on X, &X and &mut X,
-* `X` will automatically implement `IterableCol`, and hence, the `iter` and `iter_mut` methods will readily be available.
+## Custom Iterables
 
-*Note that element producing iterables such as the `Range<usize>` does not satisfy this requirement. Furthermore, cloneable iterators that produce elements on the fly, such as `numbers.iter().map(|x| x + 1)`, does not satisfy it either. This also clarifies the requirement for the Iterable trait.*
+In the previous section, we mentioned the wide range of types that already implement `Iterable` and `IterableCol` traits. This has been possible thanks to the joyful rust type system, consistent use of `IntoIterator` trait in the standard library and almost all collection crates that follow this nice design pattern.
 
-### Chainable Transformations
+What about the new types? We can discuss this in three cases: (i) immutable collections, (ii) mutable collections and (iii) others.
 
-The standard `Iterator` trait provides a wide variety of methods which transforms one iterator into another, such as `filter`, `map` or `flat_map`. These transformations can nicely be chained to compose lazy computation definitions.
+### Custom Immutable Collection
+
+For custom collections, we should not need to implement iterable traits. Better approach is to provide the `IntoIterator` implementations, and iterable traits will be automatically implemented.
+
+For an immutable collection, it suffices to implement `IntoIterator` for `&X` where `X` is our immutable collection.
+
+```rust
+
+```
+
+### Custom Collection
+
+For custom collections, we should not need to implement iterable traits. Better approach is to provide the `IntoIterator` implementations, and iterable traits will be automatically implemented.
+
+Consider for instance a custom collection of numbers which yields evens first, odds later.
+
+```rust
+use orx_iterable::*;
+
+pub struct EvensThenOdds {
+    pub evens: Vec<usize>,
+    pub odds: Vec<usize>,
+}
+
+impl IntoIterator for EvensThenOdds {
+    type Item = usize;
+
+    type IntoIter = core::iter::Chain<std::vec::IntoIter<usize>, std::vec::IntoIter<usize>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.evens.into_iter().chain(self.odds.into_iter())
+    }
+}
+
+impl<'a> IntoIterator for &'a EvensThenOdds {
+    type Item = &'a usize;
+
+    type IntoIter = core::iter::Chain<core::slice::Iter<'a, usize>, core::slice::Iter<'a, usize>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.evens.iter().chain(self.odds.iter())
+    }
+}
+
+impl<'a> IntoIterator for &'a mut EvensThenOdds {
+    type Item = &'a mut usize;
+
+    type IntoIter =
+        core::iter::Chain<core::slice::IterMut<'a, usize>, core::slice::IterMut<'a, usize>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.evens.iter_mut().chain(self.odds.iter_mut())
+    }
+}
+```
+
+
+
+## Chainable Transformations
+
+`Iterator` trait provides a wide variety of methods which transforms one iterator into another, such as `filter`, `map` or `flat_map`. These transformations can nicely be chained to compose lazy computation definitions.
 
 `Iterable` and `IterableCol` traits follow the same design and provide these chainable transformation methods.
 
