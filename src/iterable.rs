@@ -167,7 +167,7 @@ use crate::transformations::{
 /// assert_eq!(fib.iter().max(), Some(8));
 /// assert_eq!(fib.iter().collect::<Vec<_>>(), [0, 1, 1, 2, 3, 5, 8]);
 /// ```
-pub trait Iterable: Sized {
+pub trait Iterable {
     /// Type of the item that the iterators created by the [`iter`] method yields.
     ///
     /// [`iter`]: crate::Iterable::iter
@@ -205,6 +205,7 @@ pub trait Iterable: Sized {
     /// ```
     fn chained<I>(self, other: I) -> Chained<Self, I>
     where
+        Self: Sized,
         I: Iterable<Item = Self::Item>,
     {
         Chained {
@@ -234,8 +235,8 @@ pub trait Iterable: Sized {
     /// ```
     fn cloned<'a, T>(self) -> Cloned<'a, T, Self>
     where
+        Self: Sized + Iterable<Item = &'a T>,
         T: Clone,
-        Self: Iterable<Item = &'a T>,
     {
         Cloned { it: self }
     }
@@ -261,8 +262,8 @@ pub trait Iterable: Sized {
     /// ```
     fn copied<'a, T>(self) -> Copied<'a, T, Self>
     where
+        Self: Sized + Iterable<Item = &'a T>,
         T: Copy,
-        Self: Iterable<Item = &'a T>,
     {
         Copied { it: self }
     }
@@ -283,7 +284,10 @@ pub trait Iterable: Sized {
     /// assert_eq!(it.iter().count(), 3);
     /// assert_eq!(it.iter().collect::<Vec<_>>(), vec![(0, &'a'), (1, &'b'), (2, &'c')]);
     /// ```
-    fn enumerated(self) -> Enumerated<Self> {
+    fn enumerated(self) -> Enumerated<Self>
+    where
+        Self: Sized,
+    {
         Enumerated { it: self }
     }
 
@@ -309,6 +313,7 @@ pub trait Iterable: Sized {
     /// ```
     fn filter_mapped<M, U>(self, filter_map: M) -> FilterMapped<Self, M, U>
     where
+        Self: Sized,
         M: Fn(Self::Item) -> Option<U> + Copy,
     {
         FilterMapped {
@@ -336,6 +341,7 @@ pub trait Iterable: Sized {
     /// ```
     fn filtered<P>(self, filter: P) -> Filtered<Self, P>
     where
+        Self: Sized,
         P: Fn(&Self::Item) -> bool + Copy,
     {
         Filtered { it: self, filter }
@@ -365,6 +371,7 @@ pub trait Iterable: Sized {
     /// ```
     fn flat_mapped<M, U>(self, flat_map: M) -> FlatMapped<Self, M, U>
     where
+        Self: Sized,
         U: IntoIterator,
         M: Fn(Self::Item) -> U + Copy,
     {
@@ -390,6 +397,7 @@ pub trait Iterable: Sized {
     /// ```
     fn flattened(self) -> Flattened<Self>
     where
+        Self: Sized,
         Self::Item: IntoIterator,
     {
         Flattened { it: self }
@@ -402,7 +410,10 @@ pub trait Iterable: Sized {
     ///
     /// Note that the Fuse wrapper is a no-op on iterators that implement the FusedIterator trait.
     /// fuse() may therefore behave incorrectly if the FusedIterator trait is improperly implemented.
-    fn fused(self) -> Fused<Self> {
+    fn fused(self) -> Fused<Self>
+    where
+        Self: Sized,
+    {
         Fused { it: self }
     }
 
@@ -425,6 +436,7 @@ pub trait Iterable: Sized {
     /// ```
     fn mapped_while<M, U>(self, map_while: M) -> MappedWhile<Self, M, U>
     where
+        Self: Sized,
         M: Fn(Self::Item) -> Option<U> + Copy,
     {
         MappedWhile {
@@ -453,6 +465,7 @@ pub trait Iterable: Sized {
     /// ```
     fn mapped<M, U>(self, map: M) -> Mapped<Self, M, U>
     where
+        Self: Sized,
         M: Fn(Self::Item) -> U + Copy,
     {
         Mapped { it: self, map }
@@ -478,6 +491,7 @@ pub trait Iterable: Sized {
     /// ```
     fn reversed(self) -> Reversed<Self>
     where
+        Self: Sized,
         Self::Iter: DoubleEndedIterator,
     {
         Reversed { it: self }
@@ -502,7 +516,10 @@ pub trait Iterable: Sized {
     /// assert_eq!(it.iter().count(), 1);
     /// assert_eq!(it.iter().next(), Some(&3));
     /// ```
-    fn skipped(self, n: usize) -> Skipped<Self> {
+    fn skipped(self, n: usize) -> Skipped<Self>
+    where
+        Self: Sized,
+    {
         Skipped { it: self, n }
     }
 
@@ -526,6 +543,7 @@ pub trait Iterable: Sized {
     /// ```
     fn skipped_while<P>(self, skip_while: P) -> SkippedWhile<Self, P>
     where
+        Self: Sized,
         P: Fn(&Self::Item) -> bool + Copy,
     {
         SkippedWhile {
@@ -549,7 +567,10 @@ pub trait Iterable: Sized {
     ///
     /// assert_eq!(it.iter().collect::<Vec<_>>(), [&0, &2, &4]);
     /// ```
-    fn stepped_by(self, step: usize) -> SteppedBy<Self> {
+    fn stepped_by(self, step: usize) -> SteppedBy<Self>
+    where
+        Self: Sized,
+    {
         SteppedBy { it: self, step }
     }
 
@@ -566,7 +587,10 @@ pub trait Iterable: Sized {
     ///
     /// assert_eq!(it.iter().collect::<Vec<_>>(), [&1, &2]);
     /// ```
-    fn taken(self, n: usize) -> Taken<Self> {
+    fn taken(self, n: usize) -> Taken<Self>
+    where
+        Self: Sized,
+    {
         Taken { it: self, n }
     }
 
@@ -591,6 +615,7 @@ pub trait Iterable: Sized {
     /// ```
     fn taken_while<P>(self, take_while: P) -> TakenWhile<Self, P>
     where
+        Self: Sized,
         P: Fn(&Self::Item) -> bool + Copy,
     {
         TakenWhile {
@@ -623,6 +648,7 @@ pub trait Iterable: Sized {
     /// ```
     fn zipped<I>(self, other: I) -> Zipped<Self, I>
     where
+        Self: Sized,
         I: Iterable,
     {
         Zipped {

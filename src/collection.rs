@@ -64,7 +64,7 @@ use crate::{
 /// x.extend([3, 5, 7]);
 /// statistics(&x);
 /// ```
-pub trait Collection: Sized {
+pub trait Collection {
     /// Type of elements stored by the collection.
     type Item;
 
@@ -116,6 +116,7 @@ pub trait Collection: Sized {
     /// ```
     fn into_chained<I>(self, other: I) -> ChainedCol<Self, I, Self, I>
     where
+        Self: Sized,
         I: Collection<Item = Self::Item>,
     {
         ChainedCol {
@@ -145,6 +146,7 @@ pub trait Collection: Sized {
     /// ```
     fn into_filtered<P>(self, filter: P) -> FilteredCol<Self, Self, P>
     where
+        Self: Sized,
         P: Fn(&Self::Item) -> bool + Copy,
     {
         FilteredCol {
@@ -174,6 +176,7 @@ pub trait Collection: Sized {
     /// ```
     fn into_flattened(self) -> FlattenedCol<Self, Self>
     where
+        Self: Sized,
         Self::Item: IntoIterator,
         for<'i> &'i Self::Item: IntoIterator<Item = &'i <Self::Item as IntoIterator>::Item>,
     {
@@ -186,7 +189,10 @@ pub trait Collection: Sized {
     /// Consumes this collection and creates an iterable collection which is a fused version of this collection.
     ///
     /// See [`core::iter::Fuse`] for details on fused iterators.
-    fn into_fused(self) -> FusedCol<Self, Self> {
+    fn into_fused(self) -> FusedCol<Self, Self>
+    where
+        Self: Sized,
+    {
         FusedCol {
             it: self,
             phantom: Default::default(),
@@ -212,6 +218,7 @@ pub trait Collection: Sized {
     /// ```
     fn into_reversed(self) -> ReversedCol<Self, Self>
     where
+        Self: Sized,
         for<'b> <Self::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
     {
         ReversedCol {
@@ -235,7 +242,10 @@ pub trait Collection: Sized {
     /// let it = it.into_skipped(1);
     /// assert_eq!(it.iter().collect::<Vec<_>>(), [&4, &5]);
     /// ```
-    fn into_skipped(self, n: usize) -> SkippedCol<Self, Self> {
+    fn into_skipped(self, n: usize) -> SkippedCol<Self, Self>
+    where
+        Self: Sized,
+    {
         SkippedCol {
             it: self,
             n,
@@ -258,6 +268,7 @@ pub trait Collection: Sized {
     /// ```
     fn into_skipped_while<P>(self, skip_while: P) -> SkippedWhileCol<Self, Self, P>
     where
+        Self: Sized,
         P: Fn(&Self::Item) -> bool + Copy,
     {
         SkippedWhileCol {
@@ -280,7 +291,10 @@ pub trait Collection: Sized {
     ///
     /// assert_eq!(it.iter().collect::<Vec<_>>(), [&0, &2, &4]);
     /// ```
-    fn into_stepped_by(self, step: usize) -> SteppedByCol<Self, Self> {
+    fn into_stepped_by(self, step: usize) -> SteppedByCol<Self, Self>
+    where
+        Self: Sized,
+    {
         SteppedByCol {
             it: self,
             step,
@@ -303,7 +317,10 @@ pub trait Collection: Sized {
     /// let it = it.into_taken(2);
     /// assert_eq!(it.iter().collect::<Vec<_>>(), [&1, &2]);
     /// ```
-    fn into_taken(self, n: usize) -> TakenCol<Self, Self> {
+    fn into_taken(self, n: usize) -> TakenCol<Self, Self>
+    where
+        Self: Sized,
+    {
         TakenCol {
             it: self,
             n,
@@ -326,6 +343,7 @@ pub trait Collection: Sized {
     /// ```
     fn into_taken_while<P>(self, take_while: P) -> TakenWhileCol<Self, Self, P>
     where
+        Self: Sized,
         P: Fn(&Self::Item) -> bool + Copy,
     {
         TakenWhileCol {

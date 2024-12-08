@@ -106,6 +106,7 @@ pub trait CollectionMut: Collection {
         other: &'a mut I,
     ) -> ChainedCol<Self, I, &'a mut Self, &'a mut I>
     where
+        Self: Sized,
         I: CollectionMut<Item = Self::Item>,
     {
         ChainedCol {
@@ -138,6 +139,7 @@ pub trait CollectionMut: Collection {
     /// ```
     fn filtered_mut<P>(&mut self, filter: P) -> FilteredCol<Self, &mut Self, P>
     where
+        Self: Sized,
         P: Fn(&Self::Item) -> bool + Copy,
     {
         FilteredCol {
@@ -170,6 +172,7 @@ pub trait CollectionMut: Collection {
     /// ```
     fn flattened_mut(&mut self) -> FlattenedCol<Self, &mut Self>
     where
+        Self: Sized,
         Self::Item: IntoIterator,
         for<'i> &'i Self::Item: IntoIterator<Item = &'i <Self::Item as IntoIterator>::Item>,
         for<'i> &'i mut Self::Item: IntoIterator<Item = &'i mut <Self::Item as IntoIterator>::Item>,
@@ -183,7 +186,10 @@ pub trait CollectionMut: Collection {
     /// Creates an iterable collection view which is a fused version of this collection from its mutable reference.
     ///
     /// See [`core::iter::Fuse`] for details on fused iterators.
-    fn fused_mut(&mut self) -> FusedCol<Self, &mut Self> {
+    fn fused_mut(&mut self) -> FusedCol<Self, &mut Self>
+    where
+        Self: Sized,
+    {
         FusedCol {
             it: self,
             phantom: Default::default(),
@@ -207,6 +213,7 @@ pub trait CollectionMut: Collection {
     /// ```
     fn reversed_mut(&mut self) -> ReversedCol<Self, &mut Self>
     where
+        Self: Sized,
         for<'b> <Self::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
         for<'b> Self::IterMut<'b>: DoubleEndedIterator,
     {
@@ -235,7 +242,10 @@ pub trait CollectionMut: Collection {
     ///
     /// assert_eq!(a, [1, 2, 13, 14, 15]);
     /// ```
-    fn skipped_mut(&mut self, n: usize) -> SkippedCol<Self, &mut Self> {
+    fn skipped_mut(&mut self, n: usize) -> SkippedCol<Self, &mut Self>
+    where
+        Self: Sized,
+    {
         SkippedCol {
             it: self,
             n,
@@ -264,6 +274,7 @@ pub trait CollectionMut: Collection {
     /// ```
     fn skipped_while_mut<P>(&mut self, skip_while: P) -> SkippedWhileCol<Self, &mut Self, P>
     where
+        Self: Sized,
         P: Fn(&Self::Item) -> bool + Copy,
     {
         SkippedWhileCol {
@@ -292,7 +303,10 @@ pub trait CollectionMut: Collection {
     ///
     /// assert_eq!(a, [0, 1, 20, 3, 40, 5]);
     /// ```
-    fn stepped_by_mut(&mut self, step: usize) -> SteppedByCol<Self, &mut Self> {
+    fn stepped_by_mut(&mut self, step: usize) -> SteppedByCol<Self, &mut Self>
+    where
+        Self: Sized,
+    {
         SteppedByCol {
             it: self,
             step,
@@ -319,7 +333,10 @@ pub trait CollectionMut: Collection {
     ///
     /// assert_eq!(a, [11, 12, 13, 4, 5]);
     /// ```
-    fn taken_mut(&mut self, n: usize) -> TakenCol<Self, &mut Self> {
+    fn taken_mut(&mut self, n: usize) -> TakenCol<Self, &mut Self>
+    where
+        Self: Sized,
+    {
         TakenCol {
             it: self,
             n,
@@ -348,6 +365,7 @@ pub trait CollectionMut: Collection {
     /// ```
     fn taken_while_mut<P>(&mut self, take_while: P) -> TakenWhileCol<Self, &mut Self, P>
     where
+        Self: Sized,
         P: Fn(&Self::Item) -> bool + Copy,
     {
         TakenWhileCol {
