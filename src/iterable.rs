@@ -679,6 +679,6 @@ impl<'a, X> Iterable for &'a [X] {
     type Iter = core::slice::Iter<'a, X>;
 
     fn iter(&self) -> Self::Iter {
-        return <[X]>::iter(self);
+        <[X]>::iter(self)
     }
 }
