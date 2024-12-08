@@ -15,7 +15,6 @@
 mod collection;
 mod collection_mut;
 mod iterable;
-mod iterable_mut;
 mod producing_iterables;
 /// Module defining types implementing iterable traits behaving as source of iterables.
 pub mod sources;
