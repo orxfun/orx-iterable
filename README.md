@@ -5,6 +5,8 @@
 
 Defines and implements Iterable, Collection and CollectionMut traits to represent types that can be iterated over multiple times.
 
+You may find an article discussing the motivation and implementation details [here](https://orxfun.github.io/orxfun-notes/#/missing-iterable-traits-2024-12-13).
+
 There exist numerous situations where we need to iterate over an abstract type multiple times. Currently most collections allow this by `iter` and `iter_mut` methods; however, this is a convention rather than a shared behavior defined by a trait method.
 
 > `Collection` and `CollectionMut` traits are defined and automatically implemented for all collections enabling abstraction over repeatedly iterable collection types.
