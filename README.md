@@ -132,9 +132,11 @@ increment_by_sum(&mut x);
 
 ## B. Iterable
 
-Collection traits are useful; however, they do not cover all iterables. By definition, they are bound to yield shared or mutable references to their elements. However, some iterators produce elements on the fly during iteration. Therefore, they cannot return a reference to the temporarily computed values. Further, mutable references is irrelevant. Therefore, we require a more general definition for immutable iterables.
+Collection traits are useful; however, they do not cover all iterables. By definition, they are bound to yield shared or mutable references to their elements. However, some iterators produce elements on the fly during iteration. Therefore, they cannot return a reference to the temporarily computed values. Further, mutable references are irrelevant in these situations. Therefore, we require a more general definition for immutable iterables.
 
 > An `Iterable` is any type which can return a new iterator that yields elements of the associated type `Item` every time `iter` method is called.
+
+This is arguably the most general or least restrictive definition of iterables.
 
 Three categories of types implement the Iterable trait:
 
@@ -232,12 +234,12 @@ statistics(7..21i64);
 References of collections automatically implement Iterable, again based on the IntoIterator implementation.
 
 ```rust ignore
-&X: IntoIterator<Item = &T>           ===>   &X: Iterable
+&X: IntoIterator<Item = &T>    ===>   &X: Iterable<Item = &T>
 // equivalently
-X: Collection<Item = T>               ===>   &X: Iterable
+X: Collection<Item = T>        ===>   &X: Iterable<Item = &T>
 ```
 
-Note that the implication is straightforward. If we can implement `iter(&self)` for the collection itself, we can implement it for its reference too. This implementation is useful in allowing to create the more general Iterable's from Collection's; we can simply use a reference of a collection when we require an Iterable.
+Note that the implication is straightforward. If we can implement `iter(&self)` for the collection itself, we can implement it for its reference too. This implementation is very useful to allow creating the more general Iterable's from Collection's. We can simply use a reference of a collection when we require an Iterable.
 
 ### B.2. Cloneable Iterators
 
@@ -313,9 +315,10 @@ assert_eq!(fib.iter().collect::<Vec<_>>(), [0, 1, 1, 2, 3, 5, 8]);
 
 ```rust
 use orx_iterable::*;
+use std::collections::HashSet;
 
 let a = vec![3, 7, 1];
-let b = vec![8];
+let b = HashSet::<_>::from_iter([8]);
 let c = [true, false, false, true];
 
 let it = a
@@ -334,13 +337,15 @@ Also see consuming and mutable variants such as `into_filtered` or `filtered_mut
 
 ## D. Defining New Custom Collections
 
-This crate aims to bring in the missing iterable and collection traits while keeping manual implementations as few as possible. Rust's joyful type system ❤️🦀 and the consistent usage of the IntoIterator trait in standard library and collection crates allow us to achieve this almost effortlessly.
+This crate aims to bring in the missing iterable and collection traits while keeping manual implementations as few as possible. Rust's powerful type system and the consistent usage of the IntoIterator trait in standard library and collection crates allow us to achieve this almost effortlessly ❤️🦀.
 
-When developing a new collection type, iterable and collection traits and corresponding iter and iter_mut methods will be readily available once we provide the relevant IntoIterator implementations.
+When developing a new collection type, if we follow this design pattern and provide the relevant IntoIterator implementations, then corresponding iterable and collections traits, and hence, iter and iter_mut methods, will be readily available.
 
 ### D.1. Custom Collection
 
-Assume that our collection `X` does not allow for iter_mut such as the `HashSet`. In this case, once we provide the following implementations:
+Assume that our collection `X` does not allow for iter_mut method. There might be several reasons for this; it might simply be an immutable collection, or providing mutable references to elements might risk data structure's consistency such as for the `HashSet`.
+
+In this case, once we provide the following implementations:
 
 * `X: IntoIterator`
 * `&X: IntoIterator<Item = &<X as IntoIterator>::Item>`
@@ -403,7 +408,7 @@ If our new collection allows both immutable and mutable iterations, we need to a
 
 * `&mut X: IntoIterator<Item = &mut <X as IntoIterator>::Item>`
 
-Then our collection will automatically implement `CollectionMut`.
+Then our collection will implement also the `CollectionMut` trait.
 
 <br />
 <details>
