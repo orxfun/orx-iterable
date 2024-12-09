@@ -1,27 +1,22 @@
 use crate::obj_safe::collection_obj::CollectionObj;
 use std::boxed::Box;
 
-/// A mutable collection providing the [`boxed_iter_mut`] method which returns an iterator over mutable references
-/// of elements of the collection.
+/// In addition to  [`boxed_iter`], a `CollectionMutObj` provides the [`boxed_iter_mut`] method which returns a boxed
+/// iterator over mutable references of elements of the collection.
 ///
-/// Since it extends `CollectionObj`, `boxed_iter` method is also available which returns an iterator over shared references
-/// of elements.
+/// It is the object safe counterpart of [`CollectionMut`] trait which can conveniently be made into a trait object.
 ///
-/// It is the object safe variant of [`CollectionMut`] trait which can conveniently be made a trait object.
+/// Note that for collections, `CollectionMutObj` is implicitly implemented and readily available.
+/// Please refer to [`CollectionMut`] documentation for details of automatic implementations.
 ///
-/// [`boxed_iter_mut`]: crate::CollectionMutObj::boxed_iter_mut
-/// [`CollectionMut`]: orx_iterable::CollectionMut
+/// In order to use object safe iterables and collections please add `--features std` and use
+/// `use orx_iterable::{*, obj_safe::*}` to import dependencies rather than `use orx_iterable::{*}`.
 ///
-/// # Auto Implementations
-///
-/// Consider a collection type `X` storing elements of type `T`. Provided that the following implementations are provided:
-///
-/// * `X: IntoIterator<Item = T>`
-/// * `&X: IntoIterator<Item = &T>`
-/// * `&mut X: IntoIterator<Item = &mut T>`
-///
-/// Then, `X` implements `CollectionObj<Item = T>` and `CollectionMutObj<Item = T>`.
-/// Further, `&X` implements `IterableObj<Item = &T>`.
+/// [`Iterable`]: crate::Iterable
+/// [`Item`]: crate::obj_safe::CollectionMutObj::Item
+/// [`boxed_iter`]: crate::obj_safe::CollectionObj::boxed_iter
+/// [`boxed_iter_mut`]: crate::obj_safe::CollectionMutObj::boxed_iter_mut
+/// [`CollectionMut`]: crate::CollectionMut
 ///
 /// # Examples
 ///

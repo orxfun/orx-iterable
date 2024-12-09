@@ -3,54 +3,24 @@ use std::boxed::Box;
 /// An `IterableObj` is any type which can return a new boxed iterator that yields
 /// elements of the associated type [`Item`] every time [`boxed_iter`] method is called.
 ///
-/// It is the object safe variant of [`Iterable`] trait which can conveniently be made a trait object.
+/// It is the object safe counterpart of [`Iterable`] trait which can conveniently be made into a trait object.
 ///
-/// [`Item`]: crate::IterableObj::Item
-/// [`boxed_iter`]: crate::IterableObj::boxed_iter
-/// [`Iterable`]: orx_iterable::Iterable
+/// Instead of `iter`, it implements `boxed_iter` which returns the same iterator in a box.
 ///
-/// Notice that this is the least restrictive and most general iterable definition.
+/// Note that for collections and cloneable iterators, `IterableObj` is implicitly implemented and readily available.
+/// Please refer to [`Iterable`] documentation for details of automatic implementations.
 ///
-/// Three categories of types implement the Iterable trait:
+/// In order to use object safe iterables and collections please add `--features std` and use
+/// `use orx_iterable::{*, obj_safe::*}` to import dependencies rather than `use orx_iterable::{*}`.
 ///
-/// * references of collections
-/// * cloneable iterators
-/// * lazy generators
-///
-/// # Auto Implementations
-///
-/// ## References of collections
-///
-/// First, consider a collection type `X` storing elements of type `T`.
-/// Provided that the following implementation is provided:
-///
-/// * `&X: IntoIterator<Item = &T>`
-///
-/// Then, `&X` implements `IterableObj<Item = &T>`.
-///
-/// In other words, a reference of a collection is an `IterableObj`.
-///
-/// ## Cloneable iterators
-///
-/// Second, consider an iterator that can be cloned; i.e., `Iterator + Clone`.
-/// This iterator can be converted into an `IterableObj` which can be iterated over
-/// repeatedly. The transformation is by calling the `into_iterable` method.
-///
-/// ## Lazy Generators
-///
-/// Third, consider types iterators of which create values on the fly during the
-/// iteration. One such example is the range.
-/// Consider, for instance, the range 3..7.
-/// Although it looks like a collection, it does not hold elements (3, 4, 5, 6) anywhere in memory. These elements are produced on the fly during the iteration.
-/// `IterableObj` trait implementations for the ranges are provided in this crate.
-///
-/// For similar custom types, the trait needs to be implemented explicitly.
+/// [`Item`]: crate::obj_safe::IterableObj::Item
+/// [`boxed_iter`]: crate::obj_safe::IterableObj::boxed_iter
+/// [`Iterable`]: crate::Iterable
 ///
 /// # Examples
 ///
 /// ```
-/// use orx_iterable::*;
-/// use orx_iterable::obj_safe::*;
+/// use orx_iterable::{*, obj_safe::*};
 /// use arrayvec::ArrayVec;
 /// use smallvec::{smallvec, SmallVec};
 /// use std::collections::{BTreeSet, BinaryHeap, HashSet, LinkedList, VecDeque};
@@ -163,7 +133,7 @@ use std::boxed::Box;
 ///     }
 /// }
 ///
-/// let fib = FibUntil(10); // Iterable
+/// let fib = FibUntil(10); // IterableObj
 ///
 /// assert_eq!(fib.boxed_iter().count(), 7);
 /// assert_eq!(fib.boxed_iter().max(), Some(8));
@@ -172,7 +142,7 @@ use std::boxed::Box;
 pub trait IterableObj {
     /// Type of the item that the iterators created by the [`boxed_iter`] method yields.
     ///
-    /// [`boxed_iter`]: crate::IterableObj::boxed_iter
+    /// [`boxed_iter`]: crate::obj_safe::IterableObj::boxed_iter
     type Item;
 
     /// Creates a new iterator in a box from this iterable yielding elements of type `IterableObj::Item`.

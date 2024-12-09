@@ -1,22 +1,20 @@
 use std::boxed::Box;
 
-/// A collection providing the [`boxed_iter`] method which returns a boxed iterator over shared references
+/// A `CollectionObj` provides the [`boxed_iter`] method which returns a boxed iterator over shared references
 /// of elements of the collection.
 ///
-/// It is the object safe variant of [`Collection`] trait which can conveniently be made a trait object.
+/// It is the object safe counterpart of [`Collection`] trait which can conveniently be made into a trait object.
 ///
-/// [`boxed_iter`]: crate::CollectionObj::boxed_iter
-/// [`Collection`]: orx_iterable::Collection
+/// Note that for collections, `CollectionObj` is implicitly implemented and readily available.
+/// Please refer to [`Collection`] documentation for details of automatic implementations.
 ///
-/// # Auto Implementations
+/// In order to use object safe iterables and collections please add `--features std` and use
+/// `use orx_iterable::{*, obj_safe::*}` to import dependencies rather than `use orx_iterable::{*}`.
 ///
-/// Consider a collection type `X` storing elements of type `T`. Provided that the following implementations are provided:
-///
-/// * `X: IntoIterator<Item = T>`
-/// * `&X: IntoIterator<Item = &T>`
-///
-/// Then, `X` implements `CollectionObj<Item = T>`.
-/// Further, `&X` implements `IterableObj<Item = &T>`.
+/// [`Iterable`]: crate::Iterable
+/// [`Item`]: crate::obj_safe::CollectionObj::Item
+/// [`boxed_iter`]: crate::obj_safe::CollectionObj::boxed_iter
+/// [`Collection`]: crate::Collection
 ///
 /// # Examples
 ///
