@@ -43,21 +43,13 @@ where
 /// Trait to transform types implementing `Iterator + Clone` into an `Iterable`.
 ///
 /// Resulting iterable is of type [`CloningIterable`].
-pub trait IntoCloningIterable: IntoIterator
-where
-    <Self as IntoIterator>::IntoIter: Clone,
-{
+pub trait IntoCloningIterable: Iterator + Clone {
     /// Transforms this type implementing `Iterator + Clone` into an `Iterable`.
     ///
     /// Resulting iterable is of type [`CloningIterable`].
-    fn into_iterable(self) -> CloningIterable<<Self as IntoIterator>::IntoIter>;
-}
-
-impl<I> IntoCloningIterable for I
-where
-    I: Iterator + Clone,
-{
-    fn into_iterable(self) -> CloningIterable<<Self as IntoIterator>::IntoIter> {
+    fn into_iterable(self) -> CloningIterable<Self> {
         CloningIterable(self)
     }
 }
+
+impl<I> IntoCloningIterable for I where I: Iterator + Clone {}
