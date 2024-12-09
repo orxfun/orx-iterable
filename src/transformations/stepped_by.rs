@@ -60,7 +60,8 @@ where
 {
     type Item = I::Item;
 
-    type Iterable<'i> = &'i Self
+    type Iterable<'i>
+        = &'i Self
     where
         Self: 'i;
 
@@ -74,7 +75,8 @@ where
     I: CollectionMut,
     E: SoM<I>,
 {
-    type IterMut<'i> = core::iter::StepBy<I::IterMut<'i>>
+    type IterMut<'i>
+        = core::iter::StepBy<I::IterMut<'i>>
     where
         Self: 'i;
 

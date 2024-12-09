@@ -361,7 +361,8 @@ where
 {
     type Item = <X as IntoIterator>::Item;
 
-    type Iterable<'i> = &'i X
+    type Iterable<'i>
+        = &'i X
     where
         Self: 'i;
 

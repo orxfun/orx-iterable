@@ -382,7 +382,8 @@ where
     for<'a> &'a X: IntoIterator<Item = &'a <X as IntoIterator>::Item>,
     for<'a> &'a mut X: IntoIterator<Item = &'a mut <X as IntoIterator>::Item>,
 {
-    type IterMut<'i> = <&'i mut X as IntoIterator>::IntoIter
+    type IterMut<'i>
+        = <&'i mut X as IntoIterator>::IntoIter
     where
         Self: 'i;
 

@@ -5,7 +5,7 @@ pub struct Once<T>
 where
     T: Clone,
 {
-    value: T,
+    pub(crate) value: T,
 }
 
 impl<T> Iterable for Once<T>
@@ -38,7 +38,7 @@ where
 
 /// An iterable collection having only one item.
 pub struct OnceCol<T> {
-    value: T,
+    pub(crate) value: T,
 }
 
 impl<'a, T> Iterable for &'a OnceCol<T> {
@@ -54,7 +54,8 @@ impl<'a, T> Iterable for &'a OnceCol<T> {
 impl<T> Collection for OnceCol<T> {
     type Item = T;
 
-    type Iterable<'i> = &'i Self
+    type Iterable<'i>
+        = &'i Self
     where
         Self: 'i;
 
@@ -64,7 +65,8 @@ impl<T> Collection for OnceCol<T> {
 }
 
 impl<T> CollectionMut for OnceCol<T> {
-    type IterMut<'i> = core::iter::Once<&'i mut T>
+    type IterMut<'i>
+        = core::iter::Once<&'i mut T>
     where
         Self: 'i;
 

@@ -66,7 +66,8 @@ where
 {
     type Item = <I::Item as IntoIterator>::Item;
 
-    type Iterable<'i> = &'i Self
+    type Iterable<'i>
+        = &'i Self
     where
         Self: 'i;
 
@@ -83,7 +84,8 @@ where
     for<'i> &'i mut I::Item: IntoIterator<Item = &'i mut <I::Item as IntoIterator>::Item>,
     E: SoM<I>,
 {
-    type IterMut<'i> = core::iter::Flatten<I::IterMut<'i>>
+    type IterMut<'i>
+        = core::iter::Flatten<I::IterMut<'i>>
     where
         Self: 'i;
 

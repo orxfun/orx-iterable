@@ -15,3 +15,7 @@ orx-self-or = "1.0"
 [dev-dependencies]
 arrayvec = { version = "0.7.6", default-features = false }
 smallvec = { version = "1.13.2", default-features = false }
+
+[features]
+default = ["std"]
+std = []

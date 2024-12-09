@@ -63,7 +63,8 @@ where
 {
     type Item = I::Item;
 
-    type Iterable<'i> = &'i Self
+    type Iterable<'i>
+        = &'i Self
     where
         Self: 'i;
 
@@ -79,7 +80,8 @@ where
     for<'b> <I::Iterable<'b> as Iterable>::Iter: DoubleEndedIterator,
     for<'b> I::IterMut<'b>: DoubleEndedIterator,
 {
-    type IterMut<'i> = core::iter::Rev<I::IterMut<'i>>
+    type IterMut<'i>
+        = core::iter::Rev<I::IterMut<'i>>
     where
         Self: 'i;
 

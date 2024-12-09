@@ -46,7 +46,8 @@ impl<'a, T> Iterable for &'a EmptyCol<T> {
 impl<T> Collection for EmptyCol<T> {
     type Item = T;
 
-    type Iterable<'i> = &'i Self
+    type Iterable<'i>
+        = &'i Self
     where
         Self: 'i;
 
@@ -56,7 +57,8 @@ impl<T> Collection for EmptyCol<T> {
 }
 
 impl<T> CollectionMut for EmptyCol<T> {
-    type IterMut<'i> = core::iter::Empty<&'i mut T>
+    type IterMut<'i>
+        = core::iter::Empty<&'i mut T>
     where
         Self: 'i;
 

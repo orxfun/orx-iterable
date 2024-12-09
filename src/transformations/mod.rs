@@ -25,7 +25,7 @@ pub use copied::Copied;
 pub use enumerated::Enumerated;
 pub use filter_mapped::FilterMapped;
 pub use filtered::{Filtered, FilteredCol, FilteredColIter, FilteredColIterMut};
-pub use flat_mapped::FlatMapped;
+pub use flat_mapped::{FlatMapped, FlatMappedIter};
 pub use flattened::{Flattened, FlattenedCol};
 pub use fused::{Fused, FusedCol};
 pub use mapped::Mapped;
