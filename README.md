@@ -5,15 +5,15 @@
 
 Defines and implements Iterable, Collection and CollectionMut traits to represent types that can be iterated over multiple times.
 
-You may find an article discussing the motivation and implementation details [here](https://orxfun.github.io/orxfun-notes/#/missing-iterable-traits-2024-12-13).
+You may check the [article](https://orxfun.github.io/orxfun-notes/#/missing-iterable-traits-2024-12-13) discussing the motivation and implementation details.
 
 There exist numerous situations where we need to iterate over an abstract type multiple times. Currently most collections allow this by `iter` and `iter_mut` methods; however, this is a convention rather than a shared behavior defined by a trait method.
 
 > `Collection` and `CollectionMut` traits are defined and automatically implemented for all collections enabling abstraction over repeatedly iterable collection types.
 
-However, not all iterables are collections storing elements. For instance, a *Range* is iterable which cannot return a reference to its elements since the elements are not stored. Similarly, consider an iterator mapping elements of a collection to new values. As these values are not stored in memory and computed on the fly during iteration, they do not fit in the definition of collections.
+Not all iterables are collections storing elements. For instance, a *Range* is iterable which cannot return a reference to its elements since the elements are not stored. Similarly, consider an iterator mapping elements of a collection to new values. As these values are not stored in memory and computed on the fly during iteration, they do not fit in the definition of collections.
 
-> More general immutable iterable trait `Iterable` is defined and implemented for most common relevant types.
+> More general immutable iterable trait `Iterable` is defined and implemented for collections and cloneable iterators, and it is open for custom iterables.
 
 ## A. Collection and CollectionMut
 
@@ -134,17 +134,15 @@ increment_by_sum(&mut x);
 
 ## B. Iterable
 
-Collection traits are useful; however, they do not cover all iterables. By definition, they are bound to yield shared or mutable references to their elements. However, some iterators produce elements on the fly during iteration. Therefore, they cannot return a reference to the temporarily computed values. Further, mutable references are irrelevant in these situations. Therefore, we require a more general definition for immutable iterables.
+Collection traits are useful; however, they do not cover all iterables. By definition, they are bound to yield shared or mutable references to their elements. However, some iterators produce elements on the fly during iteration. Therefore, they cannot return a reference to the temporarily computed values. Further notice that mutation is irrelevant for such iterators. Therefore, we require a more general definition for immutable iterables.
 
 > An `Iterable` is any type which can return a new iterator that yields elements of the associated type `Item` every time `iter` method is called.
 
 This is arguably the most general or least restrictive definition of iterables.
 
-Three categories of types implement the Iterable trait:
+Iterable trait represents **(i)** collections, as well as, **(ii)** cloneable iterators.
 
-* references of collections
-* cloneable iterators
-* lazy generators
+Furthermore, unlike the collection traits, it must be extensible. In other words, we must be able to implement iterable on any **(iii)** custom non-collection type, whenever it makes sense. This fits best to lazy generator types which compute elements to be yield during iteration.
 
 <br />
 <details>
@@ -231,7 +229,7 @@ statistics(7..21i64);
 </details>
 <br />
 
-### B.1. Collections as Iterable
+### (i) Collections as Iterable
 
 References of collections automatically implement Iterable, again based on the IntoIterator implementation.
 
@@ -241,9 +239,14 @@ References of collections automatically implement Iterable, again based on the I
 X: Collection<Item = T>        ===>   &X: Iterable<Item = &T>
 ```
 
-Note that the implication is straightforward. If we can implement `iter(&self)` for the collection itself, we can implement it for its reference too. This implementation is very useful to allow creating the more general Iterable's from Collection's. We can simply use a reference of a collection when we require an Iterable.
+Note that the implication is straightforward. If we can implement `iter(&self)` for the collection itself, we can implement it for its reference too. 
 
-### B.2. Cloneable Iterators
+This implementation also establishes the useful relationship between the `Iterable` and `Collection` traits:
+
+* If a type `X` implements Collection, then `&X` implements Iterable.
+* Therefore, we can always provide a reference of a Collection to a function expecting an Iterable.
+
+### (ii) Cloneable Iterators
 
 An iterator is not limited to visiting elements of a collection. Thanks to chainable methods transforming one iterator to another, such as `filter` or `map`, iterators are capable of carrying definition of a computation over some data.
 
@@ -251,7 +254,7 @@ The trouble is, iterators are not repeatedly iterable. However, the conversion i
 
 Any iterator that can be cloned (`Iterator + Clone`) can be converted into an iterable by calling the `into_iterable` method.
 
-### B.3. Lazy Generators
+### (iii) Custom Iterables
 
 Some iterators yield elements which are computed and created each time its *next* method is called. These types can be represented as an Iterable; however, there is no generic implementation for them.
 
