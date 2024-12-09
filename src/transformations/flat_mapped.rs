@@ -35,15 +35,16 @@ where
     }
 }
 
+/// Flat mapped iterator for iterables.
 pub struct FlatMappedIter<I, M, U>
 where
     I: Iterable,
     U: IntoIterator,
     M: Fn(I::Item) -> U + Copy,
 {
-    iter1: I::Iter,
-    iter2: Option<U::IntoIter>,
-    flat_map: M,
+    pub(crate) iter1: I::Iter,
+    pub(crate) iter2: Option<U::IntoIter>,
+    pub(crate) flat_map: M,
 }
 
 impl<I, M, U> Iterator for FlatMappedIter<I, M, U>

@@ -15,6 +15,8 @@ Not all iterables are collections storing elements. For instance, a *Range* is i
 
 > More general immutable iterable trait `Iterable` is defined and implemented for collections and cloneable iterators, and it is open for custom iterables.
 
+In addition, **object safe variants** of these traits, `IterableObj`, `CollectionObj` and `CollectionMutObj` are provided, please see section E for details.
+
 ## A. Collection and CollectionMut
 
 The core method of the Collection trait is `iter(&self)` which returns an iterator yielding shared references; i.e., `&Item`.
@@ -490,6 +492,43 @@ assert_eq!(numbers.iter().collect::<Vec<_>>(), [&5, &8, &4, &3]);
 ```
 </details>
 <br />
+
+## E. Object Safe Iterables and Collections
+
+You may refer to the rust book for an introduction of [trait objects](https://doc.rust-lang.org/book/ch17-02-trait-objects.html).
+
+The requirement can be demonstrated with the following example. Assume that we have a type, say `Repo`, which needs to hold a String collection, say `names`. We want to allow for different collections. We can achieve this by making our type generic over the collection type; i.e., `C: Collection`. Then, our type becomes `Repo<C>`. This has the advantage of monomorphization which would give us zero cost abstraction.
+
+```rust
+use orx_iterable::*;
+
+struct Repo<C: Collection<Item = String>> {
+    names: C,
+}
+```
+
+However, this is a more complex type than only `Repo` (the complexity can get out of hand if we have, for instance, four collections in our repo). We can achieve the simpler type by making our collection a trait object, adding an indirection such as `Box` or `Rc` and using it as our field. In this case, our code will use dynamic dispatch which is slower. Sometimes the difference is negligible in our application. If we prefer simplicity in this tradeoff, we can use the trait object approach.
+
+However, we cannot use the `Iterable`, `Collection` or `CollectionMut` traits, because trait objects have certain restrictions. For this purpose, object safe variants `IterableObj`, `CollectionObj` and `CollectionMutObj` are introduced. These object safe variants have `boxed_iter` and `boxed_iter_mut` methods returning iterators in a box, rather than *iter* and *iter_mut*.
+
+The conditions to implement these variants are identical to the original traits. Therefore, if a type implements `Collection` it also implements `CollectionObj`, and vice versa.
+
+Now we can achieve our simpler `Repo` type.
+
+```rust
+use orx_iterable::obj_safe::*;
+
+struct Repo {
+    names: Box<dyn CollectionObj<Item = String>>,
+}
+```
+
+In order to use object safe iterables and collections please add `--features std` if default features are not used, and use `use orx_iterable::{*, obj_safe::*}` to import dependencies rather than `use orx_iterable::*`.
+
+For a comparison of both generic and trait object approaches, please see the examples:
+
+* [tests/fields_of_generic_iterables.rs](https://github.com/orxfun/orx-iterable/blob/main/tests/fields_of_generic_iterables.rs)
+* [tests/fields_of_iterable_objects.rs](https://github.com/orxfun/orx-iterable/blob/main/tests/fields_of_iterable_objects.rs)
 
 ## Contributing
 

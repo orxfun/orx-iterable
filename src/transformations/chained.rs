@@ -69,7 +69,8 @@ where
 {
     type Item = I1::Item;
 
-    type Iterable<'i> = &'i Self
+    type Iterable<'i>
+        = &'i Self
     where
         Self: 'i;
 
@@ -85,7 +86,8 @@ where
     E1: SoM<I1>,
     E2: SoM<I2>,
 {
-    type IterMut<'i> = core::iter::Chain<I1::IterMut<'i>, I2::IterMut<'i>>
+    type IterMut<'i>
+        = core::iter::Chain<I1::IterMut<'i>, I2::IterMut<'i>>
     where
         Self: 'i;
 

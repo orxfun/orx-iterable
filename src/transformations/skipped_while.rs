@@ -72,7 +72,8 @@ where
 {
     type Item = I::Item;
 
-    type Iterable<'i> = &'i Self
+    type Iterable<'i>
+        = &'i Self
     where
         Self: 'i;
 
@@ -87,7 +88,8 @@ where
     E: SoM<I>,
     P: Fn(&I::Item) -> bool + Copy,
 {
-    type IterMut<'i> = SkippedWhileColIterMut<'i, I, P>
+    type IterMut<'i>
+        = SkippedWhileColIterMut<'i, I, P>
     where
         Self: 'i;
 
@@ -109,9 +111,9 @@ where
     I: Collection + 'a,
     P: Fn(&I::Item) -> bool + Copy,
 {
-    iter: <I::Iterable<'a> as Iterable>::Iter,
-    skip_while: P,
-    skipped: bool,
+    pub(crate) iter: <I::Iterable<'a> as Iterable>::Iter,
+    pub(crate) skip_while: P,
+    pub(crate) skipped: bool,
 }
 
 impl<'a, I, P> Iterator for SkippedWhileColIter<'a, I, P>
@@ -149,9 +151,9 @@ where
     I: CollectionMut + 'a,
     P: Fn(&I::Item) -> bool + Copy,
 {
-    iter: I::IterMut<'a>,
-    skip_while: P,
-    skipped: bool,
+    pub(crate) iter: I::IterMut<'a>,
+    pub(crate) skip_while: P,
+    pub(crate) skipped: bool,
 }
 
 impl<'a, I, P> Iterator for SkippedWhileColIterMut<'a, I, P>

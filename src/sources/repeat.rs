@@ -5,7 +5,7 @@ pub struct Repeat<T>
 where
     T: Clone,
 {
-    value: T,
+    pub(crate) value: T,
 }
 
 impl<T> Iterable for Repeat<T>
