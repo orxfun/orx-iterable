@@ -509,7 +509,9 @@ struct Repo<C: Collection<Item = String>> {
 
 However, this is a more complex type than only `Repo` (the complexity can get out of hand if we have, for instance, four collections in our repo). We can achieve the simpler type by making our collection a trait object, adding an indirection such as `Box` or `Rc` and using it as our field. In this case, our code will use dynamic dispatch which is slower. Sometimes the difference is negligible in our application. If we prefer simplicity in this tradeoff, we can use the trait object approach.
 
-However, we cannot use the `Iterable`, `Collection` or `CollectionMut` traits, because trait objects have certain restrictions. For this purpose, object safe variants `IterableObj`, `CollectionObj` and `CollectionMutObj` are introduced. The conditions to implement these variants are identical to the original traits. For instance, if a type implements `Collection` it also implements `CollectionObj`, and vice versa.
+However, we cannot use the `Iterable`, `Collection` or `CollectionMut` traits, because trait objects have certain restrictions. For this purpose, object safe variants `IterableObj`, `CollectionObj` and `CollectionMutObj` are introduced. These object safe variants have `boxed_iter` and `boxed_iter_mut` methods returning iterators in a box, rather than *iter* and *iter_mut*.
+
+The conditions to implement these variants are identical to the original traits. Therefore, if a type implements `Collection` it also implements `CollectionObj`, and vice versa.
 
 Now we can achieve our simpler `Repo` type.
 
@@ -521,7 +523,7 @@ struct Repo {
 }
 ```
 
-In order to use object safe iterables and collections please add `--features std` and use `use orx_iterable::{*, obj_safe::*}` to import dependencies rather than `use orx_iterable::*`.
+In order to use object safe iterables and collections please add `--features std` if default features are not used, and use `use orx_iterable::{*, obj_safe::*}` to import dependencies rather than `use orx_iterable::*`.
 
 For a comparison of both generic and trait object approaches, please see the examples:
 
