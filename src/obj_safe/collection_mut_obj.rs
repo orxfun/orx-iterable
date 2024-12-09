@@ -10,7 +10,7 @@ use std::boxed::Box;
 /// Please refer to [`CollectionMut`] documentation for details of automatic implementations.
 ///
 /// In order to use object safe iterables and collections please add `--features std` and use
-/// `use orx_iterable::{*, obj_safe::*}` to import dependencies rather than `use orx_iterable::{*}`.
+/// `use orx_iterable::{*, obj_safe::*}` to import dependencies rather than `use orx_iterable::*`.
 ///
 /// [`Iterable`]: crate::Iterable
 /// [`Item`]: crate::obj_safe::CollectionMutObj::Item

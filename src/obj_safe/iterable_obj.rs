@@ -11,7 +11,7 @@ use std::boxed::Box;
 /// Please refer to [`Iterable`] documentation for details of automatic implementations.
 ///
 /// In order to use object safe iterables and collections please add `--features std` and use
-/// `use orx_iterable::{*, obj_safe::*}` to import dependencies rather than `use orx_iterable::{*}`.
+/// `use orx_iterable::{*, obj_safe::*}` to import dependencies rather than `use orx_iterable::*`.
 ///
 /// [`Item`]: crate::obj_safe::IterableObj::Item
 /// [`boxed_iter`]: crate::obj_safe::IterableObj::boxed_iter
