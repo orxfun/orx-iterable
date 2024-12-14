@@ -13,6 +13,12 @@ fn std_collections() {
     test_it(values(), &LinkedList::from_iter([1, 3, 7].into_iter()));
     test_it(values(), &HashSet::<_>::from_iter([1, 3, 7].into_iter()));
     test_it(values(), &BTreeSet::<_>::from_iter([1, 3, 7].into_iter()));
+
+    test_it(vec![10], &Some(10));
+    test_it(vec![], &None);
+
+    test_it(vec![10], &Result::<_, String>::Ok(10));
+    test_it(vec![], &Result::<_, String>::Err("error".to_string()));
 }
 
 #[test]
@@ -49,6 +55,12 @@ fn obj_std_collections() {
     obj_test_it(values(), &&LinkedList::from_iter([1, 3, 7].into_iter()));
     obj_test_it(values(), &&HashSet::<_>::from_iter([1, 3, 7].into_iter()));
     obj_test_it(values(), &&BTreeSet::<_>::from_iter([1, 3, 7].into_iter()));
+
+    obj_test_it(vec![10], &&Some(10));
+    obj_test_it(vec![], &&None);
+
+    obj_test_it(vec![10], &&Result::<_, String>::Ok(10));
+    obj_test_it(vec![], &&Result::<_, String>::Err("error".to_string()));
 }
 
 #[test]

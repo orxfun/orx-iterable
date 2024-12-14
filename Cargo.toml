@@ -1,6 +1,6 @@
 [package]
 name = "orx-iterable"
-version = "1.1.0"
+version = "1.1.1"
 edition = "2021"
 authors = ["orxfun <orx.ugur.arikan@gmail.com>"]
 description = "Defines and implements Iterable, Collection and CollectionMut traits to represent types that can be iterated over multiple times."

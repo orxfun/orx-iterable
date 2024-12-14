@@ -70,11 +70,14 @@ fn statistics(numbers: &impl Collection<Item = i64>) -> Stats {
 
 statistics(&[3, 5, 7]);
 statistics(&vec![3, 5, 7]);
-statistics(&LinkedList::from_iter([3, 5, 7]));
-statistics(&VecDeque::from_iter([3, 5, 7]));
-statistics(&HashSet::<_>::from_iter([3, 5, 7]));
-statistics(&BTreeSet::<_>::from_iter([3, 5, 7]));
-statistics(&BinaryHeap::<_>::from_iter([3, 5, 7]));
+statistics(&LinkedList::from([3, 5, 7]));
+statistics(&VecDeque::from([3, 5, 7]));
+statistics(&HashSet::<_>::from([3, 5, 7]));
+statistics(&BTreeSet::<_>::from([3, 5, 7]));
+statistics(&BinaryHeap::<_>::from([3, 5, 7]));
+
+statistics(&Some(11));
+statistics(&Ok::<_, &str>(11));
 
 let x: SmallVec<[_; 128]> = smallvec![3, 5, 7];
 statistics(&x);
@@ -116,10 +119,16 @@ assert_eq!(x, [7, 8, 9]);
 let mut x = vec![1, 2, 3];
 increment_by_sum(&mut x);
 
-let mut x = LinkedList::from_iter([1, 2, 3]);
+let mut x = LinkedList::from([1, 2, 3]);
 increment_by_sum(&mut x);
 
-let mut x = VecDeque::from_iter([1, 2, 3]);
+let mut x = VecDeque::from([1, 2, 3]);
+increment_by_sum(&mut x);
+
+let mut x = Some(7);
+increment_by_sum(&mut x);
+
+let mut x: Result<_, &str> = Ok(7);
 increment_by_sum(&mut x);
 
 let mut x: SmallVec<[_; 128]> = smallvec![3, 5, 7];
@@ -186,19 +195,25 @@ statistics(x.copied()); // see section C for details of copied()
 let x = vec![3, 5, 7];
 statistics(x.copied());
 
-let x = LinkedList::from_iter([3, 5, 7]);
+let x = LinkedList::from([3, 5, 7]);
 statistics(x.copied());
 
-let x = VecDeque::from_iter([3, 5, 7]);
+let x = VecDeque::from([3, 5, 7]);
 statistics(x.copied());
 
-let x = HashSet::<_>::from_iter([3, 5, 7]);
+let x = HashSet::<_>::from([3, 5, 7]);
 statistics(x.copied());
 
-let x = BTreeSet::from_iter([3, 5, 7]);
+let x = BTreeSet::from([3, 5, 7]);
 statistics(x.copied());
 
-let x = BinaryHeap::from_iter([3, 5, 7]);
+let x = BinaryHeap::from([3, 5, 7]);
+statistics(x.copied());
+
+let x = Some(7);
+statistics(x.copied());
+
+let x: Result<_, &str> = Ok(7);
 statistics(x.copied());
 
 let x: SmallVec<[_; 128]> = smallvec![3, 5, 7];
