@@ -1,16 +1,16 @@
 [package]
 name = "orx-iterable"
-version = "1.1.1"
+version = "1.2.0"
 edition = "2021"
 authors = ["orxfun <orx.ugur.arikan@gmail.com>"]
 description = "Defines and implements Iterable, Collection and CollectionMut traits to represent types that can be iterated over multiple times."
-license = "MIT"
+license = "MIT OR Apache-2.0"
 repository = "https://github.com/orxfun/orx-iterable/"
 keywords = ["iterable", "collection", "iterator", "intoiterator", "enumerable"]
 categories = ["data-structures", "rust-patterns", "no-std"]
 
 [dependencies]
-orx-self-or = "1.0"
+orx-self-or = "1.1.1"
 
 [dev-dependencies]
 arrayvec = { version = "0.7.6", default-features = false }
