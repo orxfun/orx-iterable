@@ -1,6 +1,7 @@
 # orx-iterable
 
 [![orx-iterable crate](https://img.shields.io/crates/v/orx-iterable.svg)](https://crates.io/crates/orx-iterable)
+[![orx-iterable crate](https://img.shields.io/crates/d/orx-iterable.svg)](https://crates.io/crates/orx-iterable)
 [![orx-iterable documentation](https://docs.rs/orx-iterable/badge.svg)](https://docs.rs/orx-iterable)
 
 Defines and implements Iterable, Collection and CollectionMut traits to represent types that can be iterated over multiple times.
@@ -551,4 +552,4 @@ Contributions are welcome! If you notice an error, have a question or think some
 
 ## License
 
-This library is licensed under MIT license. See LICENSE for details.
+Dual-licensed under [Apache 2.0](LICENSE-APACHE) or [MIT](LICENSE-MIT).
