@@ -1,5 +1,4 @@
 mod custom_iterables;
-use orx_iterable::obj_safe::*;
 use orx_iterable::*;
 use std::collections::{LinkedList, VecDeque};
 
@@ -47,9 +46,10 @@ fn copied_cloned() {
     test(vec![4, 12, 8, 2, 1, 7], col.cloned());
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_copied_cloned() {
-    fn test(values: Vec<usize>, col: &dyn IterableObj<Item = usize>) {
+    fn test(values: Vec<usize>, col: &dyn orx_iterable::obj_safe::IterableObj<Item = usize>) {
         let sum = values.iter().sum::<usize>();
         let count = values.len();
 

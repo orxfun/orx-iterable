@@ -1,5 +1,5 @@
 mod common_testers;
-use common_testers::{obj_test_it, obj_test_it_val, test_it, test_it_val};
+use common_testers::{test_it, test_it_val};
 mod custom_iterables;
 use std::collections::{BTreeSet, HashSet, LinkedList, VecDeque};
 
@@ -45,8 +45,11 @@ fn range() {
 
 // obj
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_std_collections() {
+    use common_testers::obj_test_it;
+
     let values = || vec![1, 3, 7];
 
     obj_test_it(values(), &&[1, 3, 7]);
@@ -63,8 +66,11 @@ fn obj_std_collections() {
     obj_test_it(vec![], &&Result::<_, String>::Err("error".to_string()));
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_custom_collection() {
+    use common_testers::obj_test_it;
+
     let col = custom_iterables::EvensThenOdds {
         evens: vec![4, 12, 8, 2],
         odds: vec![1, 7],
@@ -73,14 +79,20 @@ fn obj_custom_collection() {
     obj_test_it(vec![4, 12, 8, 2, 1, 7], &&col);
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_slice() {
+    use common_testers::obj_test_it;
+
     let vec = vec![1, 3, 7, 8];
     let slice = vec.as_slice();
     obj_test_it(vec![1, 3, 7, 8], &slice);
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_range() {
+    use common_testers::obj_test_it_val;
+
     obj_test_it_val(vec![1, 2, 3, 4], &(1..5usize));
 }

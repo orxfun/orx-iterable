@@ -531,7 +531,7 @@ The conditions to implement these variants are identical to the original traits.
 
 Now we can achieve our simpler `Repo` type.
 
-```rust
+```rust ignore
 use orx_iterable::obj_safe::*;
 
 struct Repo {

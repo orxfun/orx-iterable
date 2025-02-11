@@ -1,5 +1,5 @@
 mod common_testers;
-use common_testers::{obj_test_col, obj_test_it, test_col, test_it};
+use common_testers::{test_col, test_it};
 use orx_iterable::*;
 use std::collections::VecDeque;
 
@@ -46,8 +46,11 @@ fn chained_mut() {
 
 // obj
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_chained() {
+    use common_testers::obj_test_it;
+
     let a = vec![1, 3, 4];
     let b = [8, 10];
     let c = VecDeque::from_iter([2, 7].into_iter());
@@ -57,8 +60,11 @@ fn obj_chained() {
     obj_test_it(vec![1, 3, 4, 8, 10, 2, 7], &a.chained(b.chained(&c)));
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_into_chained() {
+    use common_testers::obj_test_col;
+
     let a = vec![1, 3, 4];
     let b = [8, 10];
     obj_test_col(vec![1, 3, 4, 8, 10], &a.into_chained(b));
@@ -72,8 +78,11 @@ fn obj_into_chained() {
     );
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_chained_mut() {
+    use common_testers::obj_test_col;
+
     let mut a = vec![1, 3, 4];
     let mut b = [8, 10];
     obj_test_col(vec![1, 3, 4, 8, 10], &a.chained_mut(&mut b));

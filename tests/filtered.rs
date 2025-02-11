@@ -1,6 +1,5 @@
 mod common_testers;
-use common_testers::{obj_test_col, obj_test_it, test_col, test_it};
-use orx_iterable::obj_safe::*;
+use common_testers::{test_col, test_it};
 use orx_iterable::*;
 
 #[test]
@@ -46,8 +45,11 @@ fn filtered_mut() {
 
 // obj
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_filtered() {
+    use common_testers::obj_test_it;
+
     let a = vec![1, 3, 4, 8, 10];
 
     obj_test_it(vec![1, 3, 4, 8, 10], &a.filtered(|x| **x < 100));
@@ -55,8 +57,11 @@ fn obj_filtered() {
     obj_test_it(vec![3, 4], &a.filtered(|x| **x < 5 && **x > 1));
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_into_filtered() {
+    use common_testers::obj_test_col;
+
     let a = vec![1, 3, 4, 8, 10];
     obj_test_col(vec![1, 3, 4, 8, 10], &a.into_filtered(|x| *x < 100));
 
@@ -67,8 +72,12 @@ fn obj_into_filtered() {
     obj_test_col(vec![3, 4], &a.into_filtered(|x| *x < 5 && *x > 1));
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_filtered_mut() {
+    use common_testers::{obj_test_col, obj_test_it};
+    use orx_iterable::obj_safe::*;
+
     let mut a = vec![1, 3, 4, 8, 10];
 
     obj_test_col(vec![1, 3, 4, 8, 10], &a.filtered_mut(|x| *x < 100));
