@@ -1,3 +1,5 @@
+#![cfg(feature = "std")]
+
 use orx_iterable::*;
 use std::collections::{BTreeSet, LinkedList, VecDeque};
 

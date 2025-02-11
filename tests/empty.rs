@@ -1,4 +1,3 @@
-use orx_iterable::obj_safe::*;
 use orx_iterable::*;
 
 #[test]
@@ -31,8 +30,11 @@ fn empty_col() {
 
 // obj
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_empty() {
+    use orx_iterable::obj_safe::*;
+
     let it = orx_iterable::empty::<usize>();
 
     assert_eq!(it.boxed_iter().count(), 0);
@@ -44,8 +46,11 @@ fn obj_empty() {
     assert_eq!(it.boxed_iter().sum::<usize>(), 0);
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_empty_col() {
+    use orx_iterable::obj_safe::*;
+
     let mut it = orx_iterable::empty_col::<usize>();
 
     assert_eq!(it.boxed_iter().count(), 0);

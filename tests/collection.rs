@@ -1,6 +1,6 @@
 mod common_testers;
 mod custom_iterables;
-use common_testers::{obj_test_col, test_col};
+use common_testers::test_col;
 use std::collections::{LinkedList, VecDeque};
 
 #[test]
@@ -31,8 +31,11 @@ fn custom_collection() {
 
 // obj
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_std_collections() {
+    use common_testers::obj_test_col;
+
     let values = || vec![1, 3, 7];
 
     obj_test_col(values(), &[1, 3, 7]);
@@ -41,8 +44,11 @@ fn obj_std_collections() {
     obj_test_col(values(), &LinkedList::from_iter([1, 3, 7].into_iter()));
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn obj_custom_collection() {
+    use common_testers::obj_test_col;
+
     let col = custom_iterables::EvensThenOddsCol {
         evens: vec![4, 12, 8, 2],
         odds: vec![1, 7],
