@@ -10,11 +10,11 @@ keywords = ["iterable", "collection", "iterator", "intoiterator", "enumerable"]
 categories = ["data-structures", "rust-patterns", "no-std"]
 
 [dependencies]
-orx-self-or = { path = "../orx-self-or" }
+orx-self-or = "1.2.0"
 
 [dev-dependencies]
 arrayvec = { version = "0.7.6", default-features = false }
-smallvec = { version = "1.13.2", default-features = false }
+smallvec = { version = "1.15.0", default-features = false }
 
 [features]
 default = ["std"]
