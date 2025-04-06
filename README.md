@@ -18,6 +18,8 @@ Not all iterables are collections storing elements. For instance, a *Range* is i
 
 In addition, **object safe variants** of these traits, `IterableObj`, `CollectionObj` and `CollectionMutObj` are provided, please see section E for details.
 
+> **no-std**: This crate supports **no-std**; however, *std* is added as a default feature. Please include with **no-default-features** for no-std use cases: `cargo add orx-iterable --no-default-features`.
+
 ## A. Collection and CollectionMut
 
 The core method of the Collection trait is `iter(&self)` which returns an iterator yielding shared references; i.e., `&Item`.
