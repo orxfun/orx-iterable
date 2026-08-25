@@ -1,11 +1,11 @@
 use orx_self_or::SoM;
 
 use crate::{
+    Collection, CollectionMut, Iterable,
     obj_safe::{CollectionMutObj, CollectionObj, IterableObj},
     transformations::{SkippedWhile, SkippedWhileCol, SkippedWhileColIter, SkippedWhileColIterMut},
-    Collection, CollectionMut, Iterable,
 };
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 impl<I, P> IterableObj for SkippedWhile<I, P>
 where

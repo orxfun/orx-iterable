@@ -17,5 +17,5 @@ arrayvec = { version = "0.7.6", default-features = false }
 smallvec = { version = "1.15.0", default-features = false }
 
 [features]
-default = ["std"]
+default = []
 std = []

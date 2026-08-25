@@ -1,5 +1,5 @@
 use crate::{obj_safe::IterableObj, sources::RepeatN};
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 impl<T> IterableObj for RepeatN<T>
 where

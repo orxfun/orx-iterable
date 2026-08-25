@@ -1,5 +1,5 @@
 use crate::{obj_safe::IterableObj, transformations::Mapped, Iterable};
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 impl<I, M, U> IterableObj for Mapped<I, M, U>
 where

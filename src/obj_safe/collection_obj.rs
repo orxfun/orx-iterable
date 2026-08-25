@@ -1,4 +1,4 @@
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 /// A `CollectionObj` provides the [`boxed_iter`] method which returns a boxed iterator over shared references
 /// of elements of the collection.

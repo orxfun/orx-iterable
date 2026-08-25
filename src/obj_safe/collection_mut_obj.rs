@@ -1,5 +1,5 @@
 use crate::obj_safe::collection_obj::CollectionObj;
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 /// In addition to  [`boxed_iter`], a `CollectionMutObj` provides the [`boxed_iter_mut`] method which returns a boxed
 /// iterator over mutable references of elements of the collection.

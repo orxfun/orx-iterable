@@ -5,7 +5,7 @@ use crate::{
     transformations::{Reversed, ReversedCol},
     Collection, CollectionMut, Iterable,
 };
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 impl<I> IterableObj for Reversed<I>
 where

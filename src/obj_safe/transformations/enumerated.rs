@@ -1,5 +1,5 @@
 use crate::{obj_safe::IterableObj, transformations::Enumerated, Iterable};
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 impl<I> IterableObj for Enumerated<I>
 where

@@ -1,4 +1,4 @@
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 /// An `IterableObj` is any type which can return a new boxed iterator that yields
 /// elements of the associated type [`Item`] every time [`boxed_iter`] method is called.

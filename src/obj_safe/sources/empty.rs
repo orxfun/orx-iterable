@@ -3,7 +3,7 @@ use crate::{
     sources::{Empty, EmptyCol},
     Collection, CollectionMut, Iterable,
 };
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 impl<T> IterableObj for Empty<T> {
     type Item = T;

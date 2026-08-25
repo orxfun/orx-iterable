@@ -1,10 +1,10 @@
 use crate::{
+    Collection, CollectionMut, Iterable,
     obj_safe::{CollectionMutObj, CollectionObj, IterableObj},
     transformations::{Taken, TakenCol},
-    Collection, CollectionMut, Iterable,
 };
+use alloc::boxed::Box;
 use orx_self_or::SoM;
-use std::boxed::Box;
 
 impl<I> IterableObj for Taken<I>
 where

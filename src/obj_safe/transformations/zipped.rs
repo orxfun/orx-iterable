@@ -1,5 +1,5 @@
-use crate::{obj_safe::IterableObj, transformations::Zipped, Iterable};
-use std::boxed::Box;
+use crate::{Iterable, obj_safe::IterableObj, transformations::Zipped};
+use alloc::boxed::Box;
 
 impl<I1, I2> IterableObj for Zipped<I1, I2>
 where

@@ -1,6 +1,6 @@
 use crate::obj_safe::IterableObj;
 use core::ops::Range;
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 macro_rules! impl_for_range_of {
     ($T:ty) => {

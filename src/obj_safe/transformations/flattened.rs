@@ -5,7 +5,7 @@ use crate::{
     transformations::{Flattened, FlattenedCol},
     Collection, CollectionMut, Iterable,
 };
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 impl<I> IterableObj for Flattened<I>
 where

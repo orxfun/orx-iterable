@@ -4,7 +4,7 @@ use crate::{
     Collection, CollectionMut, Iterable,
 };
 use orx_self_or::SoM;
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 impl<I> IterableObj for SteppedBy<I>
 where

@@ -2,7 +2,7 @@ use crate::{
     obj_safe::{CollectionMutObj, CollectionObj, IterableObj},
     sources::{Once, OnceCol},
 };
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 impl<T> IterableObj for Once<T>
 where

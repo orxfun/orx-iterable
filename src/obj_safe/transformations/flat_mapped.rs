@@ -3,7 +3,7 @@ use crate::{
     transformations::{FlatMapped, FlatMappedIter},
     Iterable,
 };
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 impl<I, M, U> IterableObj for FlatMapped<I, M, U>
 where

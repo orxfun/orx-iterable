@@ -5,7 +5,7 @@ use crate::{
     transformations::{Fused, FusedCol},
     Collection, CollectionMut, Iterable,
 };
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 impl<I> IterableObj for Fused<I>
 where

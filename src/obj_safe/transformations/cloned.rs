@@ -1,6 +1,6 @@
 use crate::obj_safe::IterableObj;
 use crate::{transformations::Cloned, Iterable};
-use std::boxed::Box;
+use alloc::boxed::Box;
 
 impl<'a, T, I> IterableObj for Cloned<'a, T, I>
 where

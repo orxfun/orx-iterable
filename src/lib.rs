@@ -15,6 +15,8 @@
 #[cfg(any(test, feature = "std"))]
 extern crate std;
 
+extern crate alloc;
+
 mod collection;
 mod collection_mut;
 mod iterable;
@@ -25,7 +27,6 @@ pub mod sources;
 pub mod transformations;
 
 /// Object safe variants of Iterable, Collection and CollectionMut traits.
-#[cfg(feature = "std")]
 pub mod obj_safe;
 
 pub use collection::Collection;
